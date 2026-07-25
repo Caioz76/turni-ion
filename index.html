@@ -728,11 +728,9 @@
   document.getElementById("exportMemoriaBtn").addEventListener("click", function(){
     state.meta.lastExport = new Date().toISOString(); isDirty=false; persistLocal();
     var blob = new Blob([JSON.stringify(state,null,2)], { type:"application/json" });
-    var url = URL.createObjectURL(blob);
-    var link = document.createElement("a"); link.href=url; link.download="turni_memoria.json";
-    document.body.appendChild(link); link.click(); link.remove();
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
-    updateMemoryStatus();
+    shareOrDownload(blob, "turni_memoria.json", "application/json").then(function(){
+      updateMemoryStatus();
+    });
   });
   document.getElementById("importMemoriaBtn").addEventListener("click", function(){ document.getElementById("importMemoriaInput").click(); });
   document.getElementById("importMemoriaInput").addEventListener("change", function(e){
@@ -780,6 +778,58 @@
 
   /* ---- export png/pdf ---- */
   function exportFilenameBase(){ var sat=addDays(currentMonday,5); return "turni_"+toISO(currentMonday)+"_"+toISO(sat); }
+  /* ---- share / download helper (necessario per iOS standalone / Home Screen) ---- */
+  function shareOrDownload(blob, filename, mimeType){
+    var canTryShare = false;
+    var file;
+    try{
+      if(navigator.canShare){
+        file = new File([blob], filename, { type: mimeType });
+        canTryShare = navigator.canShare({ files: [file] });
+      }
+    }catch(e){ canTryShare = false; }
+
+    function fallbackDownload(){
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.href = url; link.download = filename;
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    }
+
+    if(canTryShare){
+      return navigator.share({ files: [file] }).catch(function(err){
+        if(err && err.name === "AbortError") return;
+        fallbackDownload();
+      });
+    }
+    fallbackDownload();
+    return Promise.resolve();
+  }
+
+  function addCanvasAsMultipagePdf(pdf, canvas, marginPt){
+    var pageW = pdf.internal.pageSize.getWidth();
+    var pageH = pdf.internal.pageSize.getHeight();
+    var usableW = pageW - marginPt*2;
+    var usableH = pageH - marginPt*2;
+    var ratio = usableW / canvas.width;
+    var pxPerPage = usableH / ratio;
+    var totalPages = Math.max(1, Math.ceil(canvas.height / pxPerPage));
+    for(var p=0; p<totalPages; p++){
+      var sy = p * pxPerPage;
+      var sh = Math.min(pxPerPage, canvas.height - sy);
+      var pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sh;
+      var ctx = pageCanvas.getContext("2d");
+      ctx.drawImage(canvas, 0, sy, canvas.width, sh, 0, 0, canvas.width, sh);
+      var imgData = pageCanvas.toDataURL("image/png");
+      if(p > 0) pdf.addPage();
+      var hPt = sh * ratio;
+      pdf.addImage(imgData, "PNG", marginPt, marginPt, usableW, hPt);
+    }
+  }
+
   function librariesReady(needPdf){
     if(typeof html2canvas==="undefined"){ alert("Libreria immagine non caricata (serve connessione al primo avvio). Ricarica e riprova."); return false; }
     if(needPdf && typeof window.jspdf==="undefined"){ alert("Libreria PDF non caricata (serve connessione al primo avvio). Ricarica e riprova."); return false; }
@@ -792,21 +842,20 @@
   document.getElementById("exportPngBtn").addEventListener("click", function(){
     if(!librariesReady(false)) return;
     captureSheetArea().then(function(canvas){
-      var link=document.createElement("a"); link.download=exportFilenameBase()+".png"; link.href=canvas.toDataURL("image/png");
-      document.body.appendChild(link); link.click(); link.remove();
+      canvas.toBlob(function(blob){
+        if(!blob){ alert("Esportazione PNG non riuscita."); return; }
+        shareOrDownload(blob, exportFilenameBase()+".png", "image/png");
+      }, "image/png");
     }).catch(function(err){ alert("Esportazione PNG non riuscita: "+(err&&err.message?err.message:err)); });
   });
   document.getElementById("exportPdfBtn").addEventListener("click", function(){
     if(!librariesReady(true)) return;
     captureSheetArea().then(function(canvas){
-      var imgData=canvas.toDataURL("image/png");
       var jsPDFCtor=window.jspdf.jsPDF;
       var pdf=new jsPDFCtor({ orientation:"p", unit:"pt", format:"a4" });
-      var pageW=pdf.internal.pageSize.getWidth(), pageH=pdf.internal.pageSize.getHeight(), margin=20;
-      var ratio=Math.min((pageW-margin*2)/canvas.width,(pageH-margin*2)/canvas.height);
-      var w=canvas.width*ratio, h=canvas.height*ratio;
-      pdf.addImage(imgData,"PNG",(pageW-w)/2,(pageH-h)/2,w,h);
-      pdf.save(exportFilenameBase()+".pdf");
+      addCanvasAsMultipagePdf(pdf, canvas, 16);
+      var blob = pdf.output("blob");
+      shareOrDownload(blob, exportFilenameBase()+".pdf", "application/pdf");
     }).catch(function(err){ alert("Esportazione PDF non riuscita: "+(err&&err.message?err.message:err)); });
   });
 
