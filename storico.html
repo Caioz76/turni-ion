@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Storico Turni">
+<meta name="theme-color" content="#223349">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>Storico Turni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --paper:#F5F1E6; --paper-2:#EFE9D8; --ink:#23211D; --ink-soft:#5B564A;
+    --navy:#223349; --accent:#2F6F62; --accent-2:#3E8C7A; --alert:#B13B2E; --alert-bg:#F6E1DC;
+    --line:#D8CDB2; --line-strong:#B9AC87;
+    --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ margin:0; padding:0; }
+  body{ background: var(--paper); color: var(--ink); font-family:'IBM Plex Sans', sans-serif; font-size:16px; min-height:100dvh; padding-bottom: calc(24px + var(--safe-b)); }
+
+  header.s-header{ position:sticky; top:0; z-index:30; background: var(--navy); color:#EFE9DA; padding: calc(12px + var(--safe-t)) 16px 14px; }
+  .s-brand{ font-family:'Fraunces', serif; font-weight:700; font-size:19px; margin-bottom:2px; }
+  .s-brand span{ color: var(--accent-2); }
+  .s-sub{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:#B8C0CB; letter-spacing:1px; text-transform:uppercase; }
+
+  .s-import-row{ padding:12px 16px; background: var(--paper-2); border-bottom:2px solid var(--accent); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .s-status{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; color: var(--ink-soft); flex:1 1 100%; }
+  .btn{ font-family:'IBM Plex Sans', sans-serif; font-size:13.5px; font-weight:600; padding:10px 14px; border-radius:20px; border:1px solid transparent; min-height:42px; }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{ background: var(--accent); color:#fff; }
+  .btn-outline{ background:#fff; color: var(--navy); border-color: var(--line-strong); }
+  .btn-alert{ background: var(--alert); color:#fff; }
+  .btn-sm{ padding:8px 12px; font-size:12.5px; }
+
+  .s-filters{ padding: 12px 16px; display:flex; gap:8px; flex-wrap:wrap; }
+  .s-filters select{ flex:1; min-width:140px; padding:10px 12px; border:1px solid var(--line-strong); border-radius:10px; font-size:14px; background:#fff; }
+
+  main{ padding: 4px 16px 20px; }
+  .empty-state{ text-align:center; padding: 60px 20px; color: var(--ink-soft); font-size:14px; line-height:1.7; }
+  .empty-state b{ color: var(--navy); }
+
+  .week-card{ background:#FFFEFB; border:1px solid var(--line-strong); border-radius:14px; margin-bottom:12px; overflow:hidden; box-shadow:0 2px 6px rgba(35,33,29,0.06); }
+  .week-card-head{ padding:13px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .week-card-head:active{ background: var(--paper-2); }
+  .week-title{ font-family:'Fraunces', serif; font-weight:600; font-size:15.5px; color: var(--navy); }
+  .week-meta{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; color: var(--ink-soft); margin-top:2px; }
+  .week-badges{ display:flex; gap:6px; align-items:center; flex-shrink:0; }
+  .badge{ font-family:'IBM Plex Mono', monospace; font-size:10px; padding:3px 8px; border-radius:10px; background: var(--paper-2); color: var(--ink-soft); }
+  .badge.alert{ background: var(--alert-bg); color: var(--alert); font-weight:600; }
+  .chevron{ font-size:13px; color: var(--ink-soft); transition: transform .2s; }
+  .week-card.open .chevron{ transform: rotate(90deg); }
+
+  .week-detail{ display:none; border-top:1px solid var(--line); padding: 12px 14px 16px; }
+  .week-card.open .week-detail{ display:block; }
+  .day-row{ margin-bottom:12px; }
+  .day-row-title{ font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color: var(--navy); font-weight:600; margin-bottom:5px; }
+  .day-row-body{ font-size:12.5px; line-height:1.9; }
+  .agency-line{ margin-bottom:2px; }
+  .agency-line b{ color: var(--ink-soft); font-weight:600; font-size:11px; }
+  .chip{ display:inline-flex; align-items:center; gap:4px; border:1.4px solid var(--line-strong); border-radius:10px; padding:2px 7px 2px 5px; font-size:11px; color: var(--ink); margin:1px 3px 1px 0; }
+  .chip-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .chip.chip-absent{ border-style:dashed; }
+  .none-txt{ color:#C6BC9E; font-style:italic; font-size:11.5px; }
+  .abs-note-text{ font-size:11px; color: var(--ink-soft); font-style:italic; margin-top:3px; }
+
+  .week-actions{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+
+  .conflict-box{ background: var(--alert-bg); border:1px solid #E2B4AA; border-left:4px solid var(--alert); border-radius:8px; padding:8px 10px; font-size:11.5px; margin-bottom:12px; }
+  .conflict-box ul{ margin:4px 0 0; padding-left:16px; }
+
+  .export-target{ background:#FFFEFB; padding:16px; }
+  .export-target .sheet-head{ margin-bottom:12px; }
+  .export-target h1{ font-family:'Fraunces', serif; font-size:19px; margin:0 0 4px; }
+  .export-target .range{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<header class="s-header">
+  <div class="s-brand">STORICO <span>TURNI</span></div>
+  <div class="s-sub">archivio di consultazione · 4 agenzie · <a href="index.html" style="color:#8FC7BA;">← torna all'app</a></div>
+</header>
+
+<div class="s-import-row">
+  <div class="s-status" id="statusLine">—</div>
+  <button class="btn btn-primary" id="importBtn">📂 Importa memoria (.json)</button>
+  <button class="btn btn-outline" id="exportBtn">💾 Esporta storico aggiornato</button>
+  <input type="file" id="importInput" accept="application/json,.json" style="display:none;">
+</div>
+
+<div class="s-filters">
+  <select id="employeeFilter"><option value="">Tutti i dipendenti</option></select>
+  <select id="agencyFilter">
+    <option value="">Tutte le agenzie</option>
+    <option value="Somma Lombardo">Somma Lombardo</option>
+    <option value="Busto Arsizio">Busto Arsizio</option>
+    <option value="Tradate">Tradate</option>
+    <option value="Oleggio">Oleggio</option>
+  </select>
+</div>
+
+<main id="weeksContainer">
+  <div class="empty-state" id="emptyState">
+    Nessun dato caricato.<br><br>
+    Tocca <b>📂 Importa memoria</b> e seleziona il file <b>turni_memoria.json</b> esportato dall'app principale (desktop o mobile).<br><br>
+    Tieni questo file nella stessa cartella Download insieme a <b>turni.html</b> / <b>turni-mobile.html</b> per ritrovarlo facilmente.
+  </div>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
+  var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
+  var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
+  var DAY_NAMES = ["Lun","Mar","Mer","Gio","Ven","Sab"];
+  var LS_STATE = "turni_state_v2";
+
+  function hexToRgb(hex){ hex=hex.replace("#",""); if(hex.length===3) hex=hex.split("").map(function(c){return c+c;}).join(""); var num=parseInt(hex,16); return {r:(num>>16)&255,g:(num>>8)&255,b:num&255}; }
+  function rgbToHex(r,g,b){ function c(v){ v=Math.max(0,Math.min(255,Math.round(v))); var s=v.toString(16); return s.length===1?"0"+s:s; } return "#"+c(r)+c(g)+c(b); }
+  function tintHex(hex, amount){ var c=hexToRgb(hex); return rgbToHex(c.r+(255-c.r)*amount, c.g+(255-c.g)*amount, c.b+(255-c.b)*amount); }
+  function hashHue(str){ var h=0; for(var i=0;i<str.length;i++){ h=(h*31+str.charCodeAt(i))%360; } return h<0?h+360:h; }
+  function hslToHex(h,s,l){
+    s/=100; l/=100;
+    function k(n){ return (n+h/30)%12; }
+    var a = s*Math.min(l,1-l);
+    function f(n){ return l - a*Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n),1))); }
+    function toHex(x){ var h2=Math.round(255*x).toString(16); return h2.length===1?"0"+h2:h2; }
+    return "#"+toHex(f(0))+toHex(f(8))+toHex(f(4));
+  }
+
+  var state = { employees: [], weeks: {}, meta: { lastExport: null } };
+  var loadedFromLocal = false;
+
+  function pad(n){ return n<10?"0"+n:""+n; }
+  function fromISO(s){ var p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); }
+  function addDays(d,n){ var nd=new Date(d.getFullYear(),d.getMonth(),d.getDate()); nd.setDate(nd.getDate()+n); return nd; }
+  function fmtIt(d){ return pad(d.getDate())+"/"+pad(d.getMonth()+1); }
+  function fmtItFull(d){ return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear(); }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];}); }
+
+  function findEmployee(name){ return state.employees.filter(function(e){ return e.name===name; })[0]; }
+  function colorFor(name){ var e=findEmployee(name); return (e&&e.color) ? e.color : hslToHex(hashHue(name),45,55); }
+  function chipHtml(name, absent){
+    var color=colorFor(name); var bg=tintHex(color,0.85);
+    var cls=absent?"chip chip-absent":"chip";
+    return '<span class="'+cls+'" style="background:'+bg+';border-color:'+color+';"><span class="chip-dot" style="background:'+color+'"></span>'+escapeHtml(name)+'</span>';
+  }
+
+  function normalizeState(st){
+    if(!st || typeof st!=="object") st={};
+    if(!st.employees) st.employees=[];
+    if(!st.weeks) st.weeks={};
+    if(!st.meta) st.meta={lastExport:null};
+    Object.keys(st.weeks).forEach(function(k){
+      var w=st.weeks[k]; if(!w.days) w.days=[];
+      w.days.forEach(function(d){
+        if(!d.shifts) d.shifts={};
+        AGENCIES.forEach(function(a){
+          if(!d.shifts[a]) d.shifts[a]={mattina:[],pomeriggio:[]};
+          if(!d.shifts[a].mattina) d.shifts[a].mattina=[];
+          if(!d.shifts[a].pomeriggio) d.shifts[a].pomeriggio=[];
+        });
+        if(!d.absence) d.absence={ people:[], note:(typeof d.note==="string")?d.note:"" };
+        if(!d.absence.people) d.absence.people=[];
+        if(typeof d.absence.note!=="string") d.absence.note="";
+      });
+    });
+    return st;
+  }
+
+  function weekHasData(w){
+    return w.days.some(function(day){
+      if(day.absence && (day.absence.people.length || (day.absence.note && day.absence.note.trim()))) return true;
+      return AGENCIES.some(function(a){ return day.shifts[a].mattina.length || day.shifts[a].pomeriggio.length; });
+    });
+  }
+  function computeConflicts(w){
+    var conflicts=[];
+    w.days.forEach(function(day,dayIdx){
+      SHIFTS.forEach(function(sp){
+        var shiftKey=sp[0]; var map={};
+        AGENCIES.forEach(function(a){ day.shifts[a][shiftKey].forEach(function(name){ if(!map[name]) map[name]=[]; map[name].push(a); }); });
+        Object.keys(map).forEach(function(name){ if(map[name].length>1) conflicts.push({dayIdx:dayIdx,date:day.date,shift:shiftKey,name:name,agencies:map[name]}); });
+      });
+    });
+    return conflicts;
+  }
+  function weekMentionsEmployee(w, name){
+    return w.days.some(function(day){
+      if(day.absence.people.indexOf(name)!==-1) return true;
+      return AGENCIES.some(function(a){ return day.shifts[a].mattina.indexOf(name)!==-1 || day.shifts[a].pomeriggio.indexOf(name)!==-1; });
+    });
+  }
+  function weekMentionsAgency(w, agency){
+    return w.days.some(function(day){ return day.shifts[agency].mattina.length || day.shifts[agency].pomeriggio.length; });
+  }
+
+  function tryLoadLocal(){
+    try{
+      var raw = localStorage.getItem(LS_STATE);
+      if(raw){ state = normalizeState(JSON.parse(raw)); loadedFromLocal = true; }
+    }catch(e){}
+  }
+
+  function updateStatus(){
+    var el = document.getElementById("statusLine");
+    var count = Object.keys(state.weeks).filter(function(k){ return weekHasData(state.weeks[k]); }).length;
+    if(count === 0){ el.textContent = "Nessuna settimana caricata."; return; }
+    var src = loadedFromLocal ? "dati trovati in questo browser" : "dati importati da file";
+    el.textContent = count + " settiman" + (count===1?"a":"e") + " disponibili · " + src;
+  }
+
+  function populateEmployeeFilter(){
+    var sel = document.getElementById("employeeFilter");
+    var current = sel.value;
+    var names = state.employees.map(function(e){ return e.name; }).sort(function(a,b){ return a.localeCompare(b,'it'); });
+    sel.innerHTML = '<option value="">Tutti i dipendenti</option>' + names.map(function(n){ return '<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>'; }).join("");
+    sel.value = current;
+  }
+
+  function renderWeeks(){
+    var container = document.getElementById("weeksContainer");
+    var empFilter = document.getElementById("employeeFilter").value;
+    var agFilter = document.getElementById("agencyFilter").value;
+
+    var keys = Object.keys(state.weeks).filter(function(k){ return weekHasData(state.weeks[k]); });
+    keys.sort(function(a,b){ return b.localeCompare(a); });
+
+    if(empFilter) keys = keys.filter(function(k){ return weekMentionsEmployee(state.weeks[k], empFilter); });
+    if(agFilter) keys = keys.filter(function(k){ return weekMentionsAgency(state.weeks[k], agFilter); });
+
+    container.innerHTML = "";
+    if(keys.length === 0){
+      var msg = Object.keys(state.weeks).length === 0
+        ? '<div class="empty-state">Nessun dato caricato.<br><br>Tocca <b>📂 Importa memoria</b> e seleziona il file <b>turni_memoria.json</b>.</div>'
+        : '<div class="empty-state">Nessuna settimana corrisponde ai filtri selezionati.</div>';
+      container.innerHTML = msg;
+      return;
+    }
+
+    keys.forEach(function(k){
+      var w = state.weeks[k];
+      var mon = fromISO(k), sat = addDays(mon,5);
+      var conflicts = computeConflicts(w);
+
+      var card = document.createElement("div");
+      card.className = "week-card";
+
+      var head = document.createElement("div");
+      head.className = "week-card-head";
+      head.innerHTML =
+        '<div><div class="week-title">'+fmtIt(mon)+' – '+fmtIt(sat)+' \''+String(mon.getFullYear()).slice(2)+'</div>'+
+        '<div class="week-meta">settimana dal '+fmtItFull(mon)+'</div></div>'+
+        '<div class="week-badges">'+(conflicts.length ? '<span class="badge alert">'+conflicts.length+' ⚠</span>' : '<span class="badge">ok</span>')+
+        '<span class="chevron">›</span></div>';
+      head.addEventListener("click", function(){ card.classList.toggle("open"); });
+      card.appendChild(head);
+
+      var detail = document.createElement("div");
+      detail.className = "week-detail";
+
+      if(conflicts.length){
+        var cbox = document.createElement("div");
+        cbox.className = "conflict-box";
+        cbox.innerHTML = "<b>⚠ Sovrapposizioni</b><ul>" + conflicts.map(function(c){
+          var d = fromISO(c.date);
+          return "<li><b>"+escapeHtml(c.name)+"</b> · "+DAY_NAMES[c.dayIdx]+" "+fmtIt(d)+" ("+(c.shift==="mattina"?"mattina":"pomeriggio")+"): "+c.agencies.map(escapeHtml).join(" + ")+"</li>";
+        }).join("") + "</ul>";
+        detail.appendChild(cbox);
+      }
+
+      var agenciesToShow = agFilter ? [agFilter] : AGENCIES;
+
+      w.days.forEach(function(day, dayIdx){
+        if(empFilter && !weekMentionsEmployeeOnDay(day, empFilter)) return;
+        var d = fromISO(day.date);
+        var row = document.createElement("div");
+        row.className = "day-row";
+        var body = "";
+        agenciesToShow.forEach(function(agency){
+          SHIFTS.forEach(function(sp){
+            var names = day.shifts[agency][sp[0]];
+            var filteredNames = empFilter ? names.filter(function(n){ return n===empFilter; }) : names;
+            if(empFilter && filteredNames.length === 0) return;
+            var chips = names.length ? names.map(function(n){ return chipHtml(n,false); }).join("") : '<span class="none-txt">nessuno</span>';
+            body += '<div class="agency-line"><b>'+AGENCY_CODES[agency]+' '+sp[1]+':</b><br>'+chips+'</div>';
+          });
+        });
+        var absPeople = day.absence.people.filter(function(n){ return !empFilter || n===empFilter; });
+        if(!empFilter || absPeople.length){
+          var absChips = day.absence.people.length ? day.absence.people.map(function(n){ return chipHtml(n,true); }).join("") : '<span class="none-txt">nessuno</span>';
+          body += '<div class="agency-line"><b>Ferie/Permessi:</b><br>'+absChips;
+          if(day.absence.note && day.absence.note.trim()) body += '<div class="abs-note-text">'+escapeHtml(day.absence.note)+'</div>';
+          body += '</div>';
+        }
+        if(!body) return;
+        row.innerHTML = '<div class="day-row-title">'+DAY_NAMES[dayIdx]+' '+fmtIt(d)+'</div><div class="day-row-body">'+body+'</div>';
+        detail.appendChild(row);
+      });
+
+      var actions = document.createElement("div");
+      actions.className = "week-actions";
+      var pngBtn = document.createElement("button");
+      pngBtn.className = "btn btn-outline btn-sm";
+      pngBtn.textContent = "🖼 Esporta PNG";
+      pngBtn.addEventListener("click", function(e){ e.stopPropagation(); exportWeekImage(w, mon, sat, "png"); });
+      var pdfBtn = document.createElement("button");
+      pdfBtn.className = "btn btn-outline btn-sm";
+      pdfBtn.textContent = "📄 Esporta PDF";
+      pdfBtn.addEventListener("click", function(e){ e.stopPropagation(); exportWeekImage(w, mon, sat, "pdf"); });
+      var delBtn = document.createElement("button");
+      delBtn.className = "btn btn-alert btn-sm";
+      delBtn.textContent = "🗑 Elimina";
+      delBtn.addEventListener("click", function(e){
+        e.stopPropagation();
+        if(confirm("Eliminare definitivamente la settimana "+fmtIt(mon)+" – "+fmtIt(sat)+" dallo storico?")){
+          delete state.weeks[k];
+          persistLocal();
+          renderWeeks();
+        }
+      });
+      actions.appendChild(pngBtn); actions.appendChild(pdfBtn); actions.appendChild(delBtn);
+      detail.appendChild(actions);
+
+      card.appendChild(detail);
+      container.appendChild(card);
+    });
+  }
+
+  function weekMentionsEmployeeOnDay(day, name){
+    if(day.absence.people.indexOf(name)!==-1) return true;
+    return AGENCIES.some(function(a){ return day.shifts[a].mattina.indexOf(name)!==-1 || day.shifts[a].pomeriggio.indexOf(name)!==-1; });
+  }
+
+  function persistLocal(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(state)); }catch(e){} }
+
+  function exportWeekImage(w, mon, sat, kind){
+    if(typeof html2canvas === "undefined"){ alert("Libreria di esportazione non caricata (serve connessione al primo avvio)."); return; }
+    var target = document.createElement("div");
+    target.className = "export-target";
+    target.style.position = "fixed";
+    target.style.left = "-9999px";
+    target.style.width = "800px";
+    var html = '<div class="sheet-head"><h1>Settimana del '+fmtItFull(mon)+'</h1><div class="range">'+fmtItFull(mon)+' — '+fmtItFull(sat)+'</div></div>';
+    w.days.forEach(function(day, dayIdx){
+      var d = fromISO(day.date);
+      var body = "";
+      AGENCIES.forEach(function(agency){
+        SHIFTS.forEach(function(sp){
+          var names = day.shifts[agency][sp[0]];
+          var chips = names.length ? names.map(function(n){ return chipHtml(n,false); }).join("") : '<span class="none-txt">nessuno</span>';
+          body += '<div class="agency-line"><b>'+AGENCY_CODES[agency]+' '+sp[1]+':</b> '+chips+'</div>';
+        });
+      });
+      var absChips = day.absence.people.length ? day.absence.people.map(function(n){ return chipHtml(n,true); }).join("") : '<span class="none-txt">nessuno</span>';
+      body += '<div class="agency-line"><b>Ferie/Permessi:</b> '+absChips+'</div>';
+      html += '<div class="day-row"><div class="day-row-title">'+DAY_NAMES[dayIdx]+' '+fmtIt(d)+'</div><div class="day-row-body">'+body+'</div></div>';
+    });
+    target.innerHTML = html;
+    document.body.appendChild(target);
+
+    html2canvas(target, { scale:2, backgroundColor:"#FFFEFB", useCORS:true, allowTaint:true, logging:false }).then(function(canvas){
+      document.body.removeChild(target);
+      var base = "turni_"+mon.getFullYear()+"-"+pad(mon.getMonth()+1)+"-"+pad(mon.getDate())+"_"+sat.getFullYear()+"-"+pad(sat.getMonth()+1)+"-"+pad(sat.getDate());
+      if(kind === "png"){
+        var link=document.createElement("a"); link.download=base+".png"; link.href=canvas.toDataURL("image/png");
+        document.body.appendChild(link); link.click(); link.remove();
+      } else {
+        if(typeof window.jspdf === "undefined"){ alert("Libreria PDF non caricata (serve connessione al primo avvio)."); return; }
+        var imgData = canvas.toDataURL("image/png");
+        var jsPDFCtor = window.jspdf.jsPDF;
+        var pdf = new jsPDFCtor({ orientation:"p", unit:"pt", format:"a4" });
+        var pageW=pdf.internal.pageSize.getWidth(), pageH=pdf.internal.pageSize.getHeight(), margin=20;
+        var ratio=Math.min((pageW-margin*2)/canvas.width,(pageH-margin*2)/canvas.height);
+        var wpt=canvas.width*ratio, hpt=canvas.height*ratio;
+        pdf.addImage(imgData,"PNG",(pageW-wpt)/2,(pageH-hpt)/2,wpt,hpt);
+        pdf.save(base+".pdf");
+      }
+    }).catch(function(err){
+      if(document.body.contains(target)) document.body.removeChild(target);
+      alert("Esportazione non riuscita: "+(err&&err.message?err.message:err));
+    });
+  }
+
+  document.getElementById("importBtn").addEventListener("click", function(){ document.getElementById("importInput").click(); });
+  document.getElementById("importInput").addEventListener("change", function(e){
+    var file = e.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        var parsed = JSON.parse(evt.target.result);
+        state = normalizeState(parsed);
+        loadedFromLocal = false;
+        persistLocal();
+        populateEmployeeFilter();
+        updateStatus();
+        renderWeeks();
+        alert("Storico caricato da \u201c"+file.name+"\u201d.");
+      }catch(err){ alert("Impossibile leggere il file: "+err.message); }
+    };
+    reader.readAsText(file); e.target.value="";
+  });
+
+  document.getElementById("exportBtn").addEventListener("click", function(){
+    state.meta.lastExport = new Date().toISOString();
+    persistLocal();
+    var blob = new Blob([JSON.stringify(state,null,2)], { type:"application/json" });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a"); link.href=url; link.download="turni_memoria.json";
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  });
+
+  document.getElementById("employeeFilter").addEventListener("change", renderWeeks);
+  document.getElementById("agencyFilter").addEventListener("change", renderWeeks);
+
+  tryLoadLocal();
+  populateEmployeeFilter();
+  updateStatus();
+  renderWeeks();
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+})();
+</script>
+</body>
+</html>

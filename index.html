@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Turni">
+<meta name="theme-color" content="#223349">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>Turni · Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --paper:#F5F1E6; --paper-2:#EFE9D8; --ink:#23211D; --ink-soft:#5B564A;
+    --navy:#223349; --accent:#2F6F62; --accent-2:#3E8C7A; --alert:#B13B2E; --alert-bg:#F6E1DC;
+    --line:#D8CDB2; --line-strong:#B9AC87;
+    --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--paper); color: var(--ink); font-family:'IBM Plex Sans', sans-serif;
+    font-size:16px; min-height:100dvh; touch-action: manipulation;
+    padding-bottom: calc(78px + var(--safe-b));
+  }
+
+  /* ---- header ---- */
+  header.m-header{
+    position: sticky; top:0; z-index:40; background: var(--navy); color:#EFE9DA;
+    padding: calc(10px + var(--safe-t)) 14px 10px;
+  }
+  .m-brand{ font-family:'Fraunces', serif; font-weight:700; font-size:17px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+  .m-brand span{ color: var(--accent-2); }
+  .m-week-row{ display:flex; align-items:center; justify-content:center; gap:10px; }
+  .m-arrow{
+    background: rgba(255,255,255,0.08); border:1px solid #4C617A; color:#EFE9DA; width:40px; height:40px;
+    border-radius:50%; font-size:18px; display:flex; align-items:center; justify-content:center;
+  }
+  .m-arrow:active{ background: rgba(255,255,255,0.2); }
+  .m-week-label{ font-family:'IBM Plex Mono', monospace; font-size:14px; min-width:150px; text-align:center; }
+  .m-week-label b{ color: var(--accent-2); }
+  .m-substatus{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:9px; flex-wrap:wrap; }
+  .m-stamp{
+    font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:11.5px; letter-spacing:.5px;
+    border:2px solid var(--accent-2); color: var(--accent-2); padding:4px 10px; border-radius:12px; text-transform:uppercase;
+  }
+  .m-stamp.alert{ border-color:#E38C7C; color:#E38C7C; }
+  .m-link{ background:none; border:none; color:#B8C0CB; font-size:12px; text-decoration:underline; font-family:'IBM Plex Sans', sans-serif; }
+
+  /* ---- main ---- */
+  main.m-main{ padding: 14px 12px 20px; }
+  .m-conflict{
+    background: var(--alert-bg); border:1px solid #E2B4AA; border-left:4px solid var(--alert); border-radius:10px;
+    padding:10px 12px; font-size:12.5px; margin-bottom:14px;
+  }
+  .m-conflict.hidden{ display:none; }
+  .m-conflict h3{ margin:0 0 6px; font-family:'Fraunces', serif; font-size:14px; color: var(--alert); }
+  .m-conflict ul{ margin:0; padding-left:18px; }
+  .m-conflict li{ margin-bottom:3px; }
+
+  .day-card{ background:#FFFEFB; border:1px solid var(--line-strong); border-radius:16px; padding:12px; margin-bottom:14px; box-shadow:0 2px 8px rgba(35,33,29,0.07); }
+  .day-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .day-badge{ display:flex; align-items:baseline; gap:8px; }
+  .day-badge .num{ font-family:'Fraunces', serif; font-weight:700; font-size:24px; color: var(--navy); line-height:1; }
+  .day-badge .name{ font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; color: var(--ink-soft); letter-spacing:1px; }
+
+  .agency-grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .agency-label{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color: var(--navy); font-weight:600; margin-bottom:4px; }
+  .shift-btn{
+    display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:46px; text-align:left;
+    border:1.4px solid var(--line-strong); border-radius:10px; padding:7px 9px; margin-top:6px; background:#fff;
+    font-family:'IBM Plex Sans', sans-serif;
+  }
+  .shift-btn:active{ background: var(--paper-2); }
+  .shift-btn.conflict{ border-color: var(--alert); background: var(--alert-bg); }
+  .shift-tag{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; text-transform:uppercase; color: var(--ink-soft); letter-spacing:.5px; }
+  .shift-chips{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
+  .empty-hint{ color:#C6BC9E; font-size:11px; font-style:italic; margin-top:4px; }
+
+  .chip{ display:inline-flex; align-items:center; gap:4px; border:1.4px solid var(--line-strong); border-radius:10px; padding:2px 7px 2px 5px; font-size:11px; color: var(--ink); }
+  .chip-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .chip.chip-absent{ border-style:dashed; }
+
+  .ferie-btn{
+    width:100%; margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:8px;
+    border:1.4px dashed var(--line-strong); border-radius:10px; padding:9px 11px; background: var(--paper-2);
+    min-height:46px; font-family:'IBM Plex Sans', sans-serif; font-size:13px; font-weight:600; color: var(--navy);
+  }
+  .ferie-btn .fchips{ display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; }
+  .ferie-btn:active{ background: var(--line); }
+
+  /* ---- bottom tab bar ---- */
+  nav.m-tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:50; background: var(--navy); border-top:3px solid var(--accent);
+    display:flex; padding: 6px 4px calc(6px + var(--safe-b));
+  }
+  nav.m-tabbar button{
+    flex:1; background:none; border:none; color:#B8C0CB; display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:6px 2px; font-size:10px; font-family:'IBM Plex Sans', sans-serif; min-height:48px;
+  }
+  nav.m-tabbar button .ico{ font-size:19px; }
+  nav.m-tabbar button:active{ color:#fff; }
+
+  /* ---- bottom sheets ---- */
+  .sheet-overlay{ position:fixed; inset:0; background:rgba(35,33,29,0.5); z-index:100; display:flex; align-items:flex-end; }
+  .sheet-overlay.hidden{ display:none; }
+  .sheet-panel{
+    background:#FFFEFB; width:100%; max-height:88dvh; border-radius:20px 20px 0 0; display:flex; flex-direction:column;
+    box-shadow:0 -10px 40px rgba(0,0,0,0.3); padding-bottom: var(--safe-b);
+  }
+  .sheet-handle{ width:40px; height:4px; background: var(--line-strong); border-radius:3px; margin:10px auto 4px; }
+  .sheet-head{ padding:6px 18px 12px; border-bottom:1px solid var(--line); }
+  .sheet-head h3{ margin:0; font-family:'Fraunces', serif; font-size:17px; }
+  .sheet-head .sub{ font-family:'IBM Plex Mono', monospace; font-size:11px; color: var(--ink-soft); margin-top:2px; }
+  .sheet-body{ padding:14px 18px; overflow-y:auto; flex:1; -webkit-overflow-scrolling: touch; }
+  .sheet-foot{ padding:12px 18px; border-top:1px solid var(--line); display:flex; gap:8px; }
+
+  .btn{ font-family:'IBM Plex Sans', sans-serif; font-size:14px; font-weight:600; padding:11px 16px; border-radius:22px; border:1px solid transparent; min-height:44px; flex:1; }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{ background: var(--accent); color:#fff; }
+  .btn-outline{ background:#fff; color: var(--navy); border-color: var(--line-strong); }
+  .btn-ghost{ background: var(--paper-2); color: var(--navy); }
+  .btn-alert{ background: var(--alert); color:#fff; }
+  .btn-block{ width:100%; margin-bottom:8px; display:block; text-align:center; }
+
+  .filter-row{ display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:12px; color: var(--ink-soft); }
+  .filter-row input[type=checkbox]{ width:18px; height:18px; accent-color: var(--accent); }
+
+  .emp-list{ display:flex; flex-direction:column; gap:4px; margin-bottom:12px; }
+  .emp-row{ display:flex; align-items:center; gap:10px; padding:9px 6px; border-radius:8px; min-height:44px; }
+  .emp-row.is-absent{ opacity:0.5; }
+  .emp-row input[type=checkbox]{ width:20px; height:20px; accent-color: var(--accent); flex-shrink:0; }
+  .emp-row label{ font-size:14.5px; flex:1; display:flex; align-items:center; gap:8px; }
+  .tag-absent{ font-size:10.5px; font-family:'IBM Plex Mono', monospace; color: var(--alert); }
+  .tag-outsede{ font-size:10.5px; font-family:'IBM Plex Mono', monospace; color: var(--ink-soft); }
+
+  .add-emp-row{ display:flex; gap:8px; margin-top:6px; }
+  .add-emp-row input{ flex:1; padding:11px 12px; border:1px solid var(--line-strong); border-radius:10px; font-size:15px; }
+
+  label.field-label{ font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color: var(--ink-soft); font-weight:600; display:block; margin:12px 0 5px; }
+  select, input[type=date]{ width:100%; padding:11px 12px; border:1px solid var(--line-strong); border-radius:10px; font-size:15px; background:#fff; }
+  textarea.note-input{ width:100%; min-height:64px; padding:11px 12px; border:1px solid var(--line-strong); border-radius:10px; font-size:14.5px; resize:vertical; }
+  .warn-box{ background: var(--alert-bg); border:1px solid #E2B4AA; border-radius:10px; padding:10px 12px; font-size:12.5px; margin-top:12px; display:none; }
+  .warn-box.show{ display:block; }
+
+  .emp-manage-row{ display:flex; align-items:center; gap:9px; padding:10px 4px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .emp-manage-row input[type=color]{ width:32px; height:32px; border:1px solid var(--line-strong); border-radius:50%; padding:0; background:none; }
+  .emp-manage-name{ font-size:14.5px; font-weight:600; flex:1; min-width:80px; }
+  .sede-toggles{ display:flex; gap:4px; flex-wrap:wrap; }
+  .sede-btn{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; padding:5px 8px; border:1px solid var(--line-strong); border-radius:10px; background:#fff; color: var(--ink-soft); min-height:30px; }
+  .sede-btn.active{ background: var(--accent); color:#fff; border-color: var(--accent); }
+  .emp-remove{ background: var(--alert); color:#fff; border:none; border-radius:50%; width:26px; height:26px; font-size:12px; flex-shrink:0; }
+  .emp-hint{ font-size:11.5px; color: var(--ink-soft); margin-bottom:10px; line-height:1.5; }
+
+  #historyList{ list-style:none; margin:0; padding:0; }
+  #historyList li{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:12px 8px; border-bottom:1px solid var(--line); font-size:14px; min-height:44px; }
+  #historyList li:active{ background: var(--paper-2); }
+  #historyList li.active{ background: var(--accent); color:#fff; border-radius:8px; }
+  #historyList li .tag{ font-family:'IBM Plex Mono', monospace; font-size:10px; padding:2px 7px; border-radius:10px; background: var(--paper-2); color: var(--ink-soft); }
+  #historyList li.active .tag{ background: rgba(255,255,255,0.25); color:#fff; }
+  #historyList .empty{ font-size:13px; color: var(--ink-soft); font-style:italic; padding:10px 4px; }
+
+  .status-line{ font-family:'IBM Plex Mono', monospace; font-size:12px; color: var(--ink-soft); margin-bottom:14px; line-height:1.6; }
+  .status-line.dirty{ color: var(--alert); font-weight:600; }
+  .companion-note{ font-size:12px; color: var(--ink-soft); line-height:1.6; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+  .companion-note a{ color: var(--accent); font-weight:600; }
+</style>
+</head>
+<body>
+
+<noscript>
+  <div style="background:#B13B2E;color:#fff;padding:22px 18px;font-family:sans-serif;line-height:1.6;font-size:15px;">
+    <b>Questa pagina non si sta aprendo in Safari.</b><br><br>
+    Stai probabilmente vedendo un'<b>anteprima</b> (Quick Look) invece della vera pagina web, quindi la parte interattiva non parte.<br><br>
+    Per aprirla correttamente: tocca l'icona di condivisione, poi scegli <b>Safari</b> dall'elenco delle app.
+  </div>
+</noscript>
+
+<header class="m-header">
+  <div class="m-brand">REGISTRO <span>TURNI</span> · mobile</div>
+  <div class="m-week-row">
+    <button class="m-arrow" id="prevWeek">‹</button>
+    <div class="m-week-label" id="weekLabel">—</div>
+    <button class="m-arrow" id="nextWeek">›</button>
+  </div>
+  <div class="m-substatus">
+    <span class="m-stamp" id="conflictStamp">✓ ok</span>
+    <button class="m-link" id="gotoUpcoming">→ prossima settimana</button>
+  </div>
+</header>
+
+<main class="m-main" id="exportArea">
+  <div class="m-conflict hidden" id="conflictPanel"><h3>⚠ Sovrapposizioni</h3><ul id="conflictListUI"></ul></div>
+  <div id="daysList"></div>
+</main>
+
+<nav class="m-tabbar">
+  <button data-open="empSheetOverlay"><span class="ico">👤</span>Dipendenti</button>
+  <button data-open="dupSheetOverlay"><span class="ico">⎘</span>Duplica</button>
+  <button data-open="historySheetOverlay"><span class="ico">🕘</span>Storico</button>
+  <button data-open="exportSheetOverlay"><span class="ico">📤</span>Esporta</button>
+  <button data-open="memoriaSheetOverlay"><span class="ico">💾</span>Memoria</button>
+</nav>
+
+<!-- ===== Sheet: turno ===== -->
+<div class="sheet-overlay hidden" id="cellSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3 id="cellSheetTitle">Turno</h3><div class="sub" id="cellSheetSub"></div></div>
+    <div class="sheet-body">
+      <label class="filter-row"><input type="checkbox" id="cellShowAllSedi"> Mostra anche dipendenti di altre sedi</label>
+      <div class="emp-list" id="cellEmpList"></div>
+      <div class="add-emp-row">
+        <input type="text" id="cellNewEmpInput" placeholder="Aggiungi nuovo nome…">
+        <button class="btn btn-outline" style="flex:0 0 auto;" id="cellNewEmpBtn">+</button>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="cellSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="cellSaveBtn">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: ferie/permessi ===== -->
+<div class="sheet-overlay hidden" id="absenceSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Ferie &amp; permessi</h3><div class="sub" id="absenceSheetSub"></div></div>
+    <div class="sheet-body">
+      <div class="emp-hint">Chi selezioni qui viene rimosso automaticamente dai turni dello stesso giorno.</div>
+      <div class="emp-list" id="absenceEmpList"></div>
+      <label class="field-label">Nota (facoltativa)</label>
+      <textarea class="note-input" id="absenceNoteInput" placeholder="es. malattia, corso…"></textarea>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="absenceSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="absenceSaveBtn">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: dipendenti ===== -->
+<div class="sheet-overlay hidden" id="empSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Dipendenti</h3><div class="sub">Colore, sedi e anagrafica</div></div>
+    <div class="sheet-body">
+      <div class="emp-hint">Nessuna sede selezionata = disponibile per tutte le agenzie.</div>
+      <div id="masterEmpList"></div>
+      <div class="add-emp-row">
+        <input type="text" id="masterNewEmpInput" placeholder="Nome nuovo dipendente…">
+        <button class="btn btn-outline" style="flex:0 0 auto;" id="masterNewEmpBtn">+</button>
+      </div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="empSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: duplica ===== -->
+<div class="sheet-overlay hidden" id="dupSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Duplica settimana</h3></div>
+    <div class="sheet-body">
+      <label class="field-label">Copia da</label>
+      <select id="dupSource"></select>
+      <label class="field-label">Su settimana che inizia lunedì</label>
+      <input type="date" id="dupTarget">
+      <div class="warn-box" id="dupWarn">La settimana di destinazione contiene già dati: verranno sovrascritti.</div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="dupSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="dupConfirmBtn">Duplica</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: storico ===== -->
+<div class="sheet-overlay hidden" id="historySheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Settimane precedenti</h3><div class="sub">Tocca per aprire</div></div>
+    <div class="sheet-body"><ul id="historyList"></ul>
+      <div class="companion-note">Per consultare e cercare nello storico in modo più completo (per dipendente, con esportazione per singola settimana), apri l'<a href="storico.html">archivio storico completo</a>.</div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="historySheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: esporta ===== -->
+<div class="sheet-overlay hidden" id="exportSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Esporta settimana</h3><div class="sub">Immagine o PDF della settimana visualizzata</div></div>
+    <div class="sheet-body">
+      <button class="btn btn-outline btn-block" id="exportPngBtn">🖼 Esporta PNG</button>
+      <button class="btn btn-outline btn-block" id="exportPdfBtn">📄 Esporta PDF</button>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="exportSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: memoria ===== -->
+<div class="sheet-overlay hidden" id="memoriaSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Memoria dell'app</h3><div class="sub">Salva e trasferisci i dati tra dispositivi</div></div>
+    <div class="sheet-body">
+      <div class="status-line" id="memoryStatus">—</div>
+      <button class="btn btn-primary btn-block" id="exportMemoriaBtn">💾 Esporta memoria (.json)</button>
+      <button class="btn btn-outline btn-block" id="importMemoriaBtn">📂 Importa memoria</button>
+      <input type="file" id="importMemoriaInput" accept="application/json,.json" style="display:none;">
+      <div class="companion-note">Il file scaricato si chiama <b>turni_memoria.json</b> e va tenuto nella stessa cartella Download insieme a questa pagina. Per usarlo su un altro iPhone o computer, copia entrambi i file e importa la memoria da qui.</div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="memoriaSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
+  var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
+  var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
+  var DAY_NAMES = ["Lun","Mar","Mer","Gio","Ven","Sab"];
+  var DEFAULT_NAMES = ["Cristina","Simone","Claudio","Leo","Laura","Gaia","Paola","Loredana","Claudia","Giorgio","Chiara","Domenico","Antony","Anai","Stagista 1","Stagista 2"];
+  var LS_STATE = "turni_state_v2";
+  var LS_LEGACY_WEEKS = "turni_weeks_v1";
+  var LS_LEGACY_EMP = "turni_employees_v1";
+
+  function hslToHex(h,s,l){
+    s/=100; l/=100;
+    function k(n){ return (n + h/30) % 12; }
+    var a = s * Math.min(l, 1-l);
+    function f(n){ return l - a*Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n),1))); }
+    function toHex(x){ var h2=Math.round(255*x).toString(16); return h2.length===1?"0"+h2:h2; }
+    return "#"+toHex(f(0))+toHex(f(8))+toHex(f(4));
+  }
+  function hexToRgb(hex){
+    hex = hex.replace("#","");
+    if(hex.length===3) hex = hex.split("").map(function(c){return c+c;}).join("");
+    var num = parseInt(hex,16);
+    return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 };
+  }
+  function rgbToHex(r,g,b){
+    function c(v){ v=Math.max(0,Math.min(255,Math.round(v))); var s=v.toString(16); return s.length===1?"0"+s:s; }
+    return "#"+c(r)+c(g)+c(b);
+  }
+  function tintHex(hex, amount){ var c=hexToRgb(hex); return rgbToHex(c.r+(255-c.r)*amount, c.g+(255-c.g)*amount, c.b+(255-c.b)*amount); }
+  function paletteColor(index){ return hslToHex((index*137.508)%360, 58, 48); }
+  function hashHue(str){ var h=0; for(var i=0;i<str.length;i++){ h=(h*31+str.charCodeAt(i))%360; } return h<0?h+360:h; }
+
+  function defaultEmployees(){ return DEFAULT_NAMES.map(function(n,i){ return { name:n, color: paletteColor(i), sedi: [] }; }); }
+  function blankAbsence(){ return { people: [], note: "" }; }
+  function blankWeek(mondayISO){
+    var monday = fromISO(mondayISO); var days=[];
+    for(var i=0;i<6;i++){
+      var shifts={}; AGENCIES.forEach(function(a){ shifts[a]={mattina:[],pomeriggio:[]}; });
+      days.push({ date: toISO(addDays(monday,i)), shifts:shifts, absence: blankAbsence() });
+    }
+    return { start: mondayISO, days: days };
+  }
+  function normalizeState(st){
+    if(!st || typeof st!=="object") st={};
+    if(!st.employees || !st.employees.length) st.employees = defaultEmployees();
+    st.employees.forEach(function(e,i){ if(!e.color) e.color=paletteColor(i); if(!e.sedi) e.sedi=[]; });
+    if(!st.weeks) st.weeks={};
+    if(!st.meta) st.meta={ lastExport:null };
+    Object.keys(st.weeks).forEach(function(k){
+      var w = st.weeks[k]; if(!w.days) w.days=[];
+      w.days.forEach(function(d){
+        if(!d.shifts) d.shifts={};
+        AGENCIES.forEach(function(a){
+          if(!d.shifts[a]) d.shifts[a]={mattina:[],pomeriggio:[]};
+          if(!d.shifts[a].mattina) d.shifts[a].mattina=[];
+          if(!d.shifts[a].pomeriggio) d.shifts[a].pomeriggio=[];
+        });
+        if(!d.absence) d.absence={ people:[], note: (typeof d.note==="string")?d.note:"" };
+        if(!d.absence.people) d.absence.people=[];
+        if(typeof d.absence.note!=="string") d.absence.note="";
+      });
+    });
+    return st;
+  }
+  function migrateFromV1(){
+    var employees = defaultEmployees(); var weeks={};
+    try{
+      var rawEmp = localStorage.getItem(LS_LEGACY_EMP);
+      if(rawEmp){ var names=JSON.parse(rawEmp); employees=names.map(function(n,i){ return {name:n,color:paletteColor(i),sedi:[]}; }); }
+      var rawWeeks = localStorage.getItem(LS_LEGACY_WEEKS);
+      if(rawWeeks){
+        var oldWeeks = JSON.parse(rawWeeks);
+        Object.keys(oldWeeks).forEach(function(k){
+          var ow=oldWeeks[k];
+          weeks[k]={ start:ow.start, days: ow.days.map(function(d){ return {date:d.date, shifts:d.shifts, absence:{people:[],note:d.note||""}}; }) };
+        });
+      }
+    }catch(e){}
+    return normalizeState({ employees:employees, weeks:weeks, meta:{lastExport:null} });
+  }
+  function loadState(){
+    try{ var raw=localStorage.getItem(LS_STATE); if(raw) return normalizeState(JSON.parse(raw)); }catch(e){}
+    return migrateFromV1();
+  }
+
+  var state = loadState();
+  var employees = state.employees;
+  var weeksStore = state.weeks;
+  var isDirty = false;
+  var currentMonday = getUpcomingMonday();
+  var cellCtx = null, absenceCtx = null;
+
+  function persistLocal(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(state)); }catch(e){} }
+  function markDirty(){ isDirty=true; persistLocal(); updateMemoryStatus(); }
+  function findEmployee(name){ return employees.filter(function(e){return e.name===name;})[0]; }
+  function colorFor(name){ var e=findEmployee(name); return (e&&e.color) ? e.color : hslToHex(hashHue(name),45,55); }
+  function addEmployeeIfMissing(name){
+    var existing=findEmployee(name); if(existing) return existing;
+    var emp={ name:name, color:paletteColor(employees.length), sedi:[] };
+    employees.push(emp); state.employees=employees; markDirty(); return emp;
+  }
+  function removeEmployeeByName(name){ employees=employees.filter(function(e){return e.name!==name;}); state.employees=employees; markDirty(); }
+
+  function pad(n){ return n<10?"0"+n:""+n; }
+  function toISO(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function fromISO(s){ var p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); }
+  function getMonday(d){ d=new Date(d.getFullYear(),d.getMonth(),d.getDate()); var day=d.getDay(); var diff=(day===0?-6:1-day); d.setDate(d.getDate()+diff); return d; }
+  function addDays(d,n){ var nd=new Date(d.getFullYear(),d.getMonth(),d.getDate()); nd.setDate(nd.getDate()+n); return nd; }
+  function fmtIt(d){ return pad(d.getDate())+"/"+pad(d.getMonth()+1); }
+  function fmtItFull(d){ return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear(); }
+  function fmtDateTime(iso){ if(!iso) return null; var d=new Date(iso); return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear()+" "+pad(d.getHours())+":"+pad(d.getMinutes()); }
+  function getUpcomingMonday(){ return addDays(getMonday(new Date()),7); }
+
+  function getWeek(mondayISO){
+    if(!weeksStore[mondayISO]) weeksStore[mondayISO]=blankWeek(mondayISO);
+    var w=weeksStore[mondayISO];
+    w.days.forEach(function(day){
+      AGENCIES.forEach(function(a){
+        if(!day.shifts[a]) day.shifts[a]={mattina:[],pomeriggio:[]};
+        if(!day.shifts[a].mattina) day.shifts[a].mattina=[];
+        if(!day.shifts[a].pomeriggio) day.shifts[a].pomeriggio=[];
+      });
+      if(!day.absence) day.absence=blankAbsence();
+    });
+    return w;
+  }
+  function weekHasData(w){
+    return w.days.some(function(day){
+      if(day.absence && (day.absence.people.length || (day.absence.note && day.absence.note.trim()))) return true;
+      return AGENCIES.some(function(a){ return day.shifts[a].mattina.length || day.shifts[a].pomeriggio.length; });
+    });
+  }
+  function computeConflicts(w){
+    var conflicts=[];
+    w.days.forEach(function(day,dayIdx){
+      SHIFTS.forEach(function(sp){
+        var shiftKey=sp[0]; var map={};
+        AGENCIES.forEach(function(a){
+          day.shifts[a][shiftKey].forEach(function(name){ if(!map[name]) map[name]=[]; map[name].push(a); });
+        });
+        Object.keys(map).forEach(function(name){ if(map[name].length>1) conflicts.push({dayIdx:dayIdx,date:day.date,shift:shiftKey,name:name,agencies:map[name]}); });
+      });
+    });
+    return conflicts;
+  }
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];}); }
+  function chipHtml(name, absent){
+    var color=colorFor(name); var bg=tintHex(color,0.82);
+    var cls=absent?"chip chip-absent":"chip";
+    return '<span class="'+cls+'" style="background:'+bg+';border-color:'+color+';"><span class="chip-dot" style="background:'+color+'"></span>'+escapeHtml(name)+'</span>';
+  }
+
+  function renderDays(w, conflicts){
+    var container = document.getElementById("daysList");
+    container.innerHTML = "";
+    var conflictKey = {};
+    conflicts.forEach(function(c){ c.agencies.forEach(function(ag){ conflictKey[c.dayIdx+"|"+ag+"|"+c.shift]=true; }); });
+
+    w.days.forEach(function(day, dayIdx){
+      var d = fromISO(day.date);
+      var card = document.createElement("div");
+      card.className = "day-card";
+
+      var head = document.createElement("div");
+      head.className = "day-card-head";
+      head.innerHTML = '<div class="day-badge"><span class="num">'+d.getDate()+'</span><span class="name">'+DAY_NAMES[dayIdx]+'</span></div>';
+      card.appendChild(head);
+
+      var grid = document.createElement("div");
+      grid.className = "agency-grid";
+      AGENCIES.forEach(function(agency){
+        var block = document.createElement("div");
+        block.className = "agency-block";
+        block.innerHTML = '<div class="agency-label">'+agency+'</div>';
+        SHIFTS.forEach(function(sp){
+          var shiftKey = sp[0];
+          var btn = document.createElement("button");
+          btn.className = "shift-btn" + (conflictKey[dayIdx+"|"+agency+"|"+shiftKey] ? " conflict" : "");
+          var names = day.shifts[agency][shiftKey];
+          var chipsHtml = names.length ? names.map(function(n){ return chipHtml(n,false); }).join("") : '<span class="empty-hint">+ aggiungi</span>';
+          btn.innerHTML = '<span class="shift-tag">'+sp[1]+'</span><span class="shift-chips">'+chipsHtml+'</span>';
+          btn.addEventListener("click", function(){ openCellSheet(dayIdx, agency, shiftKey); });
+          block.appendChild(btn);
+        });
+        grid.appendChild(block);
+      });
+      card.appendChild(grid);
+
+      var ferieBtn = document.createElement("button");
+      ferieBtn.className = "ferie-btn";
+      var people = day.absence.people || [];
+      var fchips = people.length ? people.map(function(n){ return chipHtml(n,true); }).join("") : '<span class="empty-hint">nessuno</span>';
+      ferieBtn.innerHTML = '<span>🏖 Ferie/Permessi</span><span class="fchips">'+fchips+'</span>';
+      ferieBtn.addEventListener("click", function(){ openAbsenceSheet(dayIdx); });
+      card.appendChild(ferieBtn);
+
+      container.appendChild(card);
+    });
+  }
+
+  function renderWeek(){
+    var mondayISO = toISO(currentMonday);
+    var w = getWeek(mondayISO);
+    var saturday = addDays(currentMonday,5);
+    document.getElementById("weekLabel").innerHTML = "<b>"+fmtIt(currentMonday)+"</b> – "+fmtIt(saturday);
+    var conflicts = computeConflicts(w);
+    renderDays(w, conflicts);
+    renderConflictUI(conflicts);
+    updateMemoryStatus();
+  }
+
+  function renderConflictUI(conflicts){
+    var stamp = document.getElementById("conflictStamp");
+    var panel = document.getElementById("conflictPanel");
+    var list = document.getElementById("conflictListUI");
+    if(conflicts.length===0){ stamp.textContent="✓ ok"; stamp.classList.remove("alert"); panel.classList.add("hidden"); list.innerHTML=""; return; }
+    stamp.textContent = "⚠ "+conflicts.length;
+    stamp.classList.add("alert");
+    panel.classList.remove("hidden");
+    list.innerHTML = conflicts.map(function(c){
+      var d=fromISO(c.date);
+      return "<li><b>"+escapeHtml(c.name)+"</b> · "+DAY_NAMES[c.dayIdx]+" "+fmtIt(d)+" ("+(c.shift==="mattina"?"mattina":"pomeriggio")+"): "+c.agencies.map(escapeHtml).join(" + ")+"</li>";
+    }).join("");
+  }
+
+  function updateMemoryStatus(){
+    var el = document.getElementById("memoryStatus");
+    var lastExport = state.meta.lastExport ? fmtDateTime(state.meta.lastExport) : null;
+    if(isDirty){ el.className="status-line dirty"; el.textContent = "Modifiche non esportate su file" + (lastExport?(" · ultimo file: "+lastExport):" · nessun file esportato finora"); }
+    else{ el.className="status-line"; el.textContent = lastExport ? ("Memoria esportata il "+lastExport) : "Nessun file di memoria esportato finora"; }
+  }
+
+  function renderHistory(){
+    var ul = document.getElementById("historyList");
+    var keys = Object.keys(weeksStore).filter(function(k){ return weekHasData(weeksStore[k]); });
+    keys.sort(function(a,b){ return b.localeCompare(a); });
+    if(keys.length===0){ ul.innerHTML='<li class="empty">Nessuna settimana ancora compilata.</li>'; return; }
+    var currentISO = toISO(currentMonday);
+    ul.innerHTML = "";
+    keys.forEach(function(k){
+      var w=weeksStore[k]; var mon=fromISO(k); var sat=addDays(mon,5); var conflicts=computeConflicts(w);
+      var li=document.createElement("li");
+      if(k===currentISO) li.classList.add("active");
+      li.innerHTML='<span>'+fmtIt(mon)+' – '+fmtIt(sat)+' \''+String(mon.getFullYear()).slice(2)+'</span><span class="tag">'+(conflicts.length?conflicts.length+" ⚠":"ok")+'</span>';
+      li.addEventListener("click", function(){ currentMonday=mon; renderWeek(); hideSheet("historySheetOverlay"); window.scrollTo({top:0,behavior:"smooth"}); });
+      ul.appendChild(li);
+    });
+  }
+
+  /* ---- cell sheet ---- */
+  function openCellSheet(dayIdx, agency, shiftKey){
+    var w=getWeek(toISO(currentMonday)); cellCtx={dayIdx:dayIdx,agency:agency,shift:shiftKey};
+    var day=w.days[dayIdx]; var d=fromISO(day.date);
+    document.getElementById("cellSheetTitle").textContent = agency+" · "+(shiftKey==="mattina"?"Mattina":"Pomeriggio");
+    document.getElementById("cellSheetSub").textContent = DAY_NAMES[dayIdx]+" "+fmtItFull(d);
+    document.getElementById("cellShowAllSedi").checked = false;
+    renderCellEmpList(day, agency, shiftKey, day.shifts[agency][shiftKey], false);
+    document.getElementById("cellNewEmpInput").value = "";
+    showSheet("cellSheetOverlay");
+  }
+  function sedeMatches(emp, agency){ return !emp.sedi || emp.sedi.length===0 || emp.sedi.indexOf(agency)!==-1; }
+  function isAbsentOn(day, name){ return day.absence.people.indexOf(name)!==-1; }
+  function renderCellEmpList(day, agency, shiftKey, selectedNames, showAllSedi){
+    var container = document.getElementById("cellEmpList"); container.innerHTML="";
+    var sorted = employees.slice().sort(function(a,b){ return a.name.localeCompare(b.name,'it'); });
+    sorted.forEach(function(emp){
+      var absent = isAbsentOn(day, emp.name);
+      var sedeOk = showAllSedi || sedeMatches(emp, agency);
+      var isSelected = selectedNames.indexOf(emp.name)!==-1;
+      if(!sedeOk && !isSelected) return;
+      var id = "emp_"+emp.name.replace(/[^a-zA-Z0-9]/g,"_");
+      var row = document.createElement("div");
+      row.className = "emp-row" + (absent?" is-absent":"");
+      var extra = absent ? '<span class="tag-absent">in ferie</span>' : (!sedeOk ? '<span class="tag-outsede">altra sede</span>' : "");
+      row.innerHTML = '<input type="checkbox" id="'+id+'" data-name="'+escapeHtml(emp.name)+'" '+(isSelected?"checked":"")+(absent?" disabled":"")+'>'+
+        '<label for="'+id+'"><span class="chip-dot" style="background:'+emp.color+'"></span>'+escapeHtml(emp.name)+extra+'</label>';
+      container.appendChild(row);
+    });
+  }
+  document.getElementById("cellShowAllSedi").addEventListener("change", function(){
+    var w=getWeek(toISO(currentMonday)); var day=w.days[cellCtx.dayIdx];
+    var current = collectSelectedFromForm("cellEmpList", day.shifts[cellCtx.agency][cellCtx.shift]);
+    renderCellEmpList(day, cellCtx.agency, cellCtx.shift, current, this.checked);
+  });
+  document.getElementById("cellNewEmpBtn").addEventListener("click", function(){
+    var input=document.getElementById("cellNewEmpInput"); var val=input.value.trim(); if(!val) return;
+    addEmployeeIfMissing(val);
+    var w=getWeek(toISO(currentMonday)); var day=w.days[cellCtx.dayIdx];
+    var current = collectSelectedFromForm("cellEmpList", day.shifts[cellCtx.agency][cellCtx.shift]);
+    if(current.indexOf(val)===-1) current.push(val);
+    renderCellEmpList(day, cellCtx.agency, cellCtx.shift, current, document.getElementById("cellShowAllSedi").checked);
+    input.value="";
+  });
+  function collectSelectedFromForm(listId, fallback){
+    var boxes = document.querySelectorAll("#"+listId+" input[type=checkbox]");
+    if(boxes.length===0) return fallback.slice();
+    var out=[]; boxes.forEach(function(b){ if(b.checked) out.push(b.getAttribute("data-name")); }); return out;
+  }
+  document.getElementById("cellSaveBtn").addEventListener("click", function(){
+    var w=getWeek(toISO(currentMonday));
+    w.days[cellCtx.dayIdx].shifts[cellCtx.agency][cellCtx.shift] = collectSelectedFromForm("cellEmpList", []);
+    markDirty(); hideSheet("cellSheetOverlay"); renderWeek();
+  });
+
+  /* ---- absence sheet ---- */
+  function openAbsenceSheet(dayIdx){
+    var w=getWeek(toISO(currentMonday)); absenceCtx={dayIdx:dayIdx};
+    var day=w.days[dayIdx]; var d=fromISO(day.date);
+    document.getElementById("absenceSheetSub").textContent = DAY_NAMES[dayIdx]+" "+fmtItFull(d);
+    var container = document.getElementById("absenceEmpList"); container.innerHTML="";
+    var sorted = employees.slice().sort(function(a,b){ return a.name.localeCompare(b.name,'it'); });
+    sorted.forEach(function(emp){
+      var id="abs_"+emp.name.replace(/[^a-zA-Z0-9]/g,"_");
+      var checked = day.absence.people.indexOf(emp.name)!==-1;
+      var assignedIn=[];
+      AGENCIES.forEach(function(a){ SHIFTS.forEach(function(sp){ if(day.shifts[a][sp[0]].indexOf(emp.name)!==-1) assignedIn.push(AGENCY_CODES[a]+" "+(sp[0]==="mattina"?"mat":"pom")); }); });
+      var row=document.createElement("div"); row.className="emp-row";
+      var extra = assignedIn.length ? '<span class="tag-outsede">'+assignedIn.join(", ")+'</span>' : "";
+      row.innerHTML = '<input type="checkbox" id="'+id+'" data-name="'+escapeHtml(emp.name)+'" '+(checked?"checked":"")+'>'+
+        '<label for="'+id+'"><span class="chip-dot" style="background:'+emp.color+'"></span>'+escapeHtml(emp.name)+extra+'</label>';
+      container.appendChild(row);
+    });
+    document.getElementById("absenceNoteInput").value = day.absence.note || "";
+    showSheet("absenceSheetOverlay");
+  }
+  document.getElementById("absenceSaveBtn").addEventListener("click", function(){
+    var w=getWeek(toISO(currentMonday)); var day=w.days[absenceCtx.dayIdx];
+    var selected = collectSelectedFromForm("absenceEmpList", []);
+    var toRemove=[];
+    selected.forEach(function(name){ AGENCIES.forEach(function(a){ SHIFTS.forEach(function(sp){ var arr=day.shifts[a][sp[0]]; if(arr.indexOf(name)!==-1) toRemove.push({name:name,agency:a,shift:sp[0]}); }); }); });
+    if(toRemove.length){
+      var msg = "Questi dipendenti sono ancora assegnati a un turno lo stesso giorno e verranno rimossi:\n\n"+toRemove.map(function(c){ return "• "+c.name+" — "+c.agency+" ("+(c.shift==="mattina"?"mattina":"pomeriggio")+")"; }).join("\n")+"\n\nContinuare?";
+      if(!window.confirm(msg)) return;
+      toRemove.forEach(function(c){ var arr=day.shifts[c.agency][c.shift]; var i=arr.indexOf(c.name); if(i!==-1) arr.splice(i,1); });
+    }
+    day.absence.people = selected;
+    day.absence.note = document.getElementById("absenceNoteInput").value;
+    markDirty(); hideSheet("absenceSheetOverlay"); renderWeek();
+  });
+
+  /* ---- employees sheet ---- */
+  function renderMasterEmpList(){
+    var container = document.getElementById("masterEmpList"); container.innerHTML="";
+    employees.slice().sort(function(a,b){ return a.name.localeCompare(b.name,'it'); }).forEach(function(emp){
+      var row = document.createElement("div"); row.className="emp-manage-row";
+      var colorInput = document.createElement("input"); colorInput.type="color"; colorInput.value=emp.color;
+      colorInput.addEventListener("input", function(){ emp.color=colorInput.value; markDirty(); renderWeek(); });
+      row.appendChild(colorInput);
+      var nameSpan = document.createElement("span"); nameSpan.className="emp-manage-name"; nameSpan.textContent=emp.name;
+      row.appendChild(nameSpan);
+      var toggles = document.createElement("div"); toggles.className="sede-toggles";
+      AGENCIES.forEach(function(a){
+        var btn=document.createElement("button"); btn.className="sede-btn"+(emp.sedi.indexOf(a)!==-1?" active":"");
+        btn.textContent=AGENCY_CODES[a]; btn.title=a;
+        btn.addEventListener("click", function(){
+          var idx=emp.sedi.indexOf(a); if(idx===-1) emp.sedi.push(a); else emp.sedi.splice(idx,1);
+          markDirty(); renderMasterEmpList();
+        });
+        toggles.appendChild(btn);
+      });
+      row.appendChild(toggles);
+      var removeBtn = document.createElement("button"); removeBtn.className="emp-remove"; removeBtn.textContent="✕";
+      removeBtn.addEventListener("click", function(){ removeEmployeeByName(emp.name); renderMasterEmpList(); });
+      row.appendChild(removeBtn);
+      container.appendChild(row);
+    });
+  }
+  document.getElementById("masterNewEmpBtn").addEventListener("click", function(){
+    var input=document.getElementById("masterNewEmpInput"); var val=input.value.trim(); if(!val) return;
+    addEmployeeIfMissing(val); renderMasterEmpList(); input.value="";
+  });
+
+  /* ---- duplicate sheet ---- */
+  function normalizeToMonday(dateStr){ if(!dateStr) return null; return getMonday(fromISO(dateStr)); }
+  function checkDupWarn(){
+    var targetInput=document.getElementById("dupTarget"); var warnBox=document.getElementById("dupWarn");
+    var mon=normalizeToMonday(targetInput.value); if(!mon){ warnBox.classList.remove("show"); return; }
+    var iso=toISO(mon);
+    if(weeksStore[iso] && weekHasData(weeksStore[iso])) warnBox.classList.add("show"); else warnBox.classList.remove("show");
+  }
+  document.getElementById("dupTarget").addEventListener("change", checkDupWarn);
+  document.getElementById("dupConfirmBtn").addEventListener("click", function(){
+    var sourceKey = document.getElementById("dupSource").value;
+    var targetMonday = normalizeToMonday(document.getElementById("dupTarget").value);
+    if(!targetMonday){ alert("Seleziona una data valida."); return; }
+    var targetISO = toISO(targetMonday);
+    var sourceWeek = getWeek(sourceKey);
+    var newWeek = blankWeek(targetISO);
+    newWeek.days.forEach(function(day, idx){
+      var srcDay = sourceWeek.days[idx];
+      day.absence = { people: srcDay.absence.people.slice(), note: srcDay.absence.note };
+      AGENCIES.forEach(function(a){ day.shifts[a].mattina=srcDay.shifts[a].mattina.slice(); day.shifts[a].pomeriggio=srcDay.shifts[a].pomeriggio.slice(); });
+    });
+    weeksStore[targetISO] = newWeek;
+    markDirty(); currentMonday = targetMonday;
+    hideSheet("dupSheetOverlay"); renderWeek(); window.scrollTo({top:0,behavior:"smooth"});
+  });
+
+  /* ---- memoria ---- */
+  document.getElementById("exportMemoriaBtn").addEventListener("click", function(){
+    state.meta.lastExport = new Date().toISOString(); isDirty=false; persistLocal();
+    var blob = new Blob([JSON.stringify(state,null,2)], { type:"application/json" });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a"); link.href=url; link.download="turni_memoria.json";
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    updateMemoryStatus();
+  });
+  document.getElementById("importMemoriaBtn").addEventListener("click", function(){ document.getElementById("importMemoriaInput").click(); });
+  document.getElementById("importMemoriaInput").addEventListener("change", function(e){
+    var file = e.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        var parsed = JSON.parse(evt.target.result);
+        if(!parsed || typeof parsed!=="object") throw new Error("formato non riconosciuto");
+        state = normalizeState(parsed); employees=state.employees; weeksStore=state.weeks; isDirty=false;
+        persistLocal(); currentMonday=getUpcomingMonday(); renderWeek();
+        alert("Memoria importata da \u201c"+file.name+"\u201d.");
+      }catch(err){ alert("Impossibile leggere il file: "+err.message); }
+    };
+    reader.readAsText(file); e.target.value="";
+  });
+
+  /* ---- sheets open/close ---- */
+  function showSheet(id){
+    if(id === "empSheetOverlay") renderMasterEmpList();
+    if(id === "historySheetOverlay") renderHistory();
+    if(id === "dupSheetOverlay"){
+      var sourceSel = document.getElementById("dupSource");
+      var keys = Object.keys(weeksStore).filter(function(k){ return weekHasData(weeksStore[k]); });
+      keys.sort(function(a,b){ return b.localeCompare(a); });
+      if(keys.indexOf(toISO(currentMonday))===-1) keys.unshift(toISO(currentMonday));
+      sourceSel.innerHTML = keys.map(function(k){
+        var mon=fromISO(k); var sat=addDays(mon,5); var sel=(k===toISO(currentMonday))?"selected":"";
+        return '<option value="'+k+'" '+sel+'>'+fmtIt(mon)+' – '+fmtIt(sat)+' \''+String(mon.getFullYear()).slice(2)+'</option>';
+      }).join("");
+      document.getElementById("dupTarget").value = toISO(addDays(currentMonday,7));
+      checkDupWarn();
+    }
+    document.getElementById(id).classList.remove("hidden");
+  }
+  function hideSheet(id){ document.getElementById(id).classList.add("hidden"); }
+  document.querySelectorAll("[data-close]").forEach(function(btn){ btn.addEventListener("click", function(){ hideSheet(btn.getAttribute("data-close")); }); });
+  document.querySelectorAll(".sheet-overlay").forEach(function(ov){ ov.addEventListener("click", function(e){ if(e.target===ov) hideSheet(ov.id); }); });
+  document.querySelectorAll("[data-open]").forEach(function(btn){ btn.addEventListener("click", function(){ showSheet(btn.getAttribute("data-open")); }); });
+
+  /* ---- nav ---- */
+  document.getElementById("prevWeek").addEventListener("click", function(){ currentMonday=addDays(currentMonday,-7); renderWeek(); });
+  document.getElementById("nextWeek").addEventListener("click", function(){ currentMonday=addDays(currentMonday,7); renderWeek(); });
+  document.getElementById("gotoUpcoming").addEventListener("click", function(){ currentMonday=getUpcomingMonday(); renderWeek(); });
+
+  /* ---- export png/pdf ---- */
+  function exportFilenameBase(){ var sat=addDays(currentMonday,5); return "turni_"+toISO(currentMonday)+"_"+toISO(sat); }
+  function librariesReady(needPdf){
+    if(typeof html2canvas==="undefined"){ alert("Libreria immagine non caricata (serve connessione al primo avvio). Ricarica e riprova."); return false; }
+    if(needPdf && typeof window.jspdf==="undefined"){ alert("Libreria PDF non caricata (serve connessione al primo avvio). Ricarica e riprova."); return false; }
+    return true;
+  }
+  function captureSheetArea(){
+    var el = document.getElementById("exportArea");
+    return html2canvas(el, { scale:2, backgroundColor:"#F5F1E6", useCORS:true, allowTaint:true, logging:false });
+  }
+  document.getElementById("exportPngBtn").addEventListener("click", function(){
+    if(!librariesReady(false)) return;
+    captureSheetArea().then(function(canvas){
+      var link=document.createElement("a"); link.download=exportFilenameBase()+".png"; link.href=canvas.toDataURL("image/png");
+      document.body.appendChild(link); link.click(); link.remove();
+    }).catch(function(err){ alert("Esportazione PNG non riuscita: "+(err&&err.message?err.message:err)); });
+  });
+  document.getElementById("exportPdfBtn").addEventListener("click", function(){
+    if(!librariesReady(true)) return;
+    captureSheetArea().then(function(canvas){
+      var imgData=canvas.toDataURL("image/png");
+      var jsPDFCtor=window.jspdf.jsPDF;
+      var pdf=new jsPDFCtor({ orientation:"p", unit:"pt", format:"a4" });
+      var pageW=pdf.internal.pageSize.getWidth(), pageH=pdf.internal.pageSize.getHeight(), margin=20;
+      var ratio=Math.min((pageW-margin*2)/canvas.width,(pageH-margin*2)/canvas.height);
+      var w=canvas.width*ratio, h=canvas.height*ratio;
+      pdf.addImage(imgData,"PNG",(pageW-w)/2,(pageH-h)/2,w,h);
+      pdf.save(exportFilenameBase()+".pdf");
+    }).catch(function(err){ alert("Esportazione PDF non riuscita: "+(err&&err.message?err.message:err)); });
+  });
+
+  renderWeek();
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+})();
+</script>
+</body>
+</html>
