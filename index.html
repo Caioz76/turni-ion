@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --paper:#F5F1E6; --paper-2:#EFE9D8; --ink:#23211D; --ink-soft:#5B564A;
@@ -79,6 +80,8 @@
   }
   .shift-btn:active{ background: var(--paper-2); }
   .shift-btn.conflict{ border-color: var(--alert); background: var(--alert-bg); }
+  .shift-btn.closed{ background: var(--line); opacity:0.6; }
+  .shift-btn.closed:active{ background: var(--line); }
   .shift-tag{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; text-transform:uppercase; color: var(--ink-soft); letter-spacing:.5px; }
   .shift-chips{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
   .empty-hint{ color:#C6BC9E; font-size:11px; font-style:italic; margin-top:4px; }
@@ -170,6 +173,34 @@
   .status-line.dirty{ color: var(--alert); font-weight:600; }
   .companion-note{ font-size:12px; color: var(--ink-soft); line-height:1.6; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
   .companion-note a{ color: var(--accent); font-weight:600; }
+
+  .settings-section-label{ font-size:11px; text-transform:uppercase; letter-spacing:.6px; color: var(--ink-soft); font-weight:700; margin:16px 4px 6px; }
+  .settings-section-label:first-child{ margin-top:0; }
+  .settings-row{
+    width:100%; display:flex; align-items:center; justify-content:space-between; min-height:48px;
+    padding:12px 14px; border:1px solid var(--line-strong); border-radius:10px; background:#fff; margin-bottom:8px;
+    font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; color: var(--ink);
+  }
+  .settings-row:active{ background: var(--paper-2); }
+  .settings-row .chev{ color: var(--ink-soft); font-size:16px; }
+
+  .palette-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 2px; border-bottom:1px solid var(--line); }
+  .palette-row label{ font-size:14px; }
+  .palette-row input[type=color]{ width:44px; height:32px; border:1px solid var(--line-strong); border-radius:8px; padding:0; background:none; }
+
+  .opening-agency-title{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color: var(--navy); font-weight:700; margin:16px 2px 6px; }
+  .opening-agency-title:first-child{ margin-top:0; }
+  .opening-day-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 2px; border-bottom:1px solid var(--line); }
+  .opening-day-row label{ font-size:13.5px; flex:0 0 90px; }
+  .opening-day-row select{ flex:1; padding:8px 10px; border:1px solid var(--line-strong); border-radius:8px; font-size:13px; background:#fff; }
+
+  .logo-preview{
+    width:140px; height:140px; border-radius:16px; border:1px solid var(--line-strong); background: var(--paper-2);
+    display:flex; align-items:center; justify-content:center; font-size:12px; color: var(--ink-soft); overflow:hidden;
+  }
+  .logo-preview img{ width:100%; height:100%; object-fit:cover; }
+  .app-logo-header{ display:flex; justify-content:center; margin-bottom:6px; }
+  .app-logo-header img{ width:56px; height:56px; border-radius:12px; object-fit:cover; border:1px solid var(--line-strong); }
 </style>
 </head>
 <body>
@@ -196,12 +227,13 @@
 </header>
 
 <main class="m-main" id="exportArea">
+  <div class="app-logo-header" id="appLogoHeader"></div>
   <div class="m-conflict hidden" id="conflictPanel"><h3>⚠ Sovrapposizioni</h3><ul id="conflictListUI"></ul></div>
   <div id="daysList"></div>
 </main>
 
 <nav class="m-tabbar">
-  <button data-open="empSheetOverlay"><span class="ico">👤</span>Dipendenti</button>
+  <button data-open="settingsSheetOverlay"><span class="ico">⚙️</span>Impostazioni</button>
   <button data-open="dupSheetOverlay"><span class="ico">⎘</span>Duplica</button>
   <button data-open="historySheetOverlay"><span class="ico">🕘</span>Storico</button>
   <button data-open="exportSheetOverlay"><span class="ico">📤</span>Esporta</button>
@@ -243,6 +275,78 @@
       <button class="btn btn-ghost" data-close="absenceSheetOverlay">Annulla</button>
       <button class="btn btn-primary" id="absenceSaveBtn">Salva</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: impostazioni ===== -->
+<div class="sheet-overlay hidden" id="settingsSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Impostazioni</h3></div>
+    <div class="sheet-body">
+      <div class="settings-section-label">Aspetto</div>
+      <button class="settings-row" data-open="paletteSheetOverlay"><span>🎨 Palette colori</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="logoSheetOverlay"><span>🖼 Logo</span><span class="chev">›</span></button>
+      <div class="settings-section-label">Organizzazione</div>
+      <button class="settings-row" data-open="empSheetOverlay"><span>👤 Elenco dipendenti</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="openingSheetOverlay"><span>🏬 Aperture agenzie</span><span class="chev">›</span></button>
+      <div class="settings-section-label">Memoria</div>
+      <button class="settings-row" data-open="memoriaSheetOverlay"><span>💾 Esporta / importa memoria</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="cloudSheetOverlay"><span>☁️ Sincronizza (Google Drive)</span><span class="chev">›</span></button>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="settingsSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: palette colori ===== -->
+<div class="sheet-overlay hidden" id="paletteSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Palette colori</h3><div class="sub">Applicati a tutta l'app</div></div>
+    <div class="sheet-body">
+      <div class="palette-row">
+        <label for="paletteAccent">Colore principale (accento)</label>
+        <input type="color" id="paletteAccent">
+      </div>
+      <div class="palette-row">
+        <label for="paletteNavy">Intestazione</label>
+        <input type="color" id="paletteNavy">
+      </div>
+      <div class="palette-row">
+        <label for="palettePaper">Sfondo</label>
+        <input type="color" id="palettePaper">
+      </div>
+      <button class="btn btn-outline btn-block" id="paletteResetBtn" style="margin-top:14px;">Ripristina colori predefiniti</button>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="paletteSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: aperture agenzie ===== -->
+<div class="sheet-overlay hidden" id="openingSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Aperture agenzie</h3><div class="sub">Per ogni agenzia e giorno della settimana</div></div>
+    <div class="sheet-body" id="openingBody"></div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="openingSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: logo ===== -->
+<div class="sheet-overlay hidden" id="logoSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Logo</h3><div class="sub">Formato quadrato, mostrato nell'app e nelle esportazioni</div></div>
+    <div class="sheet-body">
+      <div style="display:flex; justify-content:center; margin-bottom:14px;">
+        <div id="logoPreview" class="logo-preview">Nessun logo</div>
+      </div>
+      <input type="file" id="logoFileInput" accept="image/*" style="display:none;">
+      <button class="btn btn-outline btn-block" id="logoChooseBtn">Scegli logo dal dispositivo</button>
+      <button class="btn btn-alert btn-block" id="logoRemoveBtn" style="display:none; margin-top:8px;">Rimuovi logo</button>
+      <div class="companion-note">L'immagine viene ritagliata automaticamente al centro in formato quadrato.</div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="logoSheetOverlay">Chiudi</button></div>
   </div>
 </div>
 
@@ -317,9 +421,41 @@
       <button class="btn btn-primary btn-block" id="exportMemoriaBtn">💾 Esporta memoria (.json)</button>
       <button class="btn btn-outline btn-block" id="importMemoriaBtn">📂 Importa memoria</button>
       <input type="file" id="importMemoriaInput" accept="application/json,.json" style="display:none;">
-      <div class="companion-note">Il file scaricato si chiama <b>turni_memoria.json</b> e va tenuto nella stessa cartella Download insieme a questa pagina. Per usarlo su un altro iPhone o computer, copia entrambi i file e importa la memoria da qui.</div>
+      <div class="companion-note">Il file scaricato si chiama <b>turni_memoria.json</b> e va tenuto nella stessa cartella Download insieme a questa pagina. Per usarlo su un altro iPhone o computer, copia entrambi i file e importa la memoria da qui. Per iCloud: scegli "Salva su File → iCloud Drive" quando esporti, così il file si sincronizza da solo tra i tuoi dispositivi Apple; sull'altro dispositivo usa "Importa memoria" scegliendolo da lì.</div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="memoriaSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="cloudSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Sincronizza con Google Drive</h3><div class="sub">Stessi turni su tutti i tuoi dispositivi</div></div>
+    <div class="sheet-body">
+      <div class="status-line" id="cloudStatus">Non collegato.</div>
+
+      <div id="cloudSetupBlock">
+        <div class="emp-hint">Serve un Client ID Google (gratuito, una volta sola). <a href="#" id="cloudHowToLink">Come ottenerlo →</a></div>
+        <label class="field-label">Client ID Google</label>
+        <input type="text" id="cloudClientIdInput" placeholder="xxxxxxxx.apps.googleusercontent.com">
+        <button class="btn btn-primary btn-block" id="cloudConnectBtn" style="margin-top:10px;">Accedi con Google</button>
+      </div>
+
+      <div id="cloudActionsBlock" style="display:none;">
+        <button class="btn btn-outline btn-block" id="cloudPushBtn">⬆️ Carica su Drive</button>
+        <button class="btn btn-outline btn-block" id="cloudPullBtn">⬇️ Scarica da Drive</button>
+        <button class="btn btn-ghost btn-block" id="cloudDisconnectBtn">Disconnetti account</button>
+      </div>
+
+      <div class="companion-note" id="cloudHowToBox" style="display:none;">
+        1. Vai su <b>console.cloud.google.com</b> (anche da Safari) e crea un progetto (basta un nome qualsiasi).<br>
+        2. Menu ☰ → <b>API e servizi → Schermata consenso OAuth</b>: tipo Esterno, compila i campi obbligatori, salva. In "Utenti di test" aggiungi la tua email Google.<br>
+        3. Menu ☰ → <b>API e servizi → Credenziali → Crea credenziali → ID client OAuth</b>: tipo "Applicazione web".<br>
+        4. In "Origini JavaScript autorizzate" aggiungi l'indirizzo esatto di questa pagina (es. https://tuonome.github.io), senza barra finale.<br>
+        5. Copia il "Client ID" generato e incollalo qui sopra.
+      </div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="cloudSheetOverlay">Chiudi</button></div>
   </div>
 </div>
 
@@ -367,12 +503,24 @@
     }
     return { start: mondayISO, days: days };
   }
+  var DEFAULT_THEME = { accent:"#2F6F62", navy:"#223349", paper:"#F5F1E6" };
+
   function normalizeState(st){
     if(!st || typeof st!=="object") st={};
     if(!st.employees || !st.employees.length) st.employees = defaultEmployees();
     st.employees.forEach(function(e,i){ if(!e.color) e.color=paletteColor(i); if(!e.sedi) e.sedi=[]; });
     if(!st.weeks) st.weeks={};
     if(!st.meta) st.meta={ lastExport:null };
+    if(!st.theme) st.theme={};
+    st.theme.accent = st.theme.accent || DEFAULT_THEME.accent;
+    st.theme.navy = st.theme.navy || DEFAULT_THEME.navy;
+    st.theme.paper = st.theme.paper || DEFAULT_THEME.paper;
+    if(!st.openingSchedule) st.openingSchedule = {};
+    if(typeof st.logo !== "string") st.logo = null;
+    if(!st.cloud) st.cloud = {};
+    st.cloud.fileId = st.cloud.fileId || null;
+    st.cloud.lastPush = st.cloud.lastPush || null;
+    st.cloud.lastPull = st.cloud.lastPull || null;
     Object.keys(st.weeks).forEach(function(k){
       var w = st.weeks[k]; if(!w.days) w.days=[];
       w.days.forEach(function(d){
@@ -502,12 +650,16 @@
         block.innerHTML = '<div class="agency-label">'+agency+'</div>';
         SHIFTS.forEach(function(sp){
           var shiftKey = sp[0];
+          var open = isShiftOpen(agency, dayIdx, shiftKey);
           var btn = document.createElement("button");
-          btn.className = "shift-btn" + (conflictKey[dayIdx+"|"+agency+"|"+shiftKey] ? " conflict" : "");
+          btn.className = "shift-btn" + (conflictKey[dayIdx+"|"+agency+"|"+shiftKey] ? " conflict" : "") + (!open ? " closed" : "");
           var names = day.shifts[agency][shiftKey];
-          var chipsHtml = names.length ? names.map(function(n){ return chipHtml(n,false); }).join("") : '<span class="empty-hint">+ aggiungi</span>';
+          var chipsHtml;
+          if(!open) chipsHtml = '<span class="empty-hint">Chiuso</span>';
+          else chipsHtml = names.length ? names.map(function(n){ return chipHtml(n,false); }).join("") : '<span class="empty-hint">+ aggiungi</span>';
           btn.innerHTML = '<span class="shift-tag">'+sp[1]+'</span><span class="shift-chips">'+chipsHtml+'</span>';
-          btn.addEventListener("click", function(){ openCellSheet(dayIdx, agency, shiftKey); });
+          if(open) btn.addEventListener("click", function(){ openCellSheet(dayIdx, agency, shiftKey); });
+          else btn.disabled = true;
           block.appendChild(btn);
         });
         grid.appendChild(block);
@@ -725,6 +877,18 @@
   });
 
   /* ---- memoria ---- */
+  function applyImportedState(parsed){
+    state = normalizeState(parsed);
+    employees = state.employees;
+    weeksStore = state.weeks;
+    isDirty = false;
+    persistLocal();
+    currentMonday = getUpcomingMonday();
+    applyTheme();
+    renderLogoPreview();
+    renderWeek();
+  }
+
   document.getElementById("exportMemoriaBtn").addEventListener("click", function(){
     state.meta.lastExport = new Date().toISOString(); isDirty=false; persistLocal();
     var blob = new Blob([JSON.stringify(state,null,2)], { type:"application/json" });
@@ -740,18 +904,183 @@
       try{
         var parsed = JSON.parse(evt.target.result);
         if(!parsed || typeof parsed!=="object") throw new Error("formato non riconosciuto");
-        state = normalizeState(parsed); employees=state.employees; weeksStore=state.weeks; isDirty=false;
-        persistLocal(); currentMonday=getUpcomingMonday(); renderWeek();
+        applyImportedState(parsed);
         alert("Memoria importata da \u201c"+file.name+"\u201d.");
       }catch(err){ alert("Impossibile leggere il file: "+err.message); }
     };
     reader.readAsText(file); e.target.value="";
   });
 
+  /* ---- sincronizzazione Google Drive ---- */
+  var GOOGLE_SCOPE = "https://www.googleapis.com/auth/drive.file";
+  var DRIVE_FILENAME = "turni_memoria_pwa.json";
+  var LS_GOOGLE_CLIENT_ID = "turni_google_client_id";
+  var googleTokenClient = null;
+  var googleAccessToken = null;
+
+  function getStoredClientId(){ try{ return localStorage.getItem(LS_GOOGLE_CLIENT_ID) || ""; }catch(e){ return ""; } }
+  function setStoredClientId(id){ try{ localStorage.setItem(LS_GOOGLE_CLIENT_ID, id); }catch(e){} }
+
+  function updateCloudStatus(msg){
+    var el = document.getElementById("cloudStatus");
+    if(msg){ el.textContent = msg; return; }
+    var parts = [];
+    parts.push(googleAccessToken ? "Connesso a Google." : "Non collegato.");
+    if(state.cloud.lastPush) parts.push("Ultimo caricamento: " + fmtDateTime(state.cloud.lastPush));
+    if(state.cloud.lastPull) parts.push("Ultimo scaricamento: " + fmtDateTime(state.cloud.lastPull));
+    el.textContent = parts.join(" · ");
+  }
+
+  function refreshCloudSheetUI(){
+    document.getElementById("cloudClientIdInput").value = getStoredClientId();
+    document.getElementById("cloudActionsBlock").style.display = googleAccessToken ? "" : "none";
+    document.getElementById("cloudSetupBlock").style.display = googleAccessToken ? "none" : "";
+    updateCloudStatus();
+  }
+
+  document.getElementById("cloudHowToLink").addEventListener("click", function(e){
+    e.preventDefault();
+    var box = document.getElementById("cloudHowToBox");
+    box.style.display = box.style.display === "none" ? "" : "none";
+  });
+
+  function ensureTokenClient(clientId){
+    if(typeof google === "undefined" || !google.accounts || !google.accounts.oauth2){
+      return null;
+    }
+    if(!googleTokenClient || googleTokenClient._clientId !== clientId){
+      googleTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: GOOGLE_SCOPE,
+        callback: function(resp){
+          if(resp && resp.access_token){
+            googleAccessToken = resp.access_token;
+            refreshCloudSheetUI();
+          } else {
+            updateCloudStatus("Accesso non riuscito.");
+          }
+        }
+      });
+      googleTokenClient._clientId = clientId;
+    }
+    return googleTokenClient;
+  }
+
+  document.getElementById("cloudConnectBtn").addEventListener("click", function(){
+    var clientId = document.getElementById("cloudClientIdInput").value.trim();
+    if(!clientId){ alert("Inserisci prima il Client ID di Google (vedi \u201cCome ottenerlo\u201d)."); return; }
+    setStoredClientId(clientId);
+    var tc = ensureTokenClient(clientId);
+    if(!tc){ alert("Libreria Google non ancora caricata: verifica la connessione e riprova tra qualche secondo."); return; }
+    tc.requestAccessToken({ prompt: "consent" });
+  });
+
+  document.getElementById("cloudDisconnectBtn").addEventListener("click", function(){
+    if(googleAccessToken && typeof google !== "undefined" && google.accounts && google.accounts.oauth2){
+      google.accounts.oauth2.revoke(googleAccessToken, function(){});
+    }
+    googleAccessToken = null;
+    refreshCloudSheetUI();
+  });
+
+  function driveFindFile(){
+    var q = encodeURIComponent("name='" + DRIVE_FILENAME + "' and trashed=false");
+    return fetch("https://www.googleapis.com/drive/v3/files?q=" + q + "&fields=files(id,modifiedTime)", {
+      headers: { "Authorization": "Bearer " + googleAccessToken }
+    }).then(function(r){ return r.json(); }).then(function(data){
+      return (data.files && data.files.length) ? data.files[0] : null;
+    });
+  }
+
+  function driveCreateFile(content){
+    var boundary = "turniboundary";
+    var metadata = { name: DRIVE_FILENAME, mimeType: "application/json" };
+    var body =
+      "--" + boundary + "\r\n" +
+      "Content-Type: application/json; charset=UTF-8\r\n\r\n" +
+      JSON.stringify(metadata) + "\r\n" +
+      "--" + boundary + "\r\n" +
+      "Content-Type: application/json\r\n\r\n" +
+      content + "\r\n" +
+      "--" + boundary + "--";
+    return fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + googleAccessToken, "Content-Type": "multipart/related; boundary=" + boundary },
+      body: body
+    }).then(function(r){ return r.json(); });
+  }
+
+  function driveUpdateFile(fileId, content){
+    return fetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media", {
+      method: "PATCH",
+      headers: { "Authorization": "Bearer " + googleAccessToken, "Content-Type": "application/json" },
+      body: content
+    }).then(function(r){ return r.json(); });
+  }
+
+  function driveDownloadFile(fileId){
+    return fetch("https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media", {
+      headers: { "Authorization": "Bearer " + googleAccessToken }
+    }).then(function(r){ return r.text(); });
+  }
+
+  document.getElementById("cloudPushBtn").addEventListener("click", function(){
+    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
+    updateCloudStatus("Caricamento su Drive…");
+    var content = JSON.stringify(state);
+    function proceed(fileId){
+      var op = fileId ? driveUpdateFile(fileId, content) : driveCreateFile(content);
+      op.then(function(res){
+        if(res && res.id) state.cloud.fileId = res.id;
+        state.cloud.lastPush = new Date().toISOString();
+        persistLocal();
+        refreshCloudSheetUI();
+      }).catch(function(){ updateCloudStatus("Caricamento non riuscito. Riprova."); });
+    }
+    if(state.cloud.fileId){
+      proceed(state.cloud.fileId);
+    } else {
+      driveFindFile().then(function(found){ proceed(found ? found.id : null); })
+        .catch(function(){ updateCloudStatus("Caricamento non riuscito. Riprova."); });
+    }
+  });
+
+  document.getElementById("cloudPullBtn").addEventListener("click", function(){
+    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
+    updateCloudStatus("Ricerca su Drive…");
+    function proceedDownload(fileId){
+      driveDownloadFile(fileId).then(function(text){
+        var parsed;
+        try{ parsed = JSON.parse(text); }catch(e){ updateCloudStatus("Il file su Drive non è leggibile."); return; }
+        if(!window.confirm("Sovrascrivere i dati presenti su questo dispositivo con quelli trovati su Google Drive?")) {
+          refreshCloudSheetUI();
+          return;
+        }
+        applyImportedState(parsed);
+        state.cloud.fileId = fileId;
+        state.cloud.lastPull = new Date().toISOString();
+        persistLocal();
+        refreshCloudSheetUI();
+      }).catch(function(){ updateCloudStatus("Scaricamento non riuscito. Riprova."); });
+    }
+    if(state.cloud.fileId){
+      proceedDownload(state.cloud.fileId);
+    } else {
+      driveFindFile().then(function(found){
+        if(found) proceedDownload(found.id);
+        else updateCloudStatus("Nessun file trovato su Drive: usa prima \u201cCarica su Drive\u201d da un altro dispositivo.");
+      }).catch(function(){ updateCloudStatus("Ricerca non riuscita. Riprova."); });
+    }
+  });
+
   /* ---- sheets open/close ---- */
   function showSheet(id){
     if(id === "empSheetOverlay") renderMasterEmpList();
     if(id === "historySheetOverlay") renderHistory();
+    if(id === "openingSheetOverlay") renderOpeningBody();
+    if(id === "paletteSheetOverlay") initPaletteInputs();
+    if(id === "logoSheetOverlay") renderLogoPreview();
+    if(id === "cloudSheetOverlay") refreshCloudSheetUI();
     if(id === "dupSheetOverlay"){
       var sourceSel = document.getElementById("dupSource");
       var keys = Object.keys(weeksStore).filter(function(k){ return weekHasData(weeksStore[k]); });
@@ -858,6 +1187,147 @@
       shareOrDownload(blob, exportFilenameBase()+".pdf", "application/pdf");
     }).catch(function(err){ alert("Esportazione PDF non riuscita: "+(err&&err.message?err.message:err)); });
   });
+
+  /* ---- palette colori ---- */
+  function applyTheme(){
+    var root = document.documentElement;
+    root.style.setProperty("--accent", state.theme.accent);
+    root.style.setProperty("--accent-2", tintHex(state.theme.accent, 0.25));
+    root.style.setProperty("--navy", state.theme.navy);
+    root.style.setProperty("--paper", state.theme.paper);
+    root.style.setProperty("--paper-2", shadeHex(state.theme.paper, 0.05));
+  }
+  function shadeHex(hex, amount){
+    var c = hexToRgb(hex);
+    return rgbToHex(c.r*(1-amount), c.g*(1-amount), c.b*(1-amount));
+  }
+  function initPaletteInputs(){
+    document.getElementById("paletteAccent").value = state.theme.accent;
+    document.getElementById("paletteNavy").value = state.theme.navy;
+    document.getElementById("palettePaper").value = state.theme.paper;
+  }
+  document.getElementById("paletteAccent").addEventListener("input", function(){
+    state.theme.accent = this.value; applyTheme(); markDirty();
+  });
+  document.getElementById("paletteNavy").addEventListener("input", function(){
+    state.theme.navy = this.value; applyTheme(); markDirty();
+  });
+  document.getElementById("palettePaper").addEventListener("input", function(){
+    state.theme.paper = this.value; applyTheme(); markDirty();
+  });
+  document.getElementById("paletteResetBtn").addEventListener("click", function(){
+    state.theme.accent = DEFAULT_THEME.accent;
+    state.theme.navy = DEFAULT_THEME.navy;
+    state.theme.paper = DEFAULT_THEME.paper;
+    applyTheme(); initPaletteInputs(); markDirty();
+  });
+
+  /* ---- aperture agenzie ---- */
+  var OPENING_LABELS = { closed:"Chiuso", morningOnly:"Solo mattina", fullDay:"Mattina e pomeriggio" };
+  var OPENING_DAY_NAMES = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+  function openingKey(agency, dayIndex){ return agency + "_" + dayIndex; }
+  function openingStatus(agency, dayIndex){
+    return state.openingSchedule[openingKey(agency, dayIndex)] || "fullDay";
+  }
+  function isShiftOpen(agency, dayIndex, shiftKey){
+    var status = openingStatus(agency, dayIndex);
+    if(status === "closed") return false;
+    if(status === "morningOnly") return shiftKey === "mattina";
+    return true;
+  }
+  function renderOpeningBody(){
+    var container = document.getElementById("openingBody");
+    container.innerHTML = "";
+    AGENCIES.forEach(function(agency){
+      var title = document.createElement("div");
+      title.className = "opening-agency-title";
+      title.textContent = agency;
+      container.appendChild(title);
+      for(var d=0; d<6; d++){
+        (function(dayIndex){
+          var row = document.createElement("div");
+          row.className = "opening-day-row";
+          var select = document.createElement("select");
+          Object.keys(OPENING_LABELS).forEach(function(key){
+            var opt = document.createElement("option");
+            opt.value = key; opt.textContent = OPENING_LABELS[key];
+            if(openingStatus(agency, dayIndex) === key) opt.selected = true;
+            select.appendChild(opt);
+          });
+          select.addEventListener("change", function(){
+            state.openingSchedule[openingKey(agency, dayIndex)] = select.value;
+            markDirty(); renderWeek();
+          });
+          row.innerHTML = "<label>"+OPENING_DAY_NAMES[dayIndex]+"</label>";
+          row.appendChild(select);
+          container.appendChild(row);
+        })(d);
+      }
+    });
+  }
+
+  /* ---- logo ---- */
+  function renderLogoPreview(){
+    var preview = document.getElementById("logoPreview");
+    var removeBtn = document.getElementById("logoRemoveBtn");
+    if(state.logo){
+      preview.innerHTML = '<img src="'+state.logo+'" alt="Logo">';
+      removeBtn.style.display = "block";
+    } else {
+      preview.innerHTML = "Nessun logo";
+      removeBtn.style.display = "none";
+    }
+    renderAppLogoHeader();
+  }
+  function renderAppLogoHeader(){
+    var el = document.getElementById("appLogoHeader");
+    if(!el) return;
+    el.innerHTML = state.logo ? '<img src="'+state.logo+'" alt="Logo">' : "";
+  }
+  function cropImageToSquareDataURL(file, callback){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var side = Math.min(img.width, img.height);
+        var sx = (img.width - side) / 2;
+        var sy = (img.height - side) / 2;
+        var targetSide = Math.min(side, 500);
+        var canvas = document.createElement("canvas");
+        canvas.width = targetSide; canvas.height = targetSide;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, targetSide, targetSide);
+        callback(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = function(){ callback(null); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function(){ callback(null); };
+    reader.readAsDataURL(file);
+  }
+  document.getElementById("logoChooseBtn").addEventListener("click", function(){
+    document.getElementById("logoFileInput").click();
+  });
+  document.getElementById("logoFileInput").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    cropImageToSquareDataURL(file, function(dataUrl){
+      if(!dataUrl){ alert("Impossibile leggere questa immagine."); return; }
+      state.logo = dataUrl;
+      renderLogoPreview();
+      markDirty();
+    });
+    e.target.value = "";
+  });
+  document.getElementById("logoRemoveBtn").addEventListener("click", function(){
+    state.logo = null;
+    renderLogoPreview();
+    markDirty();
+  });
+
+  applyTheme();
+  initPaletteInputs();
+  renderLogoPreview();
 
   renderWeek();
 
