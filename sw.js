@@ -1,4 +1,4 @@
-var CACHE_NAME = "turni-cache-v4";
+var CACHE_NAME = "turni-cache-v5";
 var CORE_ASSETS = [
   "./",
   "./index.html",
@@ -12,7 +12,6 @@ var CORE_ASSETS = [
 ];
 
 self.addEventListener("install", function(event){
-  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache){
       return Promise.all(CORE_ASSETS.map(function(url){
@@ -20,6 +19,12 @@ self.addEventListener("install", function(event){
       }));
     })
   );
+});
+
+self.addEventListener("message", function(event){
+  if(event.data && event.data.type === "SKIP_WAITING"){
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate", function(event){

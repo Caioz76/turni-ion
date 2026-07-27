@@ -32,6 +32,18 @@
   }
 
   /* ---- header ---- */
+  /* ---- update banner ---- */
+  .update-banner{
+    background: var(--accent-2); color: #fff; padding: calc(9px + var(--safe-t)) 16px 9px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    font-family:'IBM Plex Sans', sans-serif; font-size: 13.5px; font-weight: 600;
+  }
+  .update-banner.hidden{ display: none; }
+  .update-banner button{
+    background: #fff; color: var(--navy); border: none; border-radius: 16px; padding: 7px 14px;
+    font-weight: 700; font-size: 13px; min-height: 32px; flex-shrink: 0;
+  }
+
   header.m-header{
     position: sticky; top:0; z-index:40; background: var(--navy); color:#EFE9DA;
     padding: calc(10px + var(--safe-t)) 14px 10px;
@@ -212,6 +224,11 @@
     Per aprirla correttamente: tocca l'icona di condivisione, poi scegli <b>Safari</b> dall'elenco delle app.
   </div>
 </noscript>
+
+<div class="update-banner hidden" id="updateBanner">
+  <span>🔄 Nuova versione disponibile</span>
+  <button id="updateBannerBtn">Aggiorna</button>
+</div>
 
 <header class="m-header">
   <div class="m-brand">REGISTRO <span>TURNI</span> · mobile</div>
@@ -1333,8 +1350,37 @@
 
   if("serviceWorker" in navigator){
     window.addEventListener("load", function(){
-      navigator.serviceWorker.register("sw.js").catch(function(){});
+      navigator.serviceWorker.register("sw.js").then(function(reg){
+        if(reg.waiting){
+          showUpdateBanner(reg.waiting);
+        }
+        reg.addEventListener("updatefound", function(){
+          var newWorker = reg.installing;
+          if(!newWorker) return;
+          newWorker.addEventListener("statechange", function(){
+            if(newWorker.state === "installed" && navigator.serviceWorker.controller){
+              showUpdateBanner(newWorker);
+            }
+          });
+        });
+      }).catch(function(){});
+
+      var reloadedAfterUpdate = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function(){
+        if(reloadedAfterUpdate) return;
+        reloadedAfterUpdate = true;
+        window.location.reload();
+      });
     });
+  }
+
+  function showUpdateBanner(waitingWorker){
+    var banner = document.getElementById("updateBanner");
+    banner.classList.remove("hidden");
+    document.getElementById("updateBannerBtn").onclick = function(){
+      waitingWorker.postMessage({ type: "SKIP_WAITING" });
+      banner.classList.add("hidden");
+    };
   }
 })();
 </script>
