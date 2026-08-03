@@ -101,7 +101,7 @@
 
 <header class="s-header">
   <div class="s-brand">STORICO <span>TURNI</span></div>
-  <div class="s-sub">archivio di consultazione · 4 agenzie · <a href="index.html" style="color:#8FC7BA;">← torna all'app</a></div>
+  <div class="s-sub">archivio di consultazione · 4 agenzie · <span id="storicoVersionLabel"></span> · <a href="index.html" style="color:#8FC7BA;">← torna all'app</a></div>
 </header>
 
 <div class="s-import-row">
@@ -137,6 +137,7 @@
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
   var DAY_NAMES = ["Lun","Mar","Mer","Gio","Ven","Sab"];
+  var APP_VERSION = "1.9";
   var LS_STATE = "turni_state_v2";
 
   function hexToRgb(hex){ hex=hex.replace("#",""); if(hex.length===3) hex=hex.split("").map(function(c){return c+c;}).join(""); var num=parseInt(hex,16); return {r:(num>>16)&255,g:(num>>8)&255,b:num&255}; }
@@ -488,6 +489,7 @@
   tryLoadLocal();
   populateEmployeeFilter();
   updateStatus();
+  document.getElementById("storicoVersionLabel").textContent = "v" + APP_VERSION;
   renderWeeks();
 
   if("serviceWorker" in navigator){

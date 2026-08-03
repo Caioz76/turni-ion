@@ -57,7 +57,9 @@
     padding: calc(10px + var(--safe-t)) 14px 10px;
   }
   .m-brand{ font-family:'Fraunces', serif; font-weight:700; font-size:17px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
-  .m-brand span{ color: var(--accent-2); }
+  .m-brand .accent{ color: var(--accent-2); }
+  .m-version{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; font-weight:500; color:#8FA0AE; margin-left:auto; padding-left:8px; }
+  .settings-app-version{ font-family:'IBM Plex Mono', monospace; font-size:11px; color: var(--ink-soft); text-align:center; margin-top:18px; }
   .m-week-row{ display:flex; align-items:center; justify-content:center; gap:10px; }
   .m-arrow{
     background: rgba(255,255,255,0.08); border:1px solid #4C617A; color:#EFE9DA; width:40px; height:40px;
@@ -250,7 +252,7 @@
 <div class="auto-toast hidden" id="autoSyncToast"></div>
 
 <header class="m-header">
-  <div class="m-brand">REGISTRO <span>TURNI</span> · mobile</div>
+  <div class="m-brand">REGISTRO <span class="accent">TURNI</span> · mobile <span class="m-version" id="appVersionBadge"></span></div>
   <div class="m-week-row">
     <button class="m-arrow" id="prevWeek">‹</button>
     <div class="m-week-label" id="weekLabel">—</div>
@@ -331,6 +333,7 @@
       <div class="settings-section-label">Memoria</div>
       <button class="settings-row" data-open="memoriaSheetOverlay"><span>💾 Esporta / importa memoria</span><span class="chev">›</span></button>
       <button class="settings-row" data-open="cloudSheetOverlay"><span>☁️ Sincronizza (Google Drive)</span><span class="chev">›</span></button>
+      <div class="settings-app-version" id="settingsVersionLine"></div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="settingsSheetOverlay">Chiudi</button></div>
   </div>
@@ -516,6 +519,7 @@
 <script>
 (function(){
   "use strict";
+  var APP_VERSION = "1.9";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -1571,6 +1575,8 @@
   applyTheme();
   initPaletteInputs();
   renderLogoPreview();
+  document.getElementById("appVersionBadge").textContent = "v" + APP_VERSION;
+  document.getElementById("settingsVersionLine").textContent = "Registro Turni · versione " + APP_VERSION;
 
   renderWeek();
 

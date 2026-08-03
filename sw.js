@@ -1,4 +1,4 @@
-var CACHE_NAME = "turni-cache-v8";
+var CACHE_NAME = "turni-cache-v9";
 var CORE_ASSETS = [
   "./",
   "./index.html",
