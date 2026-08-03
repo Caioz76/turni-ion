@@ -44,6 +44,14 @@
     font-weight: 700; font-size: 13px; min-height: 32px; flex-shrink: 0;
   }
 
+  .auto-toast{
+    position: fixed; bottom: calc(78px + var(--safe-b) + 10px); left: 50%; transform: translateX(-50%);
+    background: var(--navy); color: #fff; padding: 9px 16px; border-radius: 20px; font-size: 12.5px;
+    z-index: 70; box-shadow: 0 4px 14px rgba(0,0,0,0.25); max-width: 85%; text-align: center;
+    font-family:'IBM Plex Sans', sans-serif;
+  }
+  .auto-toast.hidden{ display: none; }
+
   header.m-header{
     position: sticky; top:0; z-index:40; background: var(--navy); color:#EFE9DA;
     padding: calc(10px + var(--safe-t)) 14px 10px;
@@ -76,6 +84,15 @@
   .m-conflict h3{ margin:0 0 6px; font-family:'Fraunces', serif; font-size:14px; color: var(--alert); }
   .m-conflict ul{ margin:0; padding-left:18px; }
   .m-conflict li{ margin-bottom:3px; }
+
+  .m-gap{
+    background: #F5EAD2; border:1px solid #DFC48B; border-left:4px solid #B8860B; border-radius:10px;
+    padding:10px 12px; font-size:12.5px; margin-bottom:14px;
+  }
+  .m-gap.hidden{ display:none; }
+  .m-gap h3{ margin:0 0 6px; font-family:'Fraunces', serif; font-size:14px; color:#8A6209; }
+  .m-gap ul{ margin:0; padding-left:18px; }
+  .m-gap li{ margin-bottom:3px; }
 
   .day-card{ background:#FFFEFB; border:1px solid var(--line-strong); border-radius:16px; padding:12px; margin-bottom:14px; box-shadow:0 2px 8px rgba(35,33,29,0.07); }
   .day-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
@@ -230,6 +247,8 @@
   <button id="updateBannerBtn">Aggiorna</button>
 </div>
 
+<div class="auto-toast hidden" id="autoSyncToast"></div>
+
 <header class="m-header">
   <div class="m-brand">REGISTRO <span>TURNI</span> · mobile</div>
   <div class="m-week-row">
@@ -246,6 +265,7 @@
 <main class="m-main" id="exportArea">
   <div class="app-logo-header" id="appLogoHeader"></div>
   <div class="m-conflict hidden" id="conflictPanel"><h3>⚠ Sovrapposizioni</h3><ul id="conflictListUI"></ul></div>
+  <div class="m-gap hidden" id="gapPanel"><h3>🕳 Copertura mancante</h3><ul id="gapListUI"></ul></div>
   <div id="daysList"></div>
 </main>
 
@@ -307,6 +327,7 @@
       <div class="settings-section-label">Organizzazione</div>
       <button class="settings-row" data-open="empSheetOverlay"><span>👤 Elenco dipendenti</span><span class="chev">›</span></button>
       <button class="settings-row" data-open="openingSheetOverlay"><span>🏬 Aperture agenzie</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="statsSheetOverlay"><span>📊 Conteggio turni</span><span class="chev">›</span></button>
       <div class="settings-section-label">Memoria</div>
       <button class="settings-row" data-open="memoriaSheetOverlay"><span>💾 Esporta / importa memoria</span><span class="chev">›</span></button>
       <button class="settings-row" data-open="cloudSheetOverlay"><span>☁️ Sincronizza (Google Drive)</span><span class="chev">›</span></button>
@@ -346,6 +367,22 @@
     <div class="sheet-head"><h3>Aperture agenzie</h3><div class="sub">Per ogni agenzia e giorno della settimana</div></div>
     <div class="sheet-body" id="openingBody"></div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="openingSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: conteggio turni ===== -->
+<div class="sheet-overlay hidden" id="statsSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Conteggio turni</h3><div class="sub" id="statsSub">Questa settimana</div></div>
+    <div class="sheet-body">
+      <select id="statsScopeSelect" style="margin-bottom:14px;">
+        <option value="week">Questa settimana</option>
+        <option value="all">Tutto lo storico salvato</option>
+      </select>
+      <ul id="statsList" style="list-style:none; padding:0; margin:0;"></ul>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="statsSheetOverlay">Chiudi</button></div>
   </div>
 </div>
 
@@ -527,7 +564,8 @@
     if(!st.employees || !st.employees.length) st.employees = defaultEmployees();
     st.employees.forEach(function(e,i){ if(!e.color) e.color=paletteColor(i); if(!e.sedi) e.sedi=[]; });
     if(!st.weeks) st.weeks={};
-    if(!st.meta) st.meta={ lastExport:null };
+    if(!st.meta) st.meta={ lastExport:null, updatedAt:null };
+    if(typeof st.meta.updatedAt === "undefined") st.meta.updatedAt = null;
     if(!st.theme) st.theme={};
     st.theme.accent = st.theme.accent || DEFAULT_THEME.accent;
     st.theme.navy = st.theme.navy || DEFAULT_THEME.navy;
@@ -583,7 +621,13 @@
   var cellCtx = null, absenceCtx = null;
 
   function persistLocal(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(state)); }catch(e){} }
-  function markDirty(){ isDirty=true; persistLocal(); updateMemoryStatus(); }
+  function markDirty(){
+    isDirty=true;
+    state.meta.updatedAt = new Date().toISOString();
+    persistLocal();
+    updateMemoryStatus();
+    scheduleAutoPush();
+  }
   function findEmployee(name){ return employees.filter(function(e){return e.name===name;})[0]; }
   function colorFor(name){ var e=findEmployee(name); return (e&&e.color) ? e.color : hslToHex(hashHue(name),45,55); }
   function addEmployeeIfMissing(name){
@@ -634,6 +678,21 @@
       });
     });
     return conflicts;
+  }
+  function computeGaps(w){
+    var gaps=[];
+    w.days.forEach(function(day,dayIdx){
+      AGENCIES.forEach(function(agency){
+        SHIFTS.forEach(function(sp){
+          var shiftKey=sp[0];
+          if(!isShiftOpen(agency, dayIdx, shiftKey)) return;
+          if(day.shifts[agency][shiftKey].length===0){
+            gaps.push({ dayIdx:dayIdx, date:day.date, agency:agency, shift:shiftKey });
+          }
+        });
+      });
+    });
+    return gaps;
   }
 
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];}); }
@@ -703,7 +762,19 @@
     var conflicts = computeConflicts(w);
     renderDays(w, conflicts);
     renderConflictUI(conflicts);
+    renderGapUI(computeGaps(w), w);
     updateMemoryStatus();
+  }
+
+  function renderGapUI(gaps, w){
+    var panel = document.getElementById("gapPanel");
+    var list = document.getElementById("gapListUI");
+    if(gaps.length===0 || !weekHasData(w)){ panel.classList.add("hidden"); list.innerHTML=""; return; }
+    panel.classList.remove("hidden");
+    list.innerHTML = gaps.map(function(g){
+      var d = fromISO(g.date);
+      return "<li>"+escapeHtml(g.agency)+" · "+DAY_NAMES[g.dayIdx]+" "+fmtIt(d)+" ("+(g.shift==="mattina"?"mattina":"pomeriggio")+"): nessuno assegnato</li>";
+    }).join("");
   }
 
   function renderConflictUI(conflicts){
@@ -929,20 +1000,38 @@
   });
 
   /* ---- sincronizzazione Google Drive ---- */
-  var GOOGLE_SCOPE = "https://www.googleapis.com/auth/drive.file";
+  var GOOGLE_SCOPE = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email";
   var DRIVE_FILENAME = "turni_memoria_pwa.json";
   var LS_GOOGLE_CLIENT_ID = "turni_google_client_id";
+  var LS_GOOGLE_WAS_CONNECTED = "turni_google_was_connected";
   var googleTokenClient = null;
   var googleAccessToken = null;
+  var googleUserEmail = null;
+  var autoPushTimer = null;
 
   function getStoredClientId(){ try{ return localStorage.getItem(LS_GOOGLE_CLIENT_ID) || ""; }catch(e){ return ""; } }
   function setStoredClientId(id){ try{ localStorage.setItem(LS_GOOGLE_CLIENT_ID, id); }catch(e){} }
+  function getWasConnected(){ try{ return localStorage.getItem(LS_GOOGLE_WAS_CONNECTED) === "1"; }catch(e){ return false; } }
+  function setWasConnected(v){ try{ localStorage.setItem(LS_GOOGLE_WAS_CONNECTED, v ? "1" : "0"); }catch(e){} }
+
+  function fetchGoogleUserEmail(){
+    return fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { "Authorization": "Bearer " + googleAccessToken }
+    }).then(function(r){ return r.json(); }).then(function(data){
+      googleUserEmail = data && data.email ? data.email : null;
+      refreshCloudSheetUI();
+    }).catch(function(){});
+  }
 
   function updateCloudStatus(msg){
     var el = document.getElementById("cloudStatus");
     if(msg){ el.textContent = msg; return; }
     var parts = [];
-    parts.push(googleAccessToken ? "Connesso a Google." : "Non collegato.");
+    if(googleAccessToken){
+      parts.push(googleUserEmail ? ("Connesso come " + googleUserEmail + ".") : "Connesso a Google.");
+    } else {
+      parts.push("Non collegato.");
+    }
     if(state.cloud.lastPush) parts.push("Ultimo caricamento: " + fmtDateTime(state.cloud.lastPush));
     if(state.cloud.lastPull) parts.push("Ultimo scaricamento: " + fmtDateTime(state.cloud.lastPull));
     el.textContent = parts.join(" · ");
@@ -953,6 +1042,14 @@
     document.getElementById("cloudActionsBlock").style.display = googleAccessToken ? "" : "none";
     document.getElementById("cloudSetupBlock").style.display = googleAccessToken ? "none" : "";
     updateCloudStatus();
+  }
+
+  function showToast(msg){
+    var el = document.getElementById("autoSyncToast");
+    el.textContent = msg;
+    el.classList.remove("hidden");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ el.classList.add("hidden"); }, 4000);
   }
 
   document.getElementById("cloudHowToLink").addEventListener("click", function(e){
@@ -972,7 +1069,10 @@
         callback: function(resp){
           if(resp && resp.access_token){
             googleAccessToken = resp.access_token;
+            setWasConnected(true);
             refreshCloudSheetUI();
+            fetchGoogleUserEmail();
+            autoSyncCheck();
           } else {
             updateCloudStatus("Accesso non riuscito.");
           }
@@ -997,12 +1097,25 @@
       google.accounts.oauth2.revoke(googleAccessToken, function(){});
     }
     googleAccessToken = null;
+    googleUserEmail = null;
+    setWasConnected(false);
     refreshCloudSheetUI();
   });
 
+  function driveApiFetch(url, options){
+    return fetch(url, options).then(function(r){
+      if(!r.ok){
+        return r.text().then(function(txt){
+          throw new Error("HTTP " + r.status + " " + r.statusText + (txt ? (" — " + txt.slice(0,200)) : ""));
+        });
+      }
+      return r;
+    });
+  }
+
   function driveFindFile(){
     var q = encodeURIComponent("name='" + DRIVE_FILENAME + "' and trashed=false");
-    return fetch("https://www.googleapis.com/drive/v3/files?q=" + q + "&fields=files(id,modifiedTime)", {
+    return driveApiFetch("https://www.googleapis.com/drive/v3/files?q=" + q + "&fields=files(id,modifiedTime)&spaces=drive", {
       headers: { "Authorization": "Bearer " + googleAccessToken }
     }).then(function(r){ return r.json(); }).then(function(data){
       return (data.files && data.files.length) ? data.files[0] : null;
@@ -1020,7 +1133,7 @@
       "Content-Type: application/json\r\n\r\n" +
       content + "\r\n" +
       "--" + boundary + "--";
-    return fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
+    return driveApiFetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
       method: "POST",
       headers: { "Authorization": "Bearer " + googleAccessToken, "Content-Type": "multipart/related; boundary=" + boundary },
       body: body
@@ -1028,7 +1141,7 @@
   }
 
   function driveUpdateFile(fileId, content){
-    return fetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media", {
+    return driveApiFetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media", {
       method: "PATCH",
       headers: { "Authorization": "Bearer " + googleAccessToken, "Content-Type": "application/json" },
       body: content
@@ -1036,7 +1149,7 @@
   }
 
   function driveDownloadFile(fileId){
-    return fetch("https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media", {
+    return driveApiFetch("https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media", {
       headers: { "Authorization": "Bearer " + googleAccessToken }
     }).then(function(r){ return r.text(); });
   }
@@ -1052,13 +1165,13 @@
         state.cloud.lastPush = new Date().toISOString();
         persistLocal();
         refreshCloudSheetUI();
-      }).catch(function(){ updateCloudStatus("Caricamento non riuscito. Riprova."); });
+      }).catch(function(err){ updateCloudStatus("Caricamento non riuscito: " + (err && err.message ? err.message : "errore sconosciuto")); });
     }
     if(state.cloud.fileId){
       proceed(state.cloud.fileId);
     } else {
       driveFindFile().then(function(found){ proceed(found ? found.id : null); })
-        .catch(function(){ updateCloudStatus("Caricamento non riuscito. Riprova."); });
+        .catch(function(err){ updateCloudStatus("Caricamento non riuscito: " + (err && err.message ? err.message : "errore sconosciuto")); });
     }
   });
 
@@ -1078,17 +1191,77 @@
         state.cloud.lastPull = new Date().toISOString();
         persistLocal();
         refreshCloudSheetUI();
-      }).catch(function(){ updateCloudStatus("Scaricamento non riuscito. Riprova."); });
+      }).catch(function(err){ updateCloudStatus("Scaricamento non riuscito: " + (err && err.message ? err.message : "errore sconosciuto")); });
     }
     if(state.cloud.fileId){
       proceedDownload(state.cloud.fileId);
     } else {
       driveFindFile().then(function(found){
         if(found) proceedDownload(found.id);
-        else updateCloudStatus("Nessun file trovato su Drive: usa prima \u201cCarica su Drive\u201d da un altro dispositivo.");
-      }).catch(function(){ updateCloudStatus("Ricerca non riuscita. Riprova."); });
+        else updateCloudStatus("Nessun file trovato su Drive con questo account. Controlla di aver usato lo stesso account Google e lo stesso Client ID sull'altro dispositivo.");
+      }).catch(function(err){ updateCloudStatus("Ricerca non riuscita: " + (err && err.message ? err.message : "errore sconosciuto")); });
     }
   });
+
+  /* ---- sincronizzazione automatica in background ---- */
+  function scheduleAutoPush(){
+    if(!googleAccessToken) return;
+    if(autoPushTimer) clearTimeout(autoPushTimer);
+    autoPushTimer = setTimeout(function(){
+      var content = JSON.stringify(state);
+      function proceed(fileId){
+        var op = fileId ? driveUpdateFile(fileId, content) : driveCreateFile(content);
+        op.then(function(res){
+          if(res && res.id) state.cloud.fileId = res.id;
+          state.cloud.lastPush = new Date().toISOString();
+          persistLocal();
+          if(document.getElementById("cloudSheetOverlay") && !document.getElementById("cloudSheetOverlay").classList.contains("hidden")){
+            refreshCloudSheetUI();
+          }
+        }).catch(function(){});
+      }
+      if(state.cloud.fileId) proceed(state.cloud.fileId);
+      else driveFindFile().then(function(found){ proceed(found ? found.id : null); }).catch(function(){});
+    }, 4000);
+  }
+
+  function autoSyncCheck(){
+    if(!googleAccessToken) return;
+    driveFindFile().then(function(found){
+      if(!found) return;
+      state.cloud.fileId = found.id;
+      driveDownloadFile(found.id).then(function(text){
+        var parsed;
+        try{ parsed = JSON.parse(text); }catch(e){ return; }
+        var remoteUpdated = (parsed.meta && parsed.meta.updatedAt) ? new Date(parsed.meta.updatedAt).getTime() : 0;
+        var localUpdated = (state.meta && state.meta.updatedAt) ? new Date(state.meta.updatedAt).getTime() : 0;
+        if(remoteUpdated > localUpdated){
+          applyImportedState(parsed);
+          state.cloud.fileId = found.id;
+          state.cloud.lastPull = new Date().toISOString();
+          persistLocal();
+          refreshCloudSheetUI();
+          showToast("☁️ Aggiornato automaticamente da Google Drive.");
+        }
+      }).catch(function(){});
+    }).catch(function(){});
+  }
+
+  (function attemptSilentGoogleAuth(){
+    var clientId = getStoredClientId();
+    if(!clientId || !getWasConnected()) return;
+    var attempts = 0;
+    function tryInit(){
+      attempts++;
+      if(typeof google === "undefined" || !google.accounts || !google.accounts.oauth2){
+        if(attempts < 15) setTimeout(tryInit, 400);
+        return;
+      }
+      var tc = ensureTokenClient(clientId);
+      if(tc) tc.requestAccessToken({ prompt: "" });
+    }
+    setTimeout(tryInit, 600);
+  })();
 
   /* ---- sheets open/close ---- */
   function showSheet(id){
@@ -1098,6 +1271,7 @@
     if(id === "paletteSheetOverlay") initPaletteInputs();
     if(id === "logoSheetOverlay") renderLogoPreview();
     if(id === "cloudSheetOverlay") refreshCloudSheetUI();
+    if(id === "statsSheetOverlay") renderStats();
     if(id === "dupSheetOverlay"){
       var sourceSel = document.getElementById("dupSource");
       var keys = Object.keys(weeksStore).filter(function(k){ return weekHasData(weeksStore[k]); });
@@ -1252,6 +1426,58 @@
     if(status === "morningOnly") return shiftKey === "mattina";
     return true;
   }
+
+  /* ---- conteggio turni per dipendente ---- */
+  function computeEmployeeStats(scopeAllWeeks, currentWeek){
+    var counts = {};
+    function tally(w){
+      w.days.forEach(function(day){
+        AGENCIES.forEach(function(agency){
+          SHIFTS.forEach(function(sp){
+            day.shifts[agency][sp[0]].forEach(function(name){
+              if(!counts[name]) counts[name] = { mattina:0, pomeriggio:0 };
+              counts[name][sp[0]]++;
+            });
+          });
+        });
+      });
+    }
+    if(scopeAllWeeks){
+      Object.keys(weeksStore).forEach(function(k){ tally(weeksStore[k]); });
+    } else {
+      tally(currentWeek);
+    }
+    return counts;
+  }
+
+  function renderStats(){
+    var scope = document.getElementById("statsScopeSelect").value;
+    var w = getWeek(toISO(currentMonday));
+    var counts = computeEmployeeStats(scope === "all", w);
+    var list = document.getElementById("statsList");
+    var names = Object.keys(counts).sort(function(a,b){
+      var ta = counts[a].mattina + counts[a].pomeriggio;
+      var tb = counts[b].mattina + counts[b].pomeriggio;
+      return tb - ta;
+    });
+    if(names.length === 0){
+      list.innerHTML = '<li style="padding:12px 4px;color:var(--ink-soft);font-style:italic;">Nessun turno assegnato.</li>';
+    } else {
+      list.innerHTML = names.map(function(name){
+        var c = counts[name];
+        var total = c.mattina + c.pomeriggio;
+        var color = colorFor(name);
+        return '<li style="display:flex;align-items:center;gap:8px;padding:11px 6px;border-bottom:1px solid var(--line);">'+
+          '<span class="chip-dot" style="background:'+color+';"></span>'+
+          '<span style="flex:1;font-size:14px;">'+escapeHtml(name)+'</span>'+
+          '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--ink-soft);">'+c.mattina+' mat · '+c.pomeriggio+' pom · <b style="color:var(--ink);">'+total+'</b></span>'+
+          '</li>';
+      }).join("");
+    }
+    document.getElementById("statsSub").textContent = scope === "all" ? "Tutto lo storico salvato" : ("Settimana del " + fmtItFull(currentMonday));
+  }
+  document.getElementById("statsScopeSelect").addEventListener("change", renderStats);
+
   function renderOpeningBody(){
     var container = document.getElementById("openingBody");
     container.innerHTML = "";
