@@ -560,8 +560,7 @@
       </div>
 
       <div id="cloudActionsBlock" style="display:none;">
-        <button class="btn btn-outline btn-block" id="cloudPushBtn">⬆️ Carica su Drive</button>
-        <button class="btn btn-outline btn-block" id="cloudPullBtn">⬇️ Scarica da Drive</button>
+        <button class="btn btn-outline btn-block" id="cloudSyncBtn">🔄 Sincronizza</button>
         <button class="btn btn-ghost btn-block" id="cloudDisconnectBtn">Disconnetti account</button>
       </div>
 
@@ -580,7 +579,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.0";
+  var APP_VERSION = "2.1";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -1409,52 +1408,53 @@
     }).then(function(r){ return r.text(); });
   }
 
-  document.getElementById("cloudPushBtn").addEventListener("click", function(){
+  document.getElementById("cloudSyncBtn").addEventListener("click", function(){
     if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
-    updateCloudStatus("Caricamento su Drive…");
-    var content = JSON.stringify(state);
-    function proceed(fileId){
+    updateCloudStatus("Sincronizzazione in corso…");
+
+    function pushLocal(fileId){
+      var content = JSON.stringify(state);
       var op = fileId ? driveUpdateFile(fileId, content) : driveCreateFile(content);
       op.then(function(res){
         if(res && res.id) state.cloud.fileId = res.id;
         state.cloud.lastPush = new Date().toISOString();
         persistLocal();
         refreshCloudSheetUI();
-      }).catch(function(err){ updateCloudStatus("Caricamento non riuscito: " + (err && err.message ? err.message : "errore sconosciuto")); });
+        updateCloudStatus("Caricato su Drive: la versione su questo dispositivo era più recente.");
+      }).catch(function(err){ updateCloudStatus("Sincronizzazione non riuscita: " + (err && err.message ? err.message : "errore sconosciuto")); });
     }
-    if(state.cloud.fileId){
-      proceed(state.cloud.fileId);
-    } else {
-      driveFindFile().then(function(found){ proceed(found ? found.id : null); })
-        .catch(function(err){ updateCloudStatus("Caricamento non riuscito: " + (err && err.message ? err.message : "errore sconosciuto")); });
-    }
-  });
 
-  document.getElementById("cloudPullBtn").addEventListener("click", function(){
-    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
-    updateCloudStatus("Ricerca su Drive…");
-    function proceedDownload(fileId){
+    function compareAndSync(fileId){
       driveDownloadFile(fileId).then(function(text){
         var parsed;
         try{ parsed = JSON.parse(text); }catch(e){ updateCloudStatus("Il file su Drive non è leggibile."); return; }
-        if(!window.confirm("Sovrascrivere i dati presenti su questo dispositivo con quelli trovati su Google Drive?")) {
+        var remoteUpdated = (parsed.meta && parsed.meta.updatedAt) ? new Date(parsed.meta.updatedAt).getTime() : 0;
+        var localUpdated = (state.meta && state.meta.updatedAt) ? new Date(state.meta.updatedAt).getTime() : 0;
+        if(remoteUpdated > localUpdated){
+          applyImportedState(parsed);
+          state.cloud.fileId = fileId;
+          state.cloud.lastPull = new Date().toISOString();
+          persistLocal();
           refreshCloudSheetUI();
-          return;
+          updateCloudStatus("Scaricato da Drive: la versione su Drive era più recente.");
+        } else if(localUpdated > remoteUpdated){
+          pushLocal(fileId);
+        } else {
+          state.cloud.fileId = fileId;
+          persistLocal();
+          refreshCloudSheetUI();
+          updateCloudStatus("Già allineato: nessuna modifica da sincronizzare.");
         }
-        applyImportedState(parsed);
-        state.cloud.fileId = fileId;
-        state.cloud.lastPull = new Date().toISOString();
-        persistLocal();
-        refreshCloudSheetUI();
-      }).catch(function(err){ updateCloudStatus("Scaricamento non riuscito: " + (err && err.message ? err.message : "errore sconosciuto")); });
+      }).catch(function(err){ updateCloudStatus("Sincronizzazione non riuscita: " + (err && err.message ? err.message : "errore sconosciuto")); });
     }
+
     if(state.cloud.fileId){
-      proceedDownload(state.cloud.fileId);
+      compareAndSync(state.cloud.fileId);
     } else {
       driveFindFile().then(function(found){
-        if(found) proceedDownload(found.id);
-        else updateCloudStatus("Nessun file trovato su Drive con questo account. Controlla di aver usato lo stesso account Google e lo stesso Client ID sull'altro dispositivo.");
-      }).catch(function(err){ updateCloudStatus("Ricerca non riuscita: " + (err && err.message ? err.message : "errore sconosciuto")); });
+        if(found) compareAndSync(found.id);
+        else pushLocal(null);
+      }).catch(function(err){ updateCloudStatus("Sincronizzazione non riuscita: " + (err && err.message ? err.message : "errore sconosciuto")); });
     }
   });
 
