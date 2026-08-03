@@ -66,7 +66,8 @@
     border-radius:50%; font-size:18px; display:flex; align-items:center; justify-content:center;
   }
   .m-arrow:active{ background: rgba(255,255,255,0.2); }
-  .m-week-label{ font-family:'IBM Plex Mono', monospace; font-size:14px; min-width:150px; text-align:center; }
+  .m-week-label{ font-family:'IBM Plex Mono', monospace; font-size:14px; min-width:150px; text-align:center; background:none; border:none; color:inherit; padding:6px 4px; }
+  .m-week-label:active{ opacity:0.7; }
   .m-week-label b{ color: var(--accent-2); }
   .m-substatus{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:9px; flex-wrap:wrap; }
   .m-stamp{
@@ -128,6 +129,27 @@
   }
   .ferie-btn .fchips{ display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; }
   .ferie-btn:active{ background: var(--line); }
+  .closed-btn{ border-color:#DFC48B; background:#F5EAD2; }
+  .closed-btn:active{ background:#EBD8AC; }
+
+  .month-nav{ display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:14px; }
+  .month-nav button{ background:var(--paper-2); border:1px solid var(--line-strong); border-radius:50%; width:36px; height:36px; font-size:16px; color:var(--navy); }
+  .month-nav button:active{ background:var(--line); }
+  .month-title{ font-family:'Fraunces', serif; font-weight:600; font-size:16px; min-width:140px; text-align:center; color:var(--navy); }
+  .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .month-dow{ text-align:center; font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--ink-soft); padding-bottom:5px; }
+  .month-cell{ aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:9px; font-size:12.5px; background:#fff; border:1px solid var(--line); gap:3px; font-family:'IBM Plex Sans', sans-serif; }
+  .month-cell.empty{ border:none; background:transparent; }
+  .month-cell.off{ color:#C6BC9E; background:var(--paper-2); border-color:var(--line); }
+  .month-cell.today{ border:2px solid var(--accent); font-weight:700; }
+  .month-daynum{ line-height:1; }
+  .month-dot{ width:6px; height:6px; border-radius:50%; background:var(--line-strong); }
+  .month-cell.ok .month-dot{ background:var(--accent); }
+  .month-cell.gap .month-dot{ background:#B8860B; }
+  .month-cell.conflict .month-dot{ background:var(--alert); }
+  .month-legend{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:16px; font-size:11px; color:var(--ink-soft); }
+  .month-legend span{ display:flex; align-items:center; gap:5px; }
+  .month-legend .dot{ width:7px; height:7px; border-radius:50%; display:inline-block; }
 
   /* ---- bottom tab bar ---- */
   nav.m-tabbar{
@@ -255,7 +277,7 @@
   <div class="m-brand">REGISTRO <span class="accent">TURNI</span> · mobile <span class="m-version" id="appVersionBadge"></span></div>
   <div class="m-week-row">
     <button class="m-arrow" id="prevWeek">‹</button>
-    <div class="m-week-label" id="weekLabel">—</div>
+    <button class="m-week-label" id="weekLabel">—</button>
     <button class="m-arrow" id="nextWeek">›</button>
   </div>
   <div class="m-substatus">
@@ -313,6 +335,22 @@
     <div class="sheet-foot">
       <button class="btn btn-ghost" data-close="absenceSheetOverlay">Annulla</button>
       <button class="btn btn-primary" id="absenceSaveBtn">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: chiusure straordinarie ===== -->
+<div class="sheet-overlay hidden" id="closedSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Orari straordinari</h3><div class="sub" id="closedSheetSub"></div></div>
+    <div class="sheet-body">
+      <div class="emp-hint">Per festività o eccezioni occasionali (es. Ferragosto chiuso, oppure un pomeriggio aperto in via straordinaria). Vale solo per questa data, non cambia l'orario settimanale abituale impostato in Aperture agenzie.</div>
+      <div id="closedAgencyList"></div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="closedSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="closedSaveBtn">Salva</button>
     </div>
   </div>
 </div>
@@ -379,10 +417,11 @@
     <div class="sheet-handle"></div>
     <div class="sheet-head"><h3>Conteggio turni</h3><div class="sub" id="statsSub">Questa settimana</div></div>
     <div class="sheet-body">
-      <select id="statsScopeSelect" style="margin-bottom:14px;">
+      <select id="statsScopeSelect" style="margin-bottom:10px;">
         <option value="week">Questa settimana</option>
         <option value="all">Tutto lo storico salvato</option>
       </select>
+      <div style="font-size:11px;color:var(--ink-soft);margin-bottom:12px;">chiaro = mattina · pieno = pomeriggio</div>
       <ul id="statsList" style="list-style:none; padding:0; margin:0;"></ul>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="statsSheetOverlay">Chiudi</button></div>
@@ -440,6 +479,28 @@
       <button class="btn btn-ghost" data-close="dupSheetOverlay">Annulla</button>
       <button class="btn btn-primary" id="dupConfirmBtn">Duplica</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: vista mensile ===== -->
+<div class="sheet-overlay hidden" id="monthSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Vista mensile</h3><div class="sub">Tocca un giorno per aprire la sua settimana</div></div>
+    <div class="sheet-body">
+      <div class="month-nav">
+        <button id="monthPrevBtn">‹</button>
+        <div class="month-title" id="monthTitle">—</div>
+        <button id="monthNextBtn">›</button>
+      </div>
+      <div class="month-grid" id="monthGrid"></div>
+      <div class="month-legend">
+        <span><span class="dot" style="background:var(--accent);"></span>compilata</span>
+        <span><span class="dot" style="background:#B8860B;"></span>copertura mancante</span>
+        <span><span class="dot" style="background:var(--alert);"></span>conflitto</span>
+      </div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="monthSheetOverlay">Chiudi</button></div>
   </div>
 </div>
 
@@ -519,7 +580,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "1.9";
+  var APP_VERSION = "2.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -557,7 +618,7 @@
     var monday = fromISO(mondayISO); var days=[];
     for(var i=0;i<6;i++){
       var shifts={}; AGENCIES.forEach(function(a){ shifts[a]={mattina:[],pomeriggio:[]}; });
-      days.push({ date: toISO(addDays(monday,i)), shifts:shifts, absence: blankAbsence() });
+      days.push({ date: toISO(addDays(monday,i)), shifts:shifts, absence: blankAbsence(), shiftOverrides: {} });
     }
     return { start: mondayISO, days: days };
   }
@@ -592,6 +653,14 @@
         if(!d.absence) d.absence={ people:[], note: (typeof d.note==="string")?d.note:"" };
         if(!d.absence.people) d.absence.people=[];
         if(typeof d.absence.note!=="string") d.absence.note="";
+        if(!d.shiftOverrides) d.shiftOverrides={};
+        if(d.closedAgencies && d.closedAgencies.length){
+          d.closedAgencies.forEach(function(a){
+            d.shiftOverrides[a+"_mattina"] = "closed";
+            d.shiftOverrides[a+"_pomeriggio"] = "closed";
+          });
+          delete d.closedAgencies;
+        }
       });
     });
     return st;
@@ -661,12 +730,14 @@
         if(!day.shifts[a].pomeriggio) day.shifts[a].pomeriggio=[];
       });
       if(!day.absence) day.absence=blankAbsence();
+      if(!day.shiftOverrides) day.shiftOverrides={};
     });
     return w;
   }
   function weekHasData(w){
     return w.days.some(function(day){
       if(day.absence && (day.absence.people.length || (day.absence.note && day.absence.note.trim()))) return true;
+      if(day.shiftOverrides && Object.keys(day.shiftOverrides).length) return true;
       return AGENCIES.some(function(a){ return day.shifts[a].mattina.length || day.shifts[a].pomeriggio.length; });
     });
   }
@@ -689,7 +760,7 @@
       AGENCIES.forEach(function(agency){
         SHIFTS.forEach(function(sp){
           var shiftKey=sp[0];
-          if(!isShiftOpen(agency, dayIdx, shiftKey)) return;
+          if(!isShiftOpen(agency, dayIdx, shiftKey, day)) return;
           if(day.shifts[agency][shiftKey].length===0){
             gaps.push({ dayIdx:dayIdx, date:day.date, agency:agency, shift:shiftKey });
           }
@@ -698,6 +769,90 @@
     });
     return gaps;
   }
+
+  /* ---- vista mensile ---- */
+  var monthViewDate = null;
+  var MONTH_NAMES = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+
+  function dayStatusFor(date){
+    var dow = date.getDay();
+    if(dow === 0) return "off";
+    var mondayISO = toISO(getMonday(date));
+    var w = weeksStore[mondayISO];
+    if(!w) return "empty";
+    var dayIdx = dow - 1;
+    var day = w.days[dayIdx];
+    if(!day) return "empty";
+    var conflicts = computeConflicts(w).filter(function(c){ return c.dayIdx === dayIdx; });
+    if(conflicts.length) return "conflict";
+    var hasAny = AGENCIES.some(function(a){ return day.shifts[a].mattina.length || day.shifts[a].pomeriggio.length; });
+    var hasClosure = day.shiftOverrides && Object.keys(day.shiftOverrides).length;
+    var hasAbsence = day.absence && (day.absence.people.length || (day.absence.note && day.absence.note.trim()));
+    var gaps = computeGaps(w).filter(function(g){ return g.dayIdx === dayIdx; });
+    if(gaps.length && hasAny) return "gap";
+    if(hasAny || hasAbsence || hasClosure) return "ok";
+    return "empty";
+  }
+
+  function openMonthSheet(){
+    monthViewDate = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), 1);
+    renderMonthGrid();
+    showSheet("monthSheetOverlay");
+  }
+
+  function renderMonthGrid(){
+    var year = monthViewDate.getFullYear();
+    var month = monthViewDate.getMonth();
+    document.getElementById("monthTitle").textContent = MONTH_NAMES[month] + " " + year;
+
+    var firstOfMonth = new Date(year, month, 1);
+    var daysInMonth = new Date(year, month+1, 0).getDate();
+    var firstWeekday = firstOfMonth.getDay();
+    var leading = (firstWeekday === 0) ? 6 : firstWeekday - 1;
+
+    var cells = [];
+    for(var i=0;i<leading;i++) cells.push(null);
+    for(var d=1; d<=daysInMonth; d++) cells.push(new Date(year, month, d));
+    while(cells.length % 7 !== 0) cells.push(null);
+
+    var grid = document.getElementById("monthGrid");
+    grid.innerHTML = "";
+    ["L","M","M","G","V","S","D"].forEach(function(l){
+      var h = document.createElement("div");
+      h.className = "month-dow";
+      h.textContent = l;
+      grid.appendChild(h);
+    });
+    var todayISO = toISO(new Date());
+    cells.forEach(function(date){
+      var cell = document.createElement("div");
+      if(!date){ cell.className = "month-cell empty"; grid.appendChild(cell); return; }
+      var status = dayStatusFor(date);
+      cell.className = "month-cell " + status;
+      if(toISO(date) === todayISO) cell.classList.add("today");
+      var dotHtml = (status !== "off" && status !== "empty") ? '<span class="month-dot"></span>' : "";
+      cell.innerHTML = '<span class="month-daynum">'+date.getDate()+'</span>'+dotHtml;
+      if(status !== "off"){
+        cell.addEventListener("click", function(){
+          currentMonday = getMonday(date);
+          hideSheet("monthSheetOverlay");
+          renderWeek();
+          window.scrollTo({top:0, behavior:"smooth"});
+        });
+      }
+      grid.appendChild(cell);
+    });
+  }
+
+  document.getElementById("weekLabel").addEventListener("click", openMonthSheet);
+  document.getElementById("monthPrevBtn").addEventListener("click", function(){
+    monthViewDate = new Date(monthViewDate.getFullYear(), monthViewDate.getMonth()-1, 1);
+    renderMonthGrid();
+  });
+  document.getElementById("monthNextBtn").addEventListener("click", function(){
+    monthViewDate = new Date(monthViewDate.getFullYear(), monthViewDate.getMonth()+1, 1);
+    renderMonthGrid();
+  });
 
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];}); }
   function chipHtml(name, absent){
@@ -730,7 +885,7 @@
         block.innerHTML = '<div class="agency-label">'+agency+'</div>';
         SHIFTS.forEach(function(sp){
           var shiftKey = sp[0];
-          var open = isShiftOpen(agency, dayIdx, shiftKey);
+          var open = isShiftOpen(agency, dayIdx, shiftKey, day);
           var btn = document.createElement("button");
           btn.className = "shift-btn" + (conflictKey[dayIdx+"|"+agency+"|"+shiftKey] ? " conflict" : "") + (!open ? " closed" : "");
           var names = day.shifts[agency][shiftKey];
@@ -753,6 +908,21 @@
       ferieBtn.innerHTML = '<span>🏖 Ferie/Permessi</span><span class="fchips">'+fchips+'</span>';
       ferieBtn.addEventListener("click", function(){ openAbsenceSheet(dayIdx); });
       card.appendChild(ferieBtn);
+
+      var closedBtn = document.createElement("button");
+      closedBtn.className = "ferie-btn closed-btn";
+      var overrides = day.shiftOverrides || {};
+      var overrideKeys = Object.keys(overrides);
+      var cchips = overrideKeys.length ? overrideKeys.map(function(key){
+        var idx = key.lastIndexOf("_");
+        var agency = key.slice(0, idx);
+        var shiftKey = key.slice(idx+1);
+        var icon = overrides[key] === "open" ? "🔓" : "🔒";
+        return '<span class="empty-hint" style="font-style:normal;color:#8A6209;">'+icon+' '+AGENCY_CODES[agency]+' '+(shiftKey==="mattina"?"mat":"pom")+'</span>';
+      }).join(" ") : '<span class="empty-hint">nessuna</span>';
+      closedBtn.innerHTML = '<span>🔧 Orari straordinari</span><span class="fchips">'+cchips+'</span>';
+      closedBtn.addEventListener("click", function(){ openClosedSheet(dayIdx); });
+      card.appendChild(closedBtn);
 
       container.appendChild(card);
     });
@@ -908,6 +1078,87 @@
     day.absence.people = selected;
     day.absence.note = document.getElementById("absenceNoteInput").value;
     markDirty(); hideSheet("absenceSheetOverlay"); renderWeek();
+  });
+
+  /* ---- chiusure straordinarie per giornata specifica ---- */
+  var closedCtx = null;
+  var OVERRIDE_OPTIONS = [["", "Standard"], ["open", "Apri"], ["closed", "Chiudi"]];
+
+  function openClosedSheet(dayIdx){
+    var w = getWeek(toISO(currentMonday));
+    var day = w.days[dayIdx]; var d = fromISO(day.date);
+    closedCtx = { dayIdx: dayIdx, pending: {} };
+    Object.keys(day.shiftOverrides || {}).forEach(function(k){ closedCtx.pending[k] = day.shiftOverrides[k]; });
+    document.getElementById("closedSheetSub").textContent = DAY_NAMES[dayIdx]+" "+fmtItFull(d);
+    renderClosedSheetBody(day);
+    showSheet("closedSheetOverlay");
+  }
+
+  function renderClosedSheetBody(day){
+    var container = document.getElementById("closedAgencyList"); container.innerHTML = "";
+    var pending = closedCtx.pending;
+    AGENCIES.forEach(function(agency){
+      var block = document.createElement("div");
+      block.style.marginBottom = "16px";
+      var title = document.createElement("div");
+      title.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);font-weight:600;margin-bottom:8px;";
+      title.textContent = agency;
+      block.appendChild(title);
+
+      SHIFTS.forEach(function(sp){
+        var shiftKey = sp[0];
+        var key = agency + "_" + shiftKey;
+        var assignedCount = day.shifts[agency][shiftKey].length;
+
+        var row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;";
+        var label = document.createElement("span");
+        label.style.cssText = "font-size:12.5px;color:var(--ink-soft);min-width:78px;";
+        label.textContent = sp[1] + (assignedCount ? " ("+assignedCount+")" : "");
+        row.appendChild(label);
+
+        var optionsWrap = document.createElement("div");
+        optionsWrap.style.cssText = "display:flex;gap:4px;";
+        OVERRIDE_OPTIONS.forEach(function(opt){
+          var btn = document.createElement("button");
+          var current = pending[key] || "";
+          btn.type = "button";
+          btn.className = "sede-btn" + (current === opt[0] ? " active" : "");
+          btn.textContent = opt[1];
+          btn.addEventListener("click", function(){
+            if(opt[0]) pending[key] = opt[0]; else delete pending[key];
+            renderClosedSheetBody(day);
+          });
+          optionsWrap.appendChild(btn);
+        });
+        row.appendChild(optionsWrap);
+        block.appendChild(row);
+      });
+      container.appendChild(block);
+    });
+  }
+
+  document.getElementById("closedSaveBtn").addEventListener("click", function(){
+    var w = getWeek(toISO(currentMonday)); var day = w.days[closedCtx.dayIdx];
+    var pending = closedCtx.pending;
+    var toRemove = [];
+    Object.keys(pending).forEach(function(key){
+      if(pending[key] !== "closed") return;
+      var idx = key.lastIndexOf("_");
+      var agency = key.slice(0, idx);
+      var shiftKey = key.slice(idx+1);
+      var arr = day.shifts[agency] && day.shifts[agency][shiftKey];
+      if(arr && arr.length) toRemove.push({ agency:agency, shift:shiftKey, names:arr.slice() });
+    });
+    if(toRemove.length){
+      var msg = "Questi turni hanno già persone assegnate e verranno svuotati perché li stai chiudendo:\n\n"+
+        toRemove.map(function(c){ return "• "+c.agency+" — "+(c.shift==="mattina"?"mattina":"pomeriggio")+": "+c.names.join(", "); }).join("\n")+
+        "\n\nContinuare?";
+      if(!window.confirm(msg)) return;
+      toRemove.forEach(function(c){ day.shifts[c.agency][c.shift] = []; });
+    }
+    day.shiftOverrides = pending;
+    markDirty(); hideSheet("closedSheetOverlay"); renderWeek();
   });
 
   /* ---- employees sheet ---- */
@@ -1424,7 +1675,12 @@
   function openingStatus(agency, dayIndex){
     return state.openingSchedule[openingKey(agency, dayIndex)] || "fullDay";
   }
-  function isShiftOpen(agency, dayIndex, shiftKey){
+  function isShiftOpen(agency, dayIndex, shiftKey, day){
+    if(day && day.shiftOverrides){
+      var override = day.shiftOverrides[agency + "_" + shiftKey];
+      if(override === "closed") return false;
+      if(override === "open") return true;
+    }
     var status = openingStatus(agency, dayIndex);
     if(status === "closed") return false;
     if(status === "morningOnly") return shiftKey === "mattina";
@@ -1467,14 +1723,23 @@
     if(names.length === 0){
       list.innerHTML = '<li style="padding:12px 4px;color:var(--ink-soft);font-style:italic;">Nessun turno assegnato.</li>';
     } else {
+      var maxTotal = Math.max.apply(null, names.map(function(n){ return counts[n].mattina + counts[n].pomeriggio; })) || 1;
       list.innerHTML = names.map(function(name){
         var c = counts[name];
         var total = c.mattina + c.pomeriggio;
         var color = colorFor(name);
-        return '<li style="display:flex;align-items:center;gap:8px;padding:11px 6px;border-bottom:1px solid var(--line);">'+
-          '<span class="chip-dot" style="background:'+color+';"></span>'+
-          '<span style="flex:1;font-size:14px;">'+escapeHtml(name)+'</span>'+
-          '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--ink-soft);">'+c.mattina+' mat · '+c.pomeriggio+' pom · <b style="color:var(--ink);">'+total+'</b></span>'+
+        var lightTint = tintHex(color, 0.6);
+        var matPct = (c.mattina / maxTotal * 100);
+        var pomPct = (c.pomeriggio / maxTotal * 100);
+        return '<li style="padding:10px 6px;border-bottom:1px solid var(--line);">'+
+          '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px;">'+
+            '<span style="font-size:13.5px;display:flex;align-items:center;gap:6px;min-width:0;"><span class="chip-dot" style="background:'+color+';flex-shrink:0;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escapeHtml(name)+'</span></span>'+
+            '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10.5px;color:var(--ink-soft);flex-shrink:0;">'+c.mattina+' mat · '+c.pomeriggio+' pom · <b style="color:var(--ink);">'+total+'</b></span>'+
+          '</div>'+
+          '<div style="display:flex;height:11px;border-radius:6px;overflow:hidden;background:var(--paper-2);">'+
+            '<div style="width:'+matPct+'%;background:'+lightTint+';"></div>'+
+            '<div style="width:'+pomPct+'%;background:'+color+';"></div>'+
+          '</div>'+
           '</li>';
       }).join("");
     }
