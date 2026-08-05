@@ -579,7 +579,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.1";
+  var APP_VERSION = "2.1.1";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -1225,7 +1225,6 @@
     weeksStore = state.weeks;
     isDirty = false;
     persistLocal();
-    currentMonday = getUpcomingMonday();
     applyTheme();
     renderLogoPreview();
     renderWeek();
