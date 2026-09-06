@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
-<title>Turni · Mobile</title>
+<title>Turni · Mobile &amp; Desktop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -31,7 +31,6 @@
     padding-bottom: calc(78px + var(--safe-b));
   }
 
-  /* ---- header ---- */
   /* ---- update banner ---- */
   .update-banner{
     background: var(--accent-2); color: #fff; padding: calc(9px + var(--safe-t)) 16px 9px;
@@ -58,15 +57,24 @@
   }
   .m-brand{ font-family:'Fraunces', serif; font-weight:700; font-size:17px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
   .m-brand .accent{ color: var(--accent-2); }
-  .m-version{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; font-weight:500; color:#8FA0AE; margin-left:auto; padding-left:8px; }
+  .m-header-badges{ display:flex; align-items:center; gap:8px; margin-left:auto; }
+  .m-cloud-indicator{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; cursor:pointer; background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 2px 7px; color: #EFE9DA;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .m-cloud-indicator.synced{ border-color: var(--accent-2); color: #B3E0D6; }
+  .m-cloud-indicator.syncing{ animation: pulse 1s infinite alternate; }
+  @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
+  .m-version{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; font-weight:500; color:#8FA0AE; padding-left:4px; }
   .settings-app-version{ font-family:'IBM Plex Mono', monospace; font-size:11px; color: var(--ink-soft); text-align:center; margin-top:18px; }
   .m-week-row{ display:flex; align-items:center; justify-content:center; gap:10px; }
   .m-arrow{
     background: rgba(255,255,255,0.08); border:1px solid #4C617A; color:#EFE9DA; width:40px; height:40px;
-    border-radius:50%; font-size:18px; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
   .m-arrow:active{ background: rgba(255,255,255,0.2); }
-  .m-week-label{ font-family:'IBM Plex Mono', monospace; font-size:14px; min-width:150px; text-align:center; background:none; border:none; color:inherit; padding:6px 4px; }
+  .m-week-label{ font-family:'IBM Plex Mono', monospace; font-size:14px; min-width:150px; text-align:center; background:none; border:none; color:inherit; padding:6px 4px; cursor:pointer; }
   .m-week-label:active{ opacity:0.7; }
   .m-week-label b{ color: var(--accent-2); }
   .m-substatus{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:9px; flex-wrap:wrap; }
@@ -75,10 +83,10 @@
     border:2px solid var(--accent-2); color: var(--accent-2); padding:4px 10px; border-radius:12px; text-transform:uppercase;
   }
   .m-stamp.alert{ border-color:#E38C7C; color:#E38C7C; }
-  .m-link{ background:none; border:none; color:#B8C0CB; font-size:12px; text-decoration:underline; font-family:'IBM Plex Sans', sans-serif; }
+  .m-link{ background:none; border:none; color:#B8C0CB; font-size:12px; text-decoration:underline; font-family:'IBM Plex Sans', sans-serif; cursor:pointer; }
 
   /* ---- main ---- */
-  main.m-main{ padding: 14px 12px 20px; }
+  main.m-main{ padding: 14px 12px 20px; max-width: 900px; margin: 0 auto; }
   .m-conflict{
     background: var(--alert-bg); border:1px solid #E2B4AA; border-left:4px solid var(--alert); border-radius:10px;
     padding:10px 12px; font-size:12.5px; margin-bottom:14px;
@@ -104,15 +112,18 @@
   .day-badge .name{ font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; color: var(--ink-soft); letter-spacing:1px; }
 
   .agency-grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  @media(min-width: 680px){
+    .agency-grid{ grid-template-columns: repeat(4, 1fr); }
+  }
   .agency-label{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color: var(--navy); font-weight:600; margin-bottom:4px; }
   .shift-btn{
     display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:46px; text-align:left;
     border:1.4px solid var(--line-strong); border-radius:10px; padding:7px 9px; margin-top:6px; background:#fff;
-    font-family:'IBM Plex Sans', sans-serif;
+    font-family:'IBM Plex Sans', sans-serif; cursor:pointer;
   }
   .shift-btn:active{ background: var(--paper-2); }
   .shift-btn.conflict{ border-color: var(--alert); background: var(--alert-bg); }
-  .shift-btn.closed{ background: var(--line); opacity:0.6; }
+  .shift-btn.closed{ background: var(--line); opacity:0.6; cursor:not-allowed; }
   .shift-btn.closed:active{ background: var(--line); }
   .shift-tag{ font-family:'IBM Plex Mono', monospace; font-size:9.5px; text-transform:uppercase; color: var(--ink-soft); letter-spacing:.5px; }
   .shift-chips{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
@@ -125,7 +136,7 @@
   .ferie-btn{
     width:100%; margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:8px;
     border:1.4px dashed var(--line-strong); border-radius:10px; padding:9px 11px; background: var(--paper-2);
-    min-height:46px; font-family:'IBM Plex Sans', sans-serif; font-size:13px; font-weight:600; color: var(--navy);
+    min-height:46px; font-family:'IBM Plex Sans', sans-serif; font-size:13px; font-weight:600; color: var(--navy); cursor:pointer;
   }
   .ferie-btn .fchips{ display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; }
   .ferie-btn:active{ background: var(--line); }
@@ -133,14 +144,14 @@
   .closed-btn:active{ background:#EBD8AC; }
 
   .month-nav{ display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:14px; }
-  .month-nav button{ background:var(--paper-2); border:1px solid var(--line-strong); border-radius:50%; width:36px; height:36px; font-size:16px; color:var(--navy); }
+  .month-nav button{ background:var(--paper-2); border:1px solid var(--line-strong); border-radius:50%; width:36px; height:36px; font-size:16px; color:var(--navy); cursor:pointer; }
   .month-nav button:active{ background:var(--line); }
   .month-title{ font-family:'Fraunces', serif; font-weight:600; font-size:16px; min-width:140px; text-align:center; color:var(--navy); }
   .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
   .month-dow{ text-align:center; font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--ink-soft); padding-bottom:5px; }
-  .month-cell{ aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:9px; font-size:12.5px; background:#fff; border:1px solid var(--line); gap:3px; font-family:'IBM Plex Sans', sans-serif; }
-  .month-cell.empty{ border:none; background:transparent; }
-  .month-cell.off{ color:#C6BC9E; background:var(--paper-2); border-color:var(--line); }
+  .month-cell{ aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:9px; font-size:12.5px; background:#fff; border:1px solid var(--line); gap:3px; font-family:'IBM Plex Sans', sans-serif; cursor:pointer; }
+  .month-cell.empty{ border:none; background:transparent; cursor:default; }
+  .month-cell.off{ color:#C6BC9E; background:var(--paper-2); border-color:var(--line); cursor:default; }
   .month-cell.today{ border:2px solid var(--accent); font-weight:700; }
   .month-daynum{ line-height:1; }
   .month-dot{ width:6px; height:6px; border-radius:50%; background:var(--line-strong); }
@@ -154,20 +165,20 @@
   /* ---- bottom tab bar ---- */
   nav.m-tabbar{
     position:fixed; left:0; right:0; bottom:0; z-index:50; background: var(--navy); border-top:3px solid var(--accent);
-    display:flex; padding: 6px 4px calc(6px + var(--safe-b));
+    display:flex; padding: 6px 4px calc(6px + var(--safe-b)); max-width: 900px; margin: 0 auto;
   }
   nav.m-tabbar button{
     flex:1; background:none; border:none; color:#B8C0CB; display:flex; flex-direction:column; align-items:center; gap:2px;
-    padding:6px 2px; font-size:10px; font-family:'IBM Plex Sans', sans-serif; min-height:48px;
+    padding:6px 2px; font-size:10px; font-family:'IBM Plex Sans', sans-serif; min-height:48px; cursor:pointer;
   }
   nav.m-tabbar button .ico{ font-size:19px; }
   nav.m-tabbar button:active{ color:#fff; }
 
   /* ---- bottom sheets ---- */
-  .sheet-overlay{ position:fixed; inset:0; background:rgba(35,33,29,0.5); z-index:100; display:flex; align-items:flex-end; }
+  .sheet-overlay{ position:fixed; inset:0; background:rgba(35,33,29,0.5); z-index:100; display:flex; align-items:flex-end; justify-content:center; }
   .sheet-overlay.hidden{ display:none; }
   .sheet-panel{
-    background:#FFFEFB; width:100%; max-height:88dvh; border-radius:20px 20px 0 0; display:flex; flex-direction:column;
+    background:#FFFEFB; width:100%; max-width: 600px; max-height:88dvh; border-radius:20px 20px 0 0; display:flex; flex-direction:column;
     box-shadow:0 -10px 40px rgba(0,0,0,0.3); padding-bottom: var(--safe-b);
   }
   .sheet-handle{ width:40px; height:4px; background: var(--line-strong); border-radius:3px; margin:10px auto 4px; }
@@ -177,7 +188,7 @@
   .sheet-body{ padding:14px 18px; overflow-y:auto; flex:1; -webkit-overflow-scrolling: touch; }
   .sheet-foot{ padding:12px 18px; border-top:1px solid var(--line); display:flex; gap:8px; }
 
-  .btn{ font-family:'IBM Plex Sans', sans-serif; font-size:14px; font-weight:600; padding:11px 16px; border-radius:22px; border:1px solid transparent; min-height:44px; flex:1; }
+  .btn{ font-family:'IBM Plex Sans', sans-serif; font-size:14px; font-weight:600; padding:11px 16px; border-radius:22px; border:1px solid transparent; min-height:44px; flex:1; cursor:pointer; }
   .btn:active{ transform: scale(0.98); }
   .btn-primary{ background: var(--accent); color:#fff; }
   .btn-outline{ background:#fff; color: var(--navy); border-color: var(--line-strong); }
@@ -192,7 +203,7 @@
   .emp-row{ display:flex; align-items:center; gap:10px; padding:9px 6px; border-radius:8px; min-height:44px; }
   .emp-row.is-absent{ opacity:0.5; }
   .emp-row input[type=checkbox]{ width:20px; height:20px; accent-color: var(--accent); flex-shrink:0; }
-  .emp-row label{ font-size:14.5px; flex:1; display:flex; align-items:center; gap:8px; }
+  .emp-row label{ font-size:14.5px; flex:1; display:flex; align-items:center; gap:8px; cursor:pointer; }
   .tag-absent{ font-size:10.5px; font-family:'IBM Plex Mono', monospace; color: var(--alert); }
   .tag-outsede{ font-size:10.5px; font-family:'IBM Plex Mono', monospace; color: var(--ink-soft); }
 
@@ -200,22 +211,22 @@
   .add-emp-row input{ flex:1; padding:11px 12px; border:1px solid var(--line-strong); border-radius:10px; font-size:15px; }
 
   label.field-label{ font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color: var(--ink-soft); font-weight:600; display:block; margin:12px 0 5px; }
-  select, input[type=date]{ width:100%; padding:11px 12px; border:1px solid var(--line-strong); border-radius:10px; font-size:15px; background:#fff; }
+  select, input[type=date], input[type=text]{ width:100%; padding:11px 12px; border:1px solid var(--line-strong); border-radius:10px; font-size:15px; background:#fff; }
   textarea.note-input{ width:100%; min-height:64px; padding:11px 12px; border:1px solid var(--line-strong); border-radius:10px; font-size:14.5px; resize:vertical; }
   .warn-box{ background: var(--alert-bg); border:1px solid #E2B4AA; border-radius:10px; padding:10px 12px; font-size:12.5px; margin-top:12px; display:none; }
   .warn-box.show{ display:block; }
 
   .emp-manage-row{ display:flex; align-items:center; gap:9px; padding:10px 4px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
-  .emp-manage-row input[type=color]{ width:32px; height:32px; border:1px solid var(--line-strong); border-radius:50%; padding:0; background:none; }
+  .emp-manage-row input[type=color]{ width:32px; height:32px; border:1px solid var(--line-strong); border-radius:50%; padding:0; background:none; cursor:pointer; }
   .emp-manage-name{ font-size:14.5px; font-weight:600; flex:1; min-width:80px; }
   .sede-toggles{ display:flex; gap:4px; flex-wrap:wrap; }
-  .sede-btn{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; padding:5px 8px; border:1px solid var(--line-strong); border-radius:10px; background:#fff; color: var(--ink-soft); min-height:30px; }
+  .sede-btn{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; padding:5px 8px; border:1px solid var(--line-strong); border-radius:10px; background:#fff; color: var(--ink-soft); min-height:30px; cursor:pointer; }
   .sede-btn.active{ background: var(--accent); color:#fff; border-color: var(--accent); }
-  .emp-remove{ background: var(--alert); color:#fff; border:none; border-radius:50%; width:26px; height:26px; font-size:12px; flex-shrink:0; }
+  .emp-remove{ background: var(--alert); color:#fff; border:none; border-radius:50%; width:26px; height:26px; font-size:12px; flex-shrink:0; cursor:pointer; }
   .emp-hint{ font-size:11.5px; color: var(--ink-soft); margin-bottom:10px; line-height:1.5; }
 
   #historyList{ list-style:none; margin:0; padding:0; }
-  #historyList li{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:12px 8px; border-bottom:1px solid var(--line); font-size:14px; min-height:44px; }
+  #historyList li{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:12px 8px; border-bottom:1px solid var(--line); font-size:14px; min-height:44px; cursor:pointer; }
   #historyList li:active{ background: var(--paper-2); }
   #historyList li.active{ background: var(--accent); color:#fff; border-radius:8px; }
   #historyList li .tag{ font-family:'IBM Plex Mono', monospace; font-size:10px; padding:2px 7px; border-radius:10px; background: var(--paper-2); color: var(--ink-soft); }
@@ -232,14 +243,14 @@
   .settings-row{
     width:100%; display:flex; align-items:center; justify-content:space-between; min-height:48px;
     padding:12px 14px; border:1px solid var(--line-strong); border-radius:10px; background:#fff; margin-bottom:8px;
-    font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; color: var(--ink);
+    font-family:'IBM Plex Sans', sans-serif; font-size:14.5px; color: var(--ink); cursor:pointer;
   }
   .settings-row:active{ background: var(--paper-2); }
   .settings-row .chev{ color: var(--ink-soft); font-size:16px; }
 
   .palette-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 2px; border-bottom:1px solid var(--line); }
   .palette-row label{ font-size:14px; }
-  .palette-row input[type=color]{ width:44px; height:32px; border:1px solid var(--line-strong); border-radius:8px; padding:0; background:none; }
+  .palette-row input[type=color]{ width:44px; height:32px; border:1px solid var(--line-strong); border-radius:8px; padding:0; background:none; cursor:pointer; }
 
   .opening-agency-title{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color: var(--navy); font-weight:700; margin:16px 2px 6px; }
   .opening-agency-title:first-child{ margin-top:0; }
@@ -260,9 +271,8 @@
 
 <noscript>
   <div style="background:#B13B2E;color:#fff;padding:22px 18px;font-family:sans-serif;line-height:1.6;font-size:15px;">
-    <b>Questa pagina non si sta aprendo in Safari.</b><br><br>
-    Stai probabilmente vedendo un'<b>anteprima</b> (Quick Look) invece della vera pagina web, quindi la parte interattiva non parte.<br><br>
-    Per aprirla correttamente: tocca l'icona di condivisione, poi scegli <b>Safari</b> dall'elenco delle app.
+    <b>Questa pagina richiede JavaScript per funzionare.</b><br><br>
+    Se stai usando iOS, aprila in Safari e non in anteprima Quick Look.
   </div>
 </noscript>
 
@@ -274,11 +284,17 @@
 <div class="auto-toast hidden" id="autoSyncToast"></div>
 
 <header class="m-header">
-  <div class="m-brand">REGISTRO <span class="accent">TURNI</span> · mobile <span class="m-version" id="appVersionBadge"></span></div>
+  <div class="m-brand">
+    <span>REGISTRO <span class="accent">TURNI</span></span>
+    <div class="m-header-badges">
+      <span class="m-cloud-indicator" id="headerCloudStatus" title="Stato Google Drive">☁️ Non collegato</span>
+      <span class="m-version" id="appVersionBadge"></span>
+    </div>
+  </div>
   <div class="m-week-row">
-    <button class="m-arrow" id="prevWeek">‹</button>
+    <button class="m-arrow" id="prevWeek" aria-label="Settimana precedente">‹</button>
     <button class="m-week-label" id="weekLabel">—</button>
-    <button class="m-arrow" id="nextWeek">›</button>
+    <button class="m-arrow" id="nextWeek" aria-label="Settimana successiva">›</button>
   </div>
   <div class="m-substatus">
     <span class="m-stamp" id="conflictStamp">✓ ok</span>
@@ -345,7 +361,7 @@
     <div class="sheet-handle"></div>
     <div class="sheet-head"><h3>Orari straordinari</h3><div class="sub" id="closedSheetSub"></div></div>
     <div class="sheet-body">
-      <div class="emp-hint">Per festività o eccezioni occasionali (es. Ferragosto chiuso, oppure un pomeriggio aperto in via straordinaria). Vale solo per questa data, non cambia l'orario settimanale abituale impostato in Aperture agenzie.</div>
+      <div class="emp-hint">Per festività o eccezioni occasionali. Vale solo per questa data.</div>
       <div id="closedAgencyList"></div>
     </div>
     <div class="sheet-foot">
@@ -368,9 +384,9 @@
       <button class="settings-row" data-open="empSheetOverlay"><span>👤 Elenco dipendenti</span><span class="chev">›</span></button>
       <button class="settings-row" data-open="openingSheetOverlay"><span>🏬 Aperture agenzie</span><span class="chev">›</span></button>
       <button class="settings-row" data-open="statsSheetOverlay"><span>📊 Conteggio turni</span><span class="chev">›</span></button>
-      <div class="settings-section-label">Memoria</div>
-      <button class="settings-row" data-open="memoriaSheetOverlay"><span>💾 Esporta / importa memoria</span><span class="chev">›</span></button>
-      <button class="settings-row" data-open="cloudSheetOverlay"><span>☁️ Sincronizza (Google Drive)</span><span class="chev">›</span></button>
+      <div class="settings-section-label">Memoria &amp; Cloud</div>
+      <button class="settings-row" data-open="cloudSheetOverlay"><span>☁️ Sincronizza con Google Drive</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="memoriaSheetOverlay"><span>💾 Backup / Ripristino file (.json)</span><span class="chev">›</span></button>
       <div class="settings-app-version" id="settingsVersionLine"></div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="settingsSheetOverlay">Chiudi</button></div>
@@ -510,7 +526,7 @@
     <div class="sheet-handle"></div>
     <div class="sheet-head"><h3>Settimane precedenti</h3><div class="sub">Tocca per aprire</div></div>
     <div class="sheet-body"><ul id="historyList"></ul>
-      <div class="companion-note">Per consultare e cercare nello storico in modo più completo (per dipendente, con esportazione per singola settimana), apri l'<a href="storico.html">archivio storico completo</a>.</div>
+      <div class="companion-note">Per consultare e cercare nello storico in modo più completo, apri l'<a href="storico.html">archivio storico completo</a>.</div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="historySheetOverlay">Chiudi</button></div>
   </div>
@@ -529,47 +545,51 @@
   </div>
 </div>
 
-<!-- ===== Sheet: memoria ===== -->
+<!-- ===== Sheet: memoria manuale ===== -->
 <div class="sheet-overlay hidden" id="memoriaSheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><h3>Memoria dell'app</h3><div class="sub">Salva e trasferisci i dati tra dispositivi</div></div>
+    <div class="sheet-head"><h3>Memoria locale (.json)</h3><div class="sub">Salva o ripristina un file di backup manuale</div></div>
     <div class="sheet-body">
       <div class="status-line" id="memoryStatus">—</div>
-      <button class="btn btn-primary btn-block" id="exportMemoriaBtn">💾 Esporta memoria (.json)</button>
-      <button class="btn btn-outline btn-block" id="importMemoriaBtn">📂 Importa memoria</button>
+      <button class="btn btn-primary btn-block" id="exportMemoriaBtn">💾 Esporta backup (.json)</button>
+      <button class="btn btn-outline btn-block" id="importMemoriaBtn">📂 Importa backup (.json)</button>
       <input type="file" id="importMemoriaInput" accept="application/json,.json" style="display:none;">
-      <div class="companion-note">Il file scaricato si chiama <b>turni_memoria.json</b> e va tenuto nella stessa cartella Download insieme a questa pagina. Per usarlo su un altro iPhone o computer, copia entrambi i file e importa la memoria da qui. Per iCloud: scegli "Salva su File → iCloud Drive" quando esporti, così il file si sincronizza da solo tra i tuoi dispositivi Apple; sull'altro dispositivo usa "Importa memoria" scegliendolo da lì.</div>
+      <div class="companion-note">Il file di backup contiene tutti i turni, dipendenti e impostazioni. Puoi importarlo su qualsiasi computer o smartphone.</div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="memoriaSheetOverlay">Chiudi</button></div>
   </div>
 </div>
 
+<!-- ===== Sheet: cloud Google Drive ===== -->
 <div class="sheet-overlay hidden" id="cloudSheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><h3>Sincronizza con Google Drive</h3><div class="sub">Stessi turni su tutti i tuoi dispositivi</div></div>
+    <div class="sheet-head"><h3>Sincronizza Google Drive</h3><div class="sub">Sincronizzazione in tempo reale tra Mobile e Desktop</div></div>
     <div class="sheet-body">
       <div class="status-line" id="cloudStatus">Non collegato.</div>
 
       <div id="cloudSetupBlock">
-        <div class="emp-hint">Serve un Client ID Google (gratuito, una volta sola). <a href="#" id="cloudHowToLink">Come ottenerlo →</a></div>
-        <label class="field-label">Client ID Google</label>
-        <input type="text" id="cloudClientIdInput" placeholder="xxxxxxxx.apps.googleusercontent.com">
+        <div class="emp-hint">I dati vengono salvati sul tuo Google Drive nel file <b>turni_memoria_pwa.json</b>. Lo stesso file viene letto da Mobile e Desktop usando il tuo account Google.</div>
+        <label class="field-label">Client ID Google OAuth</label>
+        <input type="text" id="cloudClientIdInput" placeholder="es. 123456789-abcdef.apps.googleusercontent.com">
         <button class="btn btn-primary btn-block" id="cloudConnectBtn" style="margin-top:10px;">Accedi con Google</button>
       </div>
 
       <div id="cloudActionsBlock" style="display:none;">
-        <button class="btn btn-outline btn-block" id="cloudSyncBtn">🔄 Sincronizza</button>
+        <button class="btn btn-primary btn-block" id="cloudSyncBtn">🔄 Sincronizza ora</button>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-outline" id="cloudForcePullBtn" title="Scarica l'ultima versione presente su Google Drive e sostituisci quella locale">⬇️ Scarica da Drive</button>
+          <button class="btn btn-outline" id="cloudForcePushBtn" title="Carica la versione attuale del dispositivo su Google Drive sovrascrivendo il cloud">⬆️ Carica su Drive</button>
+        </div>
         <button class="btn btn-ghost btn-block" id="cloudDisconnectBtn">Disconnetti account</button>
       </div>
 
-      <div class="companion-note" id="cloudHowToBox" style="display:none;">
-        1. Vai su <b>console.cloud.google.com</b> (anche da Safari) e crea un progetto (basta un nome qualsiasi).<br>
-        2. Menu ☰ → <b>API e servizi → Schermata consenso OAuth</b>: tipo Esterno, compila i campi obbligatori, salva. In "Utenti di test" aggiungi la tua email Google.<br>
-        3. Menu ☰ → <b>API e servizi → Credenziali → Crea credenziali → ID client OAuth</b>: tipo "Applicazione web".<br>
-        4. In "Origini JavaScript autorizzate" aggiungi l'indirizzo esatto di questa pagina (es. https://tuonome.github.io), senza barra finale.<br>
-        5. Copia il "Client ID" generato e incollalo qui sopra.
+      <div class="companion-note" id="cloudHowToBox">
+        <b>Come funziona:</b><br>
+        • Accedi con la stessa Gmail sia da telefono che da PC.<br>
+        • Al primo accesso su un nuovo dispositivo, i dati vengono <b>scaricati automaticamente da Google Drive</b>.<br>
+        • Quando modifichi un turno, la sincronizzazione viene inviata in automatico dopo 3 secondi.
       </div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="cloudSheetOverlay">Chiudi</button></div>
@@ -579,7 +599,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.1.1";
+  var APP_VERSION = "2.2.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -588,6 +608,10 @@
   var LS_STATE = "turni_state_v2";
   var LS_LEGACY_WEEKS = "turni_weeks_v1";
   var LS_LEGACY_EMP = "turni_employees_v1";
+  var DRIVE_FILENAME = "turni_memoria_pwa.json";
+  var LS_GOOGLE_CLIENT_ID = "turni_google_client_id";
+  var LS_GOOGLE_WAS_CONNECTED = "turni_google_was_connected";
+  var GOOGLE_SCOPE = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email";
 
   function hslToHex(h,s,l){
     s/=100; l/=100;
@@ -628,7 +652,7 @@
     if(!st.employees || !st.employees.length) st.employees = defaultEmployees();
     st.employees.forEach(function(e,i){ if(!e.color) e.color=paletteColor(i); if(!e.sedi) e.sedi=[]; });
     if(!st.weeks) st.weeks={};
-    if(!st.meta) st.meta={ lastExport:null, updatedAt:null };
+    if(!st.meta) st.meta={ lastExport:null, updatedAt:null, updatedBy:null };
     if(typeof st.meta.updatedAt === "undefined") st.meta.updatedAt = null;
     if(!st.theme) st.theme={};
     st.theme.accent = st.theme.accent || DEFAULT_THEME.accent;
@@ -640,6 +664,7 @@
     st.cloud.fileId = st.cloud.fileId || null;
     st.cloud.lastPush = st.cloud.lastPush || null;
     st.cloud.lastPull = st.cloud.lastPull || null;
+    st.cloud.userEmail = st.cloud.userEmail || null;
     Object.keys(st.weeks).forEach(function(k){
       var w = st.weeks[k]; if(!w.days) w.days=[];
       w.days.forEach(function(d){
@@ -664,6 +689,7 @@
     });
     return st;
   }
+
   function migrateFromV1(){
     var employees = defaultEmployees(); var weeks={};
     try{
@@ -680,6 +706,7 @@
     }catch(e){}
     return normalizeState({ employees:employees, weeks:weeks, meta:{lastExport:null} });
   }
+
   function loadState(){
     try{ var raw=localStorage.getItem(LS_STATE); if(raw) return normalizeState(JSON.parse(raw)); }catch(e){}
     return migrateFromV1();
@@ -696,6 +723,7 @@
   function markDirty(){
     isDirty=true;
     state.meta.updatedAt = new Date().toISOString();
+    if(googleUserEmail) state.meta.updatedBy = googleUserEmail;
     persistLocal();
     updateMemoryStatus();
     scheduleAutoPush();
@@ -733,6 +761,7 @@
     });
     return w;
   }
+
   function weekHasData(w){
     return w.days.some(function(day){
       if(day.absence && (day.absence.people.length || (day.absence.note && day.absence.note.trim()))) return true;
@@ -740,6 +769,7 @@
       return AGENCIES.some(function(a){ return day.shifts[a].mattina.length || day.shifts[a].pomeriggio.length; });
     });
   }
+
   function computeConflicts(w){
     var conflicts=[];
     w.days.forEach(function(day,dayIdx){
@@ -753,6 +783,7 @@
     });
     return conflicts;
   }
+
   function computeGaps(w){
     var gaps=[];
     w.days.forEach(function(day,dayIdx){
@@ -937,6 +968,7 @@
     renderConflictUI(conflicts);
     renderGapUI(computeGaps(w), w);
     updateMemoryStatus();
+    updateCloudStatus();
   }
 
   function renderGapUI(gaps, w){
@@ -967,8 +999,8 @@
   function updateMemoryStatus(){
     var el = document.getElementById("memoryStatus");
     var lastExport = state.meta.lastExport ? fmtDateTime(state.meta.lastExport) : null;
-    if(isDirty){ el.className="status-line dirty"; el.textContent = "Modifiche non esportate su file" + (lastExport?(" · ultimo file: "+lastExport):" · nessun file esportato finora"); }
-    else{ el.className="status-line"; el.textContent = lastExport ? ("Memoria esportata il "+lastExport) : "Nessun file di memoria esportato finora"; }
+    if(isDirty){ el.className="status-line dirty"; el.textContent = "Modifiche non esportate su file" + (lastExport?(" · ultimo backup: "+lastExport):" · nessun backup esportato"); }
+    else{ el.className="status-line"; el.textContent = lastExport ? ("Backup esportato il "+lastExport) : "Nessun file di backup esportato finora"; }
   }
 
   function renderHistory(){
@@ -1252,50 +1284,84 @@
     reader.readAsText(file); e.target.value="";
   });
 
-  /* ---- sincronizzazione Google Drive ---- */
-  var GOOGLE_SCOPE = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email";
-  var DRIVE_FILENAME = "turni_memoria_pwa.json";
-  var LS_GOOGLE_CLIENT_ID = "turni_google_client_id";
-  var LS_GOOGLE_WAS_CONNECTED = "turni_google_was_connected";
+  /* =========================================================
+     SINCRONIZZAZIONE GOOGLE DRIVE (Desktop & Mobile unificati)
+     ========================================================= */
   var googleTokenClient = null;
   var googleAccessToken = null;
   var googleUserEmail = null;
   var autoPushTimer = null;
+  var isSyncing = false;
 
-  function getStoredClientId(){ try{ return localStorage.getItem(LS_GOOGLE_CLIENT_ID) || ""; }catch(e){ return ""; } }
-  function setStoredClientId(id){ try{ localStorage.setItem(LS_GOOGLE_CLIENT_ID, id); }catch(e){} }
-  function getWasConnected(){ try{ return localStorage.getItem(LS_GOOGLE_WAS_CONNECTED) === "1"; }catch(e){ return false; } }
-  function setWasConnected(v){ try{ localStorage.setItem(LS_GOOGLE_WAS_CONNECTED, v ? "1" : "0"); }catch(e){} }
+  function getStoredClientId(){
+    try{ return localStorage.getItem(LS_GOOGLE_CLIENT_ID) || ""; }catch(e){ return ""; }
+  }
+  function setStoredClientId(id){
+    try{ localStorage.setItem(LS_GOOGLE_CLIENT_ID, id); }catch(e){}
+  }
+  function getWasConnected(){
+    try{ return localStorage.getItem(LS_GOOGLE_WAS_CONNECTED) === "1"; }catch(e){ return false; }
+  }
+  function setWasConnected(v){
+    try{ localStorage.setItem(LS_GOOGLE_WAS_CONNECTED, v ? "1" : "0"); }catch(e){}
+  }
 
   function fetchGoogleUserEmail(){
+    if(!googleAccessToken) return Promise.resolve(null);
     return fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: { "Authorization": "Bearer " + googleAccessToken }
     }).then(function(r){ return r.json(); }).then(function(data){
-      googleUserEmail = data && data.email ? data.email : null;
+      googleUserEmail = (data && data.email) ? data.email : null;
+      if(googleUserEmail) state.cloud.userEmail = googleUserEmail;
       refreshCloudSheetUI();
-    }).catch(function(){});
+      return googleUserEmail;
+    }).catch(function(){ return null; });
   }
 
   function updateCloudStatus(msg){
     var el = document.getElementById("cloudStatus");
-    if(msg){ el.textContent = msg; return; }
-    var parts = [];
-    if(googleAccessToken){
-      parts.push(googleUserEmail ? ("Connesso come " + googleUserEmail + ".") : "Connesso a Google.");
-    } else {
-      parts.push("Non collegato.");
+    var headerBadge = document.getElementById("headerCloudStatus");
+    
+    if(msg && el){ el.textContent = msg; }
+    
+    if(headerBadge){
+      if(isSyncing){
+        headerBadge.className = "m-cloud-indicator syncing";
+        headerBadge.innerHTML = "☁️ Sincronizzazione…";
+      } else if(googleAccessToken || googleUserEmail){
+        headerBadge.className = "m-cloud-indicator synced";
+        var label = googleUserEmail ? googleUserEmail.split("@")[0] : "Connesso";
+        headerBadge.innerHTML = "☁️ " + escapeHtml(label);
+      } else {
+        headerBadge.className = "m-cloud-indicator";
+        headerBadge.innerHTML = "☁️ Non collegato";
+      }
     }
-    if(state.cloud.lastPush) parts.push("Ultimo caricamento: " + fmtDateTime(state.cloud.lastPush));
-    if(state.cloud.lastPull) parts.push("Ultimo scaricamento: " + fmtDateTime(state.cloud.lastPull));
-    el.textContent = parts.join(" · ");
+
+    if(!msg && el){
+      var parts = [];
+      if(googleAccessToken || googleUserEmail){
+        parts.push(googleUserEmail ? ("Connesso come " + googleUserEmail) : "Connesso a Google Drive");
+      } else {
+        parts.push("Non collegato.");
+      }
+      if(state.cloud.lastPush) parts.push("Ultimo upload: " + fmtDateTime(state.cloud.lastPush));
+      if(state.cloud.lastPull) parts.push("Ultimo download: " + fmtDateTime(state.cloud.lastPull));
+      el.textContent = parts.join(" · ");
+    }
   }
 
   function refreshCloudSheetUI(){
     document.getElementById("cloudClientIdInput").value = getStoredClientId();
-    document.getElementById("cloudActionsBlock").style.display = googleAccessToken ? "" : "none";
-    document.getElementById("cloudSetupBlock").style.display = googleAccessToken ? "none" : "";
+    var isConnected = !!(googleAccessToken || getWasConnected());
+    document.getElementById("cloudActionsBlock").style.display = isConnected ? "" : "none";
+    document.getElementById("cloudSetupBlock").style.display = isConnected ? "none" : "";
     updateCloudStatus();
   }
+
+  document.getElementById("headerCloudStatus").addEventListener("click", function(){
+    showSheet("cloudSheetOverlay");
+  });
 
   function showToast(msg){
     var el = document.getElementById("autoSyncToast");
@@ -1305,13 +1371,7 @@
     showToast._t = setTimeout(function(){ el.classList.add("hidden"); }, 4000);
   }
 
-  document.getElementById("cloudHowToLink").addEventListener("click", function(e){
-    e.preventDefault();
-    var box = document.getElementById("cloudHowToBox");
-    box.style.display = box.style.display === "none" ? "" : "none";
-  });
-
-  function ensureTokenClient(clientId){
+  function ensureTokenClient(clientId, onTokenCallback){
     if(typeof google === "undefined" || !google.accounts || !google.accounts.oauth2){
       return null;
     }
@@ -1323,10 +1383,15 @@
           if(resp && resp.access_token){
             googleAccessToken = resp.access_token;
             setWasConnected(true);
-            refreshCloudSheetUI();
-            fetchGoogleUserEmail();
-            autoSyncCheck();
+            fetchGoogleUserEmail().then(function(){
+              if(typeof onTokenCallback === "function"){
+                onTokenCallback();
+              } else {
+                doInitialSyncCheck(true);
+              }
+            });
           } else {
+            isSyncing = false;
             updateCloudStatus("Accesso non riuscito.");
           }
         }
@@ -1338,10 +1403,12 @@
 
   document.getElementById("cloudConnectBtn").addEventListener("click", function(){
     var clientId = document.getElementById("cloudClientIdInput").value.trim();
-    if(!clientId){ alert("Inserisci prima il Client ID di Google (vedi \u201cCome ottenerlo\u201d)."); return; }
+    if(!clientId){ alert("Inserisci il Client ID di Google OAuth."); return; }
     setStoredClientId(clientId);
-    var tc = ensureTokenClient(clientId);
-    if(!tc){ alert("Libreria Google non ancora caricata: verifica la connessione e riprova tra qualche secondo."); return; }
+    var tc = ensureTokenClient(clientId, function(){
+      doInitialSyncCheck(true);
+    });
+    if(!tc){ alert("Libreria Google non ancora caricata. Verifica la connessione e riprova tra pochi secondi."); return; }
     tc.requestAccessToken({ prompt: "consent" });
   });
 
@@ -1352,7 +1419,11 @@
     googleAccessToken = null;
     googleUserEmail = null;
     setWasConnected(false);
+    state.cloud.fileId = null;
+    state.cloud.userEmail = null;
+    persistLocal();
     refreshCloudSheetUI();
+    showToast("Account Google disconnesso.");
   });
 
   function driveApiFetch(url, options){
@@ -1366,17 +1437,33 @@
     });
   }
 
-  function driveFindFile(){
+  /* Trova il file ordinando dal più recente. Se esistono duplicati, restituisce il più recente ed elimina i vecchi */
+  function driveFindLatestFile(){
     var q = encodeURIComponent("name='" + DRIVE_FILENAME + "' and trashed=false");
-    return driveApiFetch("https://www.googleapis.com/drive/v3/files?q=" + q + "&fields=files(id,modifiedTime)&spaces=drive", {
+    var url = "https://www.googleapis.com/drive/v3/files?q=" + q + "&orderBy=modifiedTime desc&fields=files(id,name,modifiedTime,createdTime)&spaces=drive";
+    return driveApiFetch(url, {
       headers: { "Authorization": "Bearer " + googleAccessToken }
     }).then(function(r){ return r.json(); }).then(function(data){
-      return (data.files && data.files.length) ? data.files[0] : null;
+      var files = data && data.files ? data.files : [];
+      if(!files.length) return null;
+      var latest = files[0];
+      // Se ci sono file duplicati con lo stesso nome, cestiniamo i vecchi per garantire coerenza totale
+      if(files.length > 1){
+        for(var i=1; i<files.length; i++){
+          (function(fId){
+            driveApiFetch("https://www.googleapis.com/drive/v3/files/" + fId, {
+              method: "DELETE",
+              headers: { "Authorization": "Bearer " + googleAccessToken }
+            }).catch(function(){});
+          })(files[i].id);
+        }
+      }
+      return latest;
     });
   }
 
   function driveCreateFile(content){
-    var boundary = "turniboundary";
+    var boundary = "turniboundary_" + Date.now();
     var metadata = { name: DRIVE_FILENAME, mimeType: "application/json" };
     var body =
       "--" + boundary + "\r\n" +
@@ -1386,7 +1473,7 @@
       "Content-Type: application/json\r\n\r\n" +
       content + "\r\n" +
       "--" + boundary + "--";
-    return driveApiFetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
+    return driveApiFetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,modifiedTime", {
       method: "POST",
       headers: { "Authorization": "Bearer " + googleAccessToken, "Content-Type": "multipart/related; boundary=" + boundary },
       body: body
@@ -1394,7 +1481,7 @@
   }
 
   function driveUpdateFile(fileId, content){
-    return driveApiFetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media", {
+    return driveApiFetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media&fields=id,modifiedTime", {
       method: "PATCH",
       headers: { "Authorization": "Bearer " + googleAccessToken, "Content-Type": "application/json" },
       body: content
@@ -1407,100 +1494,157 @@
     }).then(function(r){ return r.text(); });
   }
 
-  document.getElementById("cloudSyncBtn").addEventListener("click", function(){
-    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
-    updateCloudStatus("Sincronizzazione in corso…");
+  /* Primo accesso da nuovo dispositivo: forza sempre download se il file esiste su Drive */
+  function doInitialSyncCheck(isLoginEvent){
+    if(!googleAccessToken) return;
+    isSyncing = true;
+    updateCloudStatus("Controllo account Google…");
 
-    function pushLocal(fileId){
-      var content = JSON.stringify(state);
-      var op = fileId ? driveUpdateFile(fileId, content) : driveCreateFile(content);
-      op.then(function(res){
-        if(res && res.id) state.cloud.fileId = res.id;
-        state.cloud.lastPush = new Date().toISOString();
-        persistLocal();
-        refreshCloudSheetUI();
-        updateCloudStatus("Caricato su Drive: la versione su questo dispositivo era più recente.");
-      }).catch(function(err){ updateCloudStatus("Sincronizzazione non riuscita: " + (err && err.message ? err.message : "errore sconosciuto")); });
-    }
+    driveFindLatestFile().then(function(latest){
+      if(!latest){
+        // Il file non esiste ancora su Google Drive: lo creiamo con i dati attuali
+        var content = JSON.stringify(state, null, 2);
+        return driveCreateFile(content).then(function(res){
+          state.cloud.fileId = res.id;
+          state.cloud.lastPush = new Date().toISOString();
+          persistLocal();
+          isSyncing = false;
+          refreshCloudSheetUI();
+          showToast("☁️ Archivio creato su Google Drive.");
+        });
+      }
 
-    function compareAndSync(fileId){
-      driveDownloadFile(fileId).then(function(text){
+      state.cloud.fileId = latest.id;
+      return driveDownloadFile(latest.id).then(function(remoteText){
         var parsed;
-        try{ parsed = JSON.parse(text); }catch(e){ updateCloudStatus("Il file su Drive non è leggibile."); return; }
+        try{ parsed = JSON.parse(remoteText); }catch(e){ throw new Error("File cloud non leggibile"); }
+        
         var remoteUpdated = (parsed.meta && parsed.meta.updatedAt) ? new Date(parsed.meta.updatedAt).getTime() : 0;
         var localUpdated = (state.meta && state.meta.updatedAt) ? new Date(state.meta.updatedAt).getTime() : 0;
-        if(remoteUpdated > localUpdated){
+
+        // Se è login su nuovo dispositivo OPPURE il remoto è più recente: scarica immediatamente
+        if(isLoginEvent || remoteUpdated >= localUpdated || !weekHasData(state)){
           applyImportedState(parsed);
-          state.cloud.fileId = fileId;
+          state.cloud.fileId = latest.id;
           state.cloud.lastPull = new Date().toISOString();
           persistLocal();
+          isSyncing = false;
           refreshCloudSheetUI();
-          updateCloudStatus("Scaricato da Drive: la versione su Drive era più recente.");
-        } else if(localUpdated > remoteUpdated){
-          pushLocal(fileId);
+          showToast("☁️ Dati scaricati e allineati con l'account Google!");
         } else {
-          state.cloud.fileId = fileId;
-          persistLocal();
-          refreshCloudSheetUI();
-          updateCloudStatus("Già allineato: nessuna modifica da sincronizzare.");
+          // Dispositivo locale ha modifiche offline più recenti: caricamento
+          var content = JSON.stringify(state, null, 2);
+          return driveUpdateFile(latest.id, content).then(function(){
+            state.cloud.lastPush = new Date().toISOString();
+            persistLocal();
+            isSyncing = false;
+            refreshCloudSheetUI();
+            showToast("☁️ Dati sincronizzati con Google Drive.");
+          });
         }
-      }).catch(function(err){ updateCloudStatus("Sincronizzazione non riuscita: " + (err && err.message ? err.message : "errore sconosciuto")); });
-    }
+      });
+    }).catch(function(err){
+      isSyncing = false;
+      updateCloudStatus("Errore sincronizzazione: " + (err && err.message ? err.message : err));
+    });
+  }
 
-    if(state.cloud.fileId){
-      compareAndSync(state.cloud.fileId);
-    } else {
-      driveFindFile().then(function(found){
-        if(found) compareAndSync(found.id);
-        else pushLocal(null);
-      }).catch(function(err){ updateCloudStatus("Sincronizzazione non riuscita: " + (err && err.message ? err.message : "errore sconosciuto")); });
+  /* Sincronizzazione manuale pulsante "Sincronizza ora" */
+  document.getElementById("cloudSyncBtn").addEventListener("click", function(){
+    if(!googleAccessToken){
+      var clientId = getStoredClientId();
+      if(!clientId){ alert("Inserisci prima il Client ID."); return; }
+      var tc = ensureTokenClient(clientId, function(){ doInitialSyncCheck(false); });
+      if(tc) tc.requestAccessToken();
+      return;
     }
+    doInitialSyncCheck(false);
   });
 
-  /* ---- sincronizzazione automatica in background ---- */
+  /* Download forzato da Drive */
+  document.getElementById("cloudForcePullBtn").addEventListener("click", function(){
+    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
+    if(!confirm("Vuoi sostituire tutti i dati di questo dispositivo con l'ultima versione presente su Google Drive?")) return;
+    isSyncing = true;
+    updateCloudStatus("Scaricamento forzato da Drive…");
+    driveFindLatestFile().then(function(latest){
+      if(!latest){ alert("Nessun file trovato su Google Drive."); isSyncing=false; updateCloudStatus(); return; }
+      return driveDownloadFile(latest.id).then(function(txt){
+        var parsed = JSON.parse(txt);
+        applyImportedState(parsed);
+        state.cloud.fileId = latest.id;
+        state.cloud.lastPull = new Date().toISOString();
+        persistLocal();
+        isSyncing = false;
+        refreshCloudSheetUI();
+        showToast("⬇️ Dati scaricati con successo da Google Drive.");
+      });
+    }).catch(function(err){
+      isSyncing = false;
+      alert("Errore scaricamento: " + (err && err.message ? err.message : err));
+      updateCloudStatus();
+    });
+  });
+
+  /* Upload forzato su Drive */
+  document.getElementById("cloudForcePushBtn").addEventListener("click", function(){
+    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
+    if(!confirm("Vuoi sovrascrivere il file su Google Drive con la versione presente su questo dispositivo?")) return;
+    isSyncing = true;
+    updateCloudStatus("Caricamento forzato su Drive…");
+    var content = JSON.stringify(state, null, 2);
+    driveFindLatestFile().then(function(latest){
+      var op = latest ? driveUpdateFile(latest.id, content) : driveCreateFile(content);
+      return op.then(function(res){
+        state.cloud.fileId = res.id || (latest ? latest.id : null);
+        state.cloud.lastPush = new Date().toISOString();
+        persistLocal();
+        isSyncing = false;
+        refreshCloudSheetUI();
+        showToast("⬆️ Dati caricati con successo su Google Drive.");
+      });
+    }).catch(function(err){
+      isSyncing = false;
+      alert("Errore caricamento: " + (err && err.message ? err.message : err));
+      updateCloudStatus();
+    });
+  });
+
+  /* Sincronizzazione automatica in background dopo modifiche */
   function scheduleAutoPush(){
     if(!googleAccessToken) return;
     if(autoPushTimer) clearTimeout(autoPushTimer);
     autoPushTimer = setTimeout(function(){
-      var content = JSON.stringify(state);
-      function proceed(fileId){
-        var op = fileId ? driveUpdateFile(fileId, content) : driveCreateFile(content);
-        op.then(function(res){
-          if(res && res.id) state.cloud.fileId = res.id;
+      if(isSyncing) return;
+      isSyncing = true;
+      updateCloudStatus("Salvataggio automatico su Drive…");
+      var content = JSON.stringify(state, null, 2);
+
+      driveFindLatestFile().then(function(latest){
+        var op = latest ? driveUpdateFile(latest.id, content) : driveCreateFile(content);
+        return op.then(function(res){
+          state.cloud.fileId = res.id || (latest ? latest.id : null);
           state.cloud.lastPush = new Date().toISOString();
           persistLocal();
-          if(document.getElementById("cloudSheetOverlay") && !document.getElementById("cloudSheetOverlay").classList.contains("hidden")){
-            refreshCloudSheetUI();
-          }
-        }).catch(function(){});
-      }
-      if(state.cloud.fileId) proceed(state.cloud.fileId);
-      else driveFindFile().then(function(found){ proceed(found ? found.id : null); }).catch(function(){});
-    }, 4000);
-  }
-
-  function autoSyncCheck(){
-    if(!googleAccessToken) return;
-    driveFindFile().then(function(found){
-      if(!found) return;
-      state.cloud.fileId = found.id;
-      driveDownloadFile(found.id).then(function(text){
-        var parsed;
-        try{ parsed = JSON.parse(text); }catch(e){ return; }
-        var remoteUpdated = (parsed.meta && parsed.meta.updatedAt) ? new Date(parsed.meta.updatedAt).getTime() : 0;
-        var localUpdated = (state.meta && state.meta.updatedAt) ? new Date(state.meta.updatedAt).getTime() : 0;
-        if(remoteUpdated > localUpdated){
-          applyImportedState(parsed);
-          state.cloud.fileId = found.id;
-          state.cloud.lastPull = new Date().toISOString();
-          persistLocal();
+          isSyncing = false;
           refreshCloudSheetUI();
-          showToast("☁️ Aggiornato automaticamente da Google Drive.");
-        }
-      }).catch(function(){});
-    }).catch(function(){});
+          showToast("☁️ Salvato su Google Drive.");
+        });
+      }).catch(function(){
+        isSyncing = false;
+        updateCloudStatus();
+      });
+    }, 3000);
   }
 
+  /* Controllo aggiornamenti quando la finestra riprende il focus (es. tornando dall'altra app) */
+  window.addEventListener("focus", function(){
+    if(googleAccessToken && !isSyncing){
+      doInitialSyncCheck(false);
+    }
+  });
+
+  /* Connessione silenziosa iniziale (senza popup invasivo) */
   (function attemptSilentGoogleAuth(){
     var clientId = getStoredClientId();
     if(!clientId || !getWasConnected()) return;
@@ -1508,13 +1652,15 @@
     function tryInit(){
       attempts++;
       if(typeof google === "undefined" || !google.accounts || !google.accounts.oauth2){
-        if(attempts < 15) setTimeout(tryInit, 400);
+        if(attempts < 20) setTimeout(tryInit, 300);
         return;
       }
-      var tc = ensureTokenClient(clientId);
+      var tc = ensureTokenClient(clientId, function(){
+        doInitialSyncCheck(true);
+      });
       if(tc) tc.requestAccessToken({ prompt: "" });
     }
-    setTimeout(tryInit, 600);
+    setTimeout(tryInit, 500);
   })();
 
   /* ---- sheets open/close ---- */
@@ -1552,7 +1698,6 @@
 
   /* ---- export png/pdf ---- */
   function exportFilenameBase(){ var sat=addDays(currentMonday,5); return "turni_"+toISO(currentMonday)+"_"+toISO(sat); }
-  /* ---- share / download helper (necessario per iOS standalone / Home Screen) ---- */
   function shareOrDownload(blob, filename, mimeType){
     var canTryShare = false;
     var file;
@@ -1605,8 +1750,8 @@
   }
 
   function librariesReady(needPdf){
-    if(typeof html2canvas==="undefined"){ alert("Libreria immagine non caricata (serve connessione al primo avvio). Ricarica e riprova."); return false; }
-    if(needPdf && typeof window.jspdf==="undefined"){ alert("Libreria PDF non caricata (serve connessione al primo avvio). Ricarica e riprova."); return false; }
+    if(typeof html2canvas==="undefined"){ alert("Libreria immagine non caricata. Ricarica e riprova."); return false; }
+    if(needPdf && typeof window.jspdf==="undefined"){ alert("Libreria PDF non caricata. Ricarica e riprova."); return false; }
     return true;
   }
   function captureSheetArea(){
