@@ -599,7 +599,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.2.0";
+  var APP_VERSION = "2.2.1";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -762,21 +762,39 @@
     return w;
   }
 
+  /* Funzione sicura: verifica se una settimana ha dati inseriti */
   function weekHasData(w){
+    if(!w || !w.days || !Array.isArray(w.days)) return false;
     return w.days.some(function(day){
-      if(day.absence && (day.absence.people.length || (day.absence.note && day.absence.note.trim()))) return true;
+      if(!day) return false;
+      if(day.absence && ((day.absence.people && day.absence.people.length) || (day.absence.note && day.absence.note.trim()))) return true;
       if(day.shiftOverrides && Object.keys(day.shiftOverrides).length) return true;
-      return AGENCIES.some(function(a){ return day.shifts[a].mattina.length || day.shifts[a].pomeriggio.length; });
+      if(!day.shifts) return false;
+      return AGENCIES.some(function(a){
+        var sh = day.shifts[a];
+        return sh && ((sh.mattina && sh.mattina.length) || (sh.pomeriggio && sh.pomeriggio.length));
+      });
+    });
+  }
+
+  /* Funzione sicura: verifica se l'intero archivio contiene almeno una settimana compilata */
+  function stateHasAnyWeekData(st){
+    if(!st || !st.weeks || typeof st.weeks !== "object") return false;
+    return Object.keys(st.weeks).some(function(k){
+      return weekHasData(st.weeks[k]);
     });
   }
 
   function computeConflicts(w){
     var conflicts=[];
+    if(!w || !w.days) return conflicts;
     w.days.forEach(function(day,dayIdx){
       SHIFTS.forEach(function(sp){
         var shiftKey=sp[0]; var map={};
         AGENCIES.forEach(function(a){
-          day.shifts[a][shiftKey].forEach(function(name){ if(!map[name]) map[name]=[]; map[name].push(a); });
+          if(day.shifts && day.shifts[a] && day.shifts[a][shiftKey]){
+            day.shifts[a][shiftKey].forEach(function(name){ if(!map[name]) map[name]=[]; map[name].push(a); });
+          }
         });
         Object.keys(map).forEach(function(name){ if(map[name].length>1) conflicts.push({dayIdx:dayIdx,date:day.date,shift:shiftKey,name:name,agencies:map[name]}); });
       });
@@ -786,12 +804,13 @@
 
   function computeGaps(w){
     var gaps=[];
+    if(!w || !w.days) return gaps;
     w.days.forEach(function(day,dayIdx){
       AGENCIES.forEach(function(agency){
         SHIFTS.forEach(function(sp){
           var shiftKey=sp[0];
           if(!isShiftOpen(agency, dayIdx, shiftKey, day)) return;
-          if(day.shifts[agency][shiftKey].length===0){
+          if(day.shifts && day.shifts[agency] && day.shifts[agency][shiftKey] && day.shifts[agency][shiftKey].length===0){
             gaps.push({ dayIdx:dayIdx, date:day.date, agency:agency, shift:shiftKey });
           }
         });
@@ -811,11 +830,11 @@
     var w = weeksStore[mondayISO];
     if(!w) return "empty";
     var dayIdx = dow - 1;
-    var day = w.days[dayIdx];
+    var day = w.days ? w.days[dayIdx] : null;
     if(!day) return "empty";
     var conflicts = computeConflicts(w).filter(function(c){ return c.dayIdx === dayIdx; });
     if(conflicts.length) return "conflict";
-    var hasAny = AGENCIES.some(function(a){ return day.shifts[a].mattina.length || day.shifts[a].pomeriggio.length; });
+    var hasAny = AGENCIES.some(function(a){ return day.shifts && day.shifts[a] && (day.shifts[a].mattina.length || day.shifts[a].pomeriggio.length); });
     var hasClosure = day.shiftOverrides && Object.keys(day.shiftOverrides).length;
     var hasAbsence = day.absence && (day.absence.people.length || (day.absence.note && day.absence.note.trim()));
     var gaps = computeGaps(w).filter(function(g){ return g.dayIdx === dayIdx; });
@@ -918,7 +937,7 @@
           var open = isShiftOpen(agency, dayIdx, shiftKey, day);
           var btn = document.createElement("button");
           btn.className = "shift-btn" + (conflictKey[dayIdx+"|"+agency+"|"+shiftKey] ? " conflict" : "") + (!open ? " closed" : "");
-          var names = day.shifts[agency][shiftKey];
+          var names = (day.shifts && day.shifts[agency] && day.shifts[agency][shiftKey]) ? day.shifts[agency][shiftKey] : [];
           var chipsHtml;
           if(!open) chipsHtml = '<span class="empty-hint">Chiuso</span>';
           else chipsHtml = names.length ? names.map(function(n){ return chipHtml(n,false); }).join("") : '<span class="empty-hint">+ aggiungi</span>';
@@ -933,7 +952,7 @@
 
       var ferieBtn = document.createElement("button");
       ferieBtn.className = "ferie-btn";
-      var people = day.absence.people || [];
+      var people = (day.absence && day.absence.people) ? day.absence.people : [];
       var fchips = people.length ? people.map(function(n){ return chipHtml(n,true); }).join("") : '<span class="empty-hint">nessuno</span>';
       ferieBtn.innerHTML = '<span>🏖 Ferie/Permessi</span><span class="fchips">'+fchips+'</span>';
       ferieBtn.addEventListener("click", function(){ openAbsenceSheet(dayIdx); });
@@ -1032,7 +1051,7 @@
     showSheet("cellSheetOverlay");
   }
   function sedeMatches(emp, agency){ return !emp.sedi || emp.sedi.length===0 || emp.sedi.indexOf(agency)!==-1; }
-  function isAbsentOn(day, name){ return day.absence.people.indexOf(name)!==-1; }
+  function isAbsentOn(day, name){ return day.absence && day.absence.people && day.absence.people.indexOf(name)!==-1; }
   function renderCellEmpList(day, agency, shiftKey, selectedNames, showAllSedi){
     var container = document.getElementById("cellEmpList"); container.innerHTML="";
     var sorted = employees.slice().sort(function(a,b){ return a.name.localeCompare(b.name,'it'); });
@@ -1084,16 +1103,16 @@
     var sorted = employees.slice().sort(function(a,b){ return a.name.localeCompare(b.name,'it'); });
     sorted.forEach(function(emp){
       var id="abs_"+emp.name.replace(/[^a-zA-Z0-9]/g,"_");
-      var checked = day.absence.people.indexOf(emp.name)!==-1;
+      var checked = day.absence && day.absence.people && day.absence.people.indexOf(emp.name)!==-1;
       var assignedIn=[];
-      AGENCIES.forEach(function(a){ SHIFTS.forEach(function(sp){ if(day.shifts[a][sp[0]].indexOf(emp.name)!==-1) assignedIn.push(AGENCY_CODES[a]+" "+(sp[0]==="mattina"?"mat":"pom")); }); });
+      AGENCIES.forEach(function(a){ SHIFTS.forEach(function(sp){ if(day.shifts && day.shifts[a] && day.shifts[a][sp[0]].indexOf(emp.name)!==-1) assignedIn.push(AGENCY_CODES[a]+" "+(sp[0]==="mattina"?"mat":"pom")); }); });
       var row=document.createElement("div"); row.className="emp-row";
       var extra = assignedIn.length ? '<span class="tag-outsede">'+assignedIn.join(", ")+'</span>' : "";
       row.innerHTML = '<input type="checkbox" id="'+id+'" data-name="'+escapeHtml(emp.name)+'" '+(checked?"checked":"")+'>'+
         '<label for="'+id+'"><span class="chip-dot" style="background:'+emp.color+'"></span>'+escapeHtml(emp.name)+extra+'</label>';
       container.appendChild(row);
     });
-    document.getElementById("absenceNoteInput").value = day.absence.note || "";
+    document.getElementById("absenceNoteInput").value = (day.absence && day.absence.note) ? day.absence.note : "";
     showSheet("absenceSheetOverlay");
   }
   document.getElementById("absenceSaveBtn").addEventListener("click", function(){
@@ -1139,7 +1158,7 @@
       SHIFTS.forEach(function(sp){
         var shiftKey = sp[0];
         var key = agency + "_" + shiftKey;
-        var assignedCount = day.shifts[agency][shiftKey].length;
+        var assignedCount = (day.shifts && day.shifts[agency] && day.shifts[agency][shiftKey]) ? day.shifts[agency][shiftKey].length : 0;
 
         var row = document.createElement("div");
         row.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;";
@@ -1178,7 +1197,7 @@
       var idx = key.lastIndexOf("_");
       var agency = key.slice(0, idx);
       var shiftKey = key.slice(idx+1);
-      var arr = day.shifts[agency] && day.shifts[agency][shiftKey];
+      var arr = day.shifts && day.shifts[agency] && day.shifts[agency][shiftKey];
       if(arr && arr.length) toRemove.push({ agency:agency, shift:shiftKey, names:arr.slice() });
     });
     if(toRemove.length){
@@ -1447,7 +1466,6 @@
       var files = data && data.files ? data.files : [];
       if(!files.length) return null;
       var latest = files[0];
-      // Se ci sono file duplicati con lo stesso nome, cestiniamo i vecchi per garantire coerenza totale
       if(files.length > 1){
         for(var i=1; i<files.length; i++){
           (function(fId){
@@ -1494,7 +1512,7 @@
     }).then(function(r){ return r.text(); });
   }
 
-  /* Primo accesso da nuovo dispositivo: forza sempre download se il file esiste su Drive */
+  /* Sincronizzazione sicura: protegge i dati e gestisce compatibilità mobile */
   function doInitialSyncCheck(isLoginEvent){
     if(!googleAccessToken) return;
     isSyncing = true;
@@ -1502,7 +1520,6 @@
 
     driveFindLatestFile().then(function(latest){
       if(!latest){
-        // Il file non esiste ancora su Google Drive: lo creiamo con i dati attuali
         var content = JSON.stringify(state, null, 2);
         return driveCreateFile(content).then(function(res){
           state.cloud.fileId = res.id;
@@ -1522,17 +1539,19 @@
         var remoteUpdated = (parsed.meta && parsed.meta.updatedAt) ? new Date(parsed.meta.updatedAt).getTime() : 0;
         var localUpdated = (state.meta && state.meta.updatedAt) ? new Date(state.meta.updatedAt).getTime() : 0;
 
-        // Se è login su nuovo dispositivo OPPURE il remoto è più recente: scarica immediatamente
-        if(isLoginEvent || remoteUpdated >= localUpdated || !weekHasData(state)){
+        var remoteHasData = stateHasAnyWeekData(parsed);
+        var localHasData = stateHasAnyWeekData(state);
+
+        /* Se il file remoto ha dati e il locale è vuoto, oppure il remoto è più recente, o è login: scarica sempre */
+        if(isLoginEvent || (remoteHasData && !localHasData) || (remoteUpdated >= localUpdated)){
           applyImportedState(parsed);
           state.cloud.fileId = latest.id;
           state.cloud.lastPull = new Date().toISOString();
           persistLocal();
           isSyncing = false;
           refreshCloudSheetUI();
-          showToast("☁️ Dati scaricati e allineati con l'account Google!");
+          showToast("☁️ Dati scaricati e sincronizzati!");
         } else {
-          // Dispositivo locale ha modifiche offline più recenti: caricamento
           var content = JSON.stringify(state, null, 2);
           return driveUpdateFile(latest.id, content).then(function(){
             state.cloud.lastPush = new Date().toISOString();
@@ -1637,14 +1656,14 @@
     }, 3000);
   }
 
-  /* Controllo aggiornamenti quando la finestra riprende il focus (es. tornando dall'altra app) */
+  /* Controllo aggiornamenti quando la finestra riprende il focus */
   window.addEventListener("focus", function(){
     if(googleAccessToken && !isSyncing){
       doInitialSyncCheck(false);
     }
   });
 
-  /* Connessione silenziosa iniziale (senza popup invasivo) */
+  /* Connessione silenziosa iniziale */
   (function attemptSilentGoogleAuth(){
     var clientId = getStoredClientId();
     if(!clientId || !getWasConnected()) return;
@@ -1835,13 +1854,16 @@
   function computeEmployeeStats(scopeAllWeeks, currentWeek){
     var counts = {};
     function tally(w){
+      if(!w || !w.days) return;
       w.days.forEach(function(day){
         AGENCIES.forEach(function(agency){
           SHIFTS.forEach(function(sp){
-            day.shifts[agency][sp[0]].forEach(function(name){
-              if(!counts[name]) counts[name] = { mattina:0, pomeriggio:0 };
-              counts[name][sp[0]]++;
-            });
+            if(day.shifts && day.shifts[agency] && day.shifts[agency][sp[0]]){
+              day.shifts[agency][sp[0]].forEach(function(name){
+                if(!counts[name]) counts[name] = { mattina:0, pomeriggio:0 };
+                counts[name][sp[0]]++;
+              });
+            }
           });
         });
       });
