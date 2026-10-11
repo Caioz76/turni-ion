@@ -95,3 +95,2292 @@
     background: var(--navy);
     color: #EFE9DA;
     padding: calc(10px + var(--safe-t)) 14px 10px;
+  }
+  .m-brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .m-brand .accent { color: var(--accent-2); }
+  .m-header-badges { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .m-cloud-indicator {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 2px 7px;
+    color: #EFE9DA;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .m-cloud-indicator.synced { border-color: var(--accent-2); color: #B3E0D6; }
+  .m-cloud-indicator.syncing { animation: pulse 1s infinite alternate; }
+  @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
+  .m-version {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: #8FA0AE;
+    padding-left: 4px;
+  }
+  .settings-app-version {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-top: 18px;
+  }
+  .m-week-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .m-arrow {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid #4C617A;
+    color: #EFE9DA;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .m-arrow:active { background: rgba(255,255,255,0.2); }
+  .m-week-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    min-width: 150px;
+    text-align: center;
+    background: none;
+    border: none;
+    color: inherit;
+    padding: 6px 4px;
+    cursor: pointer;
+  }
+  .m-week-label:active { opacity: 0.7; }
+  .m-week-label b { color: var(--accent-2); }
+  .m-substatus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 9px;
+    flex-wrap: wrap;
+  }
+  .m-stamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: .5px;
+    border: 2px solid var(--accent-2);
+    color: var(--accent-2);
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+  }
+  .m-stamp.alert { border-color: #E38C7C; color: #E38C7C; }
+  .m-link {
+    background: none;
+    border: none;
+    color: #B8C0CB;
+    font-size: 12px;
+    text-decoration: underline;
+    font-family: 'IBM Plex Sans', sans-serif;
+    cursor: pointer;
+  }
+
+  main.m-main { padding: 14px 12px 20px; max-width: 900px; margin: 0 auto; }
+  .m-conflict {
+    background: var(--alert-bg);
+    border: 1px solid #E2B4AA;
+    border-left: 4px solid var(--alert);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    margin-bottom: 14px;
+  }
+  .m-conflict.hidden { display: none; }
+  .m-conflict h3 { margin: 0 0 6px; font-family: 'Fraunces', serif; font-size: 14px; color: var(--alert); }
+  .m-conflict ul { margin: 0; padding-left: 18px; }
+  .m-conflict li { margin-bottom: 3px; }
+
+  .m-gap {
+    background: #F5EAD2;
+    border: 1px solid #DFC48B;
+    border-left: 4px solid #B8860B;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    margin-bottom: 14px;
+  }
+  .m-gap.hidden { display: none; }
+  .m-gap h3 { margin: 0 0 6px; font-family: 'Fraunces', serif; font-size: 14px; color: #8A6209; }
+  .m-gap ul { margin: 0; padding-left: 18px; }
+  .m-gap li { margin-bottom: 3px; }
+
+  .day-card {
+    background: #FFFEFB;
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(35,33,29,0.07);
+  }
+  .day-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .day-badge { display: flex; align-items: baseline; gap: 8px; }
+  .day-badge .num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 24px; color: var(--navy); line-height: 1; }
+  .day-badge .name { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; color: var(--ink-soft); letter-spacing: 1px; }
+
+  .agency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  @media(min-width: 680px) {
+    .agency-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .agency-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: var(--navy);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .shift-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    min-height: 46px;
+    text-align: left;
+    border: 1.4px solid var(--line-strong);
+    border-radius: 10px;
+    padding: 7px 9px;
+    margin-top: 6px;
+    background: #fff;
+    font-family: 'IBM Plex Sans', sans-serif;
+    cursor: pointer;
+  }
+  .shift-btn:active { background: var(--paper-2); }
+  .shift-btn.conflict { border-color: var(--alert); background: var(--alert-bg); }
+  .shift-btn.closed { background: var(--line); opacity: 0.6; cursor: not-allowed; }
+  .shift-btn.closed:active { background: var(--line); }
+  .shift-tag { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; text-transform: uppercase; color: var(--ink-soft); letter-spacing: .5px; }
+  .shift-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .empty-hint { color: #C6BC9E; font-size: 11px; font-style: italic; margin-top: 4px; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1.4px solid var(--line-strong);
+    border-radius: 10px;
+    padding: 2px 7px 2px 5px;
+    font-size: 11px;
+    color: var(--ink);
+  }
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .chip.chip-absent { border-style: dashed; }
+
+  .ferie-btn {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1.4px dashed var(--line-strong);
+    border-radius: 10px;
+    padding: 9px 11px;
+    background: var(--paper-2);
+    min-height: 46px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    cursor: pointer;
+  }
+  .ferie-btn .fchips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+  .ferie-btn:active { background: var(--line); }
+  .closed-btn { border-color: #DFC48B; background: #F5EAD2; }
+  .closed-btn:active { background: #EBD8AC; }
+
+  .month-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 14px; }
+  .month-nav button {
+    background: var(--paper-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    color: var(--navy);
+    cursor: pointer;
+  }
+  .month-nav button:active { background: var(--line); }
+  .month-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 16px;
+    min-width: 140px;
+    text-align: center;
+    color: var(--navy);
+  }
+  .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .month-dow { text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-soft); padding-bottom: 5px; }
+  .month-cell {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    font-size: 12.5px;
+    background: #fff;
+    border: 1px solid var(--line);
+    gap: 3px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    cursor: pointer;
+  }
+  .month-cell.empty { border: none; background: transparent; cursor: default; }
+  .month-cell.off { color: #C6BC9E; background: var(--paper-2); border-color: var(--line); cursor: default; }
+  .month-cell.today { border: 2px solid var(--accent); font-weight: 700; }
+  .month-daynum { line-height: 1; }
+  .month-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--line-strong); }
+  .month-cell.ok .month-dot { background: var(--accent); }
+  .month-cell.gap .month-dot { background: #B8860B; }
+  .month-cell.conflict .month-dot { background: var(--alert); }
+  .month-legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 16px; font-size: 11px; color: var(--ink-soft); }
+  .month-legend span { display: flex; align-items: center; gap: 5px; }
+  .month-legend .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+  nav.m-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    background: var(--navy);
+    border-top: 3px solid var(--accent);
+    display: flex;
+    padding: 6px 4px calc(6px + var(--safe-b));
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  nav.m-tabbar button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #B8C0CB;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 2px;
+    font-size: 10px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 48px;
+    cursor: pointer;
+  }
+  nav.m-tabbar button .ico { font-size: 19px; }
+  nav.m-tabbar button:active { color: #fff; }
+
+  .sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(35,33,29,0.5);
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .sheet-overlay.hidden { display: none; }
+  .sheet-panel {
+    background: #FFFEFB;
+    width: 100%;
+    max-width: 600px;
+    max-height: 88dvh;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+    padding-bottom: var(--safe-b);
+  }
+  .sheet-handle { width: 40px; height: 4px; background: var(--line-strong); border-radius: 3px; margin: 10px auto 4px; }
+  .sheet-head { padding: 6px 18px 12px; border-bottom: 1px solid var(--line); }
+  .sheet-head h3 { margin: 0; font-family: 'Fraunces', serif; font-size: 17px; }
+  .sheet-head .sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+  .sheet-body { padding: 14px 18px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+  .sheet-foot { padding: 12px 18px; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+
+  .btn {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 16px;
+    border-radius: 22px;
+    border: 1px solid transparent;
+    min-height: 44px;
+    flex: 1;
+    cursor: pointer;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-outline { background: #fff; color: var(--navy); border-color: var(--line-strong); }
+  .btn-ghost { background: var(--paper-2); color: var(--navy); }
+  .btn-alert { background: var(--alert); color: #fff; }
+  .btn-block { width: 100%; margin-bottom: 8px; display: block; text-align: center; }
+
+  .filter-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 12px; color: var(--ink-soft); }
+  .filter-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+
+  .emp-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+  .emp-row { display: flex; align-items: center; gap: 10px; padding: 9px 6px; border-radius: 8px; min-height: 44px; }
+  .emp-row.is-absent { opacity: 0.5; }
+  .emp-row input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
+  .emp-row label { font-size: 14.5px; flex: 1; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .tag-absent { font-size: 10.5px; font-family: 'IBM Plex Mono', monospace; color: var(--alert); }
+  .tag-outsede { font-size: 10.5px; font-family: 'IBM Plex Mono', monospace; color: var(--ink-soft); }
+
+  .add-emp-row { display: flex; gap: 8px; margin-top: 6px; }
+  .add-emp-row input { flex: 1; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 15px; }
+
+  label.field-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--ink-soft); font-weight: 600; display: block; margin: 12px 0 5px; }
+  select, input[type=date], input[type=text] { width: 100%; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 15px; background: #fff; }
+  textarea.note-input { width: 100%; min-height: 64px; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 14.5px; resize: vertical; }
+  .warn-box { background: var(--alert-bg); border: 1px solid #E2B4AA; border-radius: 10px; padding: 10px 12px; font-size: 12.5px; margin-top: 12px; display: none; }
+  .warn-box.show { display: block; }
+
+  .emp-manage-row { display: flex; align-items: center; gap: 9px; padding: 10px 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .emp-manage-row input[type=color] { width: 32px; height: 32px; border: 1px solid var(--line-strong); border-radius: 50%; padding: 0; background: none; cursor: pointer; }
+  .emp-manage-name { font-size: 14.5px; font-weight: 600; flex: 1; min-width: 80px; }
+  .sede-toggles { display: flex; gap: 4px; flex-wrap: wrap; }
+  .sede-btn { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; padding: 5px 8px; border: 1px solid var(--line-strong); border-radius: 10px; background: #fff; color: var(--ink-soft); min-height: 30px; cursor: pointer; }
+  .sede-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .emp-remove { background: var(--alert); color: #fff; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 12px; flex-shrink: 0; cursor: pointer; }
+  .emp-hint { font-size: 11.5px; color: var(--ink-soft); margin-bottom: 10px; line-height: 1.5; }
+
+  #historyList { list-style: none; margin: 0; padding: 0; }
+  #historyList li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 8px; border-bottom: 1px solid var(--line); font-size: 14px; min-height: 44px; cursor: pointer; }
+  #historyList li:active { background: var(--paper-2); }
+  #historyList li.active { background: var(--accent); color: #fff; border-radius: 8px; }
+  #historyList li .tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 10px; background: var(--paper-2); color: var(--ink-soft); }
+  #historyList li.active .tag { background: rgba(255,255,255,0.25); color: #fff; }
+  #historyList .empty { font-size: 13px; color: var(--ink-soft); font-style: italic; padding: 10px 4px; }
+
+  .status-line { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.6; }
+  .status-line.dirty { color: var(--alert); font-weight: 600; }
+  .companion-note { font-size: 12px; color: var(--ink-soft); line-height: 1.6; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .companion-note a { color: var(--accent); font-weight: 600; }
+
+  .settings-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--ink-soft); font-weight: 700; margin: 16px 4px 6px; }
+  .settings-section-label:first-child { margin-top: 0; }
+  .settings-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: #fff;
+    margin-bottom: 8px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .settings-row:active { background: var(--paper-2); }
+  .settings-row .chev { color: var(--ink-soft); font-size: 16px; }
+
+  .palette-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+  .palette-row label { font-size: 14px; }
+  .palette-row input[type=color] { width: 44px; height: 32px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0; background: none; cursor: pointer; }
+
+  .opening-agency-title { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--navy); font-weight: 700; margin: 16px 2px 6px; }
+  .opening-agency-title:first-child { margin-top: 0; }
+  .opening-day-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 2px; border-bottom: 1px solid var(--line); }
+  .opening-day-row label { font-size: 13.5px; flex: 0 0 90px; }
+  .opening-day-row select { flex: 1; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 13px; background: #fff; }
+
+  .logo-preview {
+    width: 140px;
+    height: 140px;
+    border-radius: 16px;
+    border: 1px solid var(--line-strong);
+    background: var(--paper-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+    overflow: hidden;
+  }
+  .logo-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .app-logo-header { display: flex; justify-content: center; margin-bottom: 6px; }
+  .app-logo-header img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; border: 1px solid var(--line-strong); }
+</style>
+</head>
+<body>
+
+<noscript>
+  <div style="background:#B13B2E;color:#fff;padding:22px 18px;font-family:sans-serif;line-height:1.6;font-size:15px;">
+    <b>Questa pagina richiede JavaScript per funzionare.</b><br><br>
+    Se stai usando iOS, aprila in Safari e non in anteprima Quick Look.
+  </div>
+</noscript>
+
+<div class="update-banner hidden" id="updateBanner">
+  <span>🔄 Nuova versione disponibile</span>
+  <button id="updateBannerBtn">Aggiorna</button>
+</div>
+
+<div class="auto-toast hidden" id="autoSyncToast"></div>
+
+<header class="m-header">
+  <div class="m-brand">
+    <span>REGISTRO <span class="accent">TURNI</span></span>
+    <div class="m-header-badges">
+      <span class="m-cloud-indicator" id="headerCloudStatus" title="Stato Google Drive">☁️ Non collegato</span>
+      <span class="m-version" id="appVersionBadge"></span>
+    </div>
+  </div>
+  <div class="m-week-row">
+    <button class="m-arrow" id="prevWeek" aria-label="Settimana precedente">‹</button>
+    <button class="m-week-label" id="weekLabel">—</button>
+    <button class="m-arrow" id="nextWeek" aria-label="Settimana successiva">›</button>
+  </div>
+  <div class="m-substatus">
+    <span class="m-stamp" id="conflictStamp">✓ ok</span>
+    <button class="m-link" id="gotoUpcoming">→ prossima settimana</button>
+  </div>
+</header>
+
+<main class="m-main" id="exportArea">
+  <div class="app-logo-header" id="appLogoHeader"></div>
+  <div class="m-conflict hidden" id="conflictPanel"><h3>⚠ Sovrapposizioni</h3><ul id="conflictListUI"></ul></div>
+  <div class="m-gap hidden" id="gapPanel"><h3>🕳 Copertura mancante</h3><ul id="gapListUI"></ul></div>
+  <div id="daysList"></div>
+</main>
+
+<nav class="m-tabbar">
+  <button data-open="settingsSheetOverlay"><span class="ico">⚙️</span>Impostazioni</button>
+  <button data-open="dupSheetOverlay"><span class="ico">⎘</span>Duplica</button>
+  <button data-open="historySheetOverlay"><span class="ico">🕘</span>Storico</button>
+  <button data-open="exportSheetOverlay"><span class="ico">📤</span>Esporta</button>
+  <button data-open="memoriaSheetOverlay"><span class="ico">💾</span>Memoria</button>
+</nav>
+
+<!-- ===== Sheet: turno ===== -->
+<div class="sheet-overlay hidden" id="cellSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3 id="cellSheetTitle">Turno</h3><div class="sub" id="cellSheetSub"></div></div>
+    <div class="sheet-body">
+      <label class="filter-row"><input type="checkbox" id="cellShowAllSedi"> Mostra anche dipendenti di altre sedi</label>
+      <div class="emp-list" id="cellEmpList"></div>
+      <div class="add-emp-row">
+        <input type="text" id="cellNewEmpInput" placeholder="Aggiungi nuovo nome…">
+        <button class="btn btn-outline" style="flex:0 0 auto;" id="cellNewEmpBtn">+</button>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="cellSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="cellSaveBtn">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: ferie/permessi ===== -->
+<div class="sheet-overlay hidden" id="absenceSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Ferie &amp; permessi</h3><div class="sub" id="absenceSheetSub"></div></div>
+    <div class="sheet-body">
+      <div class="emp-hint">Chi selezioni qui viene rimosso automaticamente dai turni dello stesso giorno.</div>
+      <div class="emp-list" id="absenceEmpList"></div>
+      <label class="field-label">Nota (facoltativa)</label>
+      <textarea class="note-input" id="absenceNoteInput" placeholder="es. malattia, corso…"></textarea>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="absenceSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="absenceSaveBtn">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: chiusure straordinarie ===== -->
+<div class="sheet-overlay hidden" id="closedSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Orari straordinari</h3><div class="sub" id="closedSheetSub"></div></div>
+    <div class="sheet-body">
+      <div class="emp-hint">Per festività o eccezioni occasionali. Vale solo per questa data.</div>
+      <div id="closedAgencyList"></div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="closedSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="closedSaveBtn">Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: impostazioni ===== -->
+<div class="sheet-overlay hidden" id="settingsSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Impostazioni</h3></div>
+    <div class="sheet-body">
+      <div class="settings-section-label">Aspetto</div>
+      <button class="settings-row" data-open="paletteSheetOverlay"><span>🎨 Palette colori</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="logoSheetOverlay"><span>🖼 Logo</span><span class="chev">›</span></button>
+      <div class="settings-section-label">Organizzazione</div>
+      <button class="settings-row" data-open="empSheetOverlay"><span>👤 Elenco dipendenti</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="openingSheetOverlay"><span>🏬 Aperture agenzie</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="statsSheetOverlay"><span>📊 Conteggio turni</span><span class="chev">›</span></button>
+      <div class="settings-section-label">Memoria &amp; Cloud</div>
+      <button class="settings-row" data-open="cloudSheetOverlay"><span>☁️ Sincronizza con Google Drive</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="memoriaSheetOverlay"><span>💾 Backup / Ripristino file (.json)</span><span class="chev">›</span></button>
+      <div class="settings-app-version" id="settingsVersionLine"></div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="settingsSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: palette colori ===== -->
+<div class="sheet-overlay hidden" id="paletteSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Palette colori</h3><div class="sub">Applicati a tutta l'app</div></div>
+    <div class="sheet-body">
+      <div class="palette-row">
+        <label for="paletteAccent">Colore principale (accento)</label>
+        <input type="color" id="paletteAccent">
+      </div>
+      <div class="palette-row">
+        <label for="paletteNavy">Intestazione</label>
+        <input type="color" id="paletteNavy">
+      </div>
+      <div class="palette-row">
+        <label for="palettePaper">Sfondo</label>
+        <input type="color" id="palettePaper">
+      </div>
+      <button class="btn btn-outline btn-block" id="paletteResetBtn" style="margin-top:14px;">Ripristina colori predefiniti</button>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="paletteSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: aperture agenzie ===== -->
+<div class="sheet-overlay hidden" id="openingSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Aperture agenzie</h3><div class="sub">Per ogni agenzia e giorno della settimana</div></div>
+    <div class="sheet-body" id="openingBody"></div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="openingSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: conteggio turni ===== -->
+<div class="sheet-overlay hidden" id="statsSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Conteggio turni</h3><div class="sub" id="statsSub">Questa settimana</div></div>
+    <div class="sheet-body">
+      <select id="statsScopeSelect" style="margin-bottom:10px;">
+        <option value="week">Questa settimana</option>
+        <option value="all">Tutto lo storico salvato</option>
+      </select>
+      <div style="font-size:11px;color:var(--ink-soft);margin-bottom:12px;">chiaro = mattina · pieno = pomeriggio</div>
+      <ul id="statsList" style="list-style:none; padding:0; margin:0;"></ul>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="statsSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: logo ===== -->
+<div class="sheet-overlay hidden" id="logoSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Logo</h3><div class="sub">Formato quadrato, mostrato nell'app e nelle esportazioni</div></div>
+    <div class="sheet-body">
+      <div style="display:flex; justify-content:center; margin-bottom:14px;">
+        <div id="logoPreview" class="logo-preview">Nessun logo</div>
+      </div>
+      <input type="file" id="logoFileInput" accept="image/*" style="display:none;">
+      <button class="btn btn-outline btn-block" id="logoChooseBtn">Scegli logo dal dispositivo</button>
+      <button class="btn btn-alert btn-block" id="logoRemoveBtn" style="display:none; margin-top:8px;">Rimuovi logo</button>
+      <div class="companion-note">L'immagine viene ritagliata automaticamente al centro in formato quadrato.</div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="logoSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: dipendenti ===== -->
+<div class="sheet-overlay hidden" id="empSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Dipendenti</h3><div class="sub">Colore, sedi e anagrafica</div></div>
+    <div class="sheet-body">
+      <div class="emp-hint">Nessuna sede selezionata = disponibile per tutte le agenzie.</div>
+      <div id="masterEmpList"></div>
+      <div class="add-emp-row">
+        <input type="text" id="masterNewEmpInput" placeholder="Nome nuovo dipendente…">
+        <button class="btn btn-outline" style="flex:0 0 auto;" id="masterNewEmpBtn">+</button>
+      </div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="empSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: duplica ===== -->
+<div class="sheet-overlay hidden" id="dupSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Duplica settimana</h3></div>
+    <div class="sheet-body">
+      <label class="field-label">Copia da</label>
+      <select id="dupSource"></select>
+      <label class="field-label">Su settimana che inizia lunedì</label>
+      <input type="date" id="dupTarget">
+      <div class="warn-box" id="dupWarn">La settimana di destinazione contiene già dati: verranno sovrascritti.</div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="dupSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="dupConfirmBtn">Duplica</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: vista mensile ===== -->
+<div class="sheet-overlay hidden" id="monthSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Vista mensile</h3><div class="sub">Tocca un giorno per aprire la sua settimana</div></div>
+    <div class="sheet-body">
+      <div class="month-nav">
+        <button id="monthPrevBtn">‹</button>
+        <div class="month-title" id="monthTitle">—</div>
+        <button id="monthNextBtn">›</button>
+      </div>
+      <div class="month-grid" id="monthGrid"></div>
+      <div class="month-legend">
+        <span><span class="dot" style="background:var(--accent);"></span>compilata</span>
+        <span><span class="dot" style="background:#B8860B;"></span>copertura mancante</span>
+        <span><span class="dot" style="background:var(--alert);"></span>conflitto</span>
+      </div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="monthSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: storico ===== -->
+<div class="sheet-overlay hidden" id="historySheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Settimane precedenti</h3><div class="sub">Tocca per aprire</div></div>
+    <div class="sheet-body"><ul id="historyList"></ul>
+      <div class="companion-note">Per consultare e cercare nello storico in modo più completo, apri l'<a href="storico.html">archivio storico completo</a>.</div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="historySheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: esporta ===== -->
+<div class="sheet-overlay hidden" id="exportSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Esporta settimana</h3><div class="sub">Immagine o PDF della settimana visualizzata</div></div>
+    <div class="sheet-body">
+      <button class="btn btn-primary btn-block" id="copyPngBtn">📋 Copia PNG negli appunti</button>
+      <button class="btn btn-outline btn-block" id="exportPngBtn">🖼 Salva / Condividi PNG</button>
+      <button class="btn btn-outline btn-block" id="exportPdfBtn">📄 Esporta PDF</button>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="exportSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: memoria manuale ===== -->
+<div class="sheet-overlay hidden" id="memoriaSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Memoria locale (.json)</h3><div class="sub">Salva o ripristina un file di backup manuale</div></div>
+    <div class="sheet-body">
+      <div class="status-line" id="memoryStatus">—</div>
+      <button class="btn btn-primary btn-block" id="exportMemoriaBtn">💾 Esporta backup (.json)</button>
+      <button class="btn btn-outline btn-block" id="importMemoriaBtn">📂 Importa backup (.json)</button>
+      <input type="file" id="importMemoriaInput" accept="application/json,.json" style="display:none;">
+      <div class="companion-note">Il file di backup contiene tutti i turni, dipendenti e impostazioni. Puoi importarlo su qualsiasi computer o smartphone.</div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="memoriaSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: cloud Google Drive ===== -->
+<div class="sheet-overlay hidden" id="cloudSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>Sincronizza Google Drive</h3><div class="sub">Sincronizzazione tra Mobile e Desktop</div></div>
+    <div class="sheet-body">
+      <div class="status-line" id="cloudStatus">Non collegato.</div>
+
+      <div id="cloudSetupBlock">
+        <div class="emp-hint">I dati vengono salvati sul tuo Google Drive nel file <b>turni_memoria_pwa.json</b>. Lo stesso file viene letto da Mobile e Desktop usando il tuo account Google.</div>
+        <label class="field-label">Client ID Google OAuth</label>
+        <input type="text" id="cloudClientIdInput" placeholder="es. 123456789-abcdef.apps.googleusercontent.com">
+        <button class="btn btn-primary btn-block" id="cloudConnectBtn" style="margin-top:10px;">Accedi con Google</button>
+      </div>
+
+      <div id="cloudActionsBlock" style="display:none;">
+        <button class="btn btn-primary btn-block" id="cloudSyncBtn">🔄 Sincronizza ora</button>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-outline" id="cloudForcePullBtn" title="Scarica l'ultima versione presente su Google Drive e sostituisci quella locale">⬇️ Scarica da Drive</button>
+          <button class="btn btn-outline" id="cloudForcePushBtn" title="Carica la versione attuale del dispositivo su Google Drive sovrascrivendo il cloud">⬆️ Carica su Drive</button>
+        </div>
+        <button class="btn btn-ghost btn-block" id="cloudDisconnectBtn">Disconnetti account</button>
+      </div>
+
+      <div class="companion-note" id="cloudHowToBox">
+        <b>Comandi di sincronizzazione:</b><br>
+        • <b>🔄 Sincronizza ora:</b> confronta la versione sul cloud con quella locale e allinea quella più recente.<br>
+        • <b>⬇️ Scarica da Drive:</b> scarica l'archivio salvato su Google Drive e aggiorna questo dispositivo.<br>
+        • <b>⬆️ Carica su Drive:</b> invia i dati attuali di questo dispositivo su Google Drive.
+      </div>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="cloudSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var APP_VERSION = "2.2.3";
+  var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
+  var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
+  var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
+  var DAY_NAMES = ["Lun","Mar","Mer","Gio","Ven","Sab"];
+  var DEFAULT_NAMES = ["Cristina","Simone","Claudio","Leo","Laura","Gaia","Paola","Loredana","Claudia","Giorgio","Chiara","Domenico","Antony","Anai","Stagista 1","Stagista 2"];
+  var LS_STATE = "turni_state_v2";
+  var LS_LEGACY_WEEKS = "turni_weeks_v1";
+  var LS_LEGACY_EMP = "turni_employees_v1";
+  var DRIVE_FILENAME = "turni_memoria_pwa.json";
+  var LS_GOOGLE_CLIENT_ID = "turni_google_client_id";
+  var LS_GOOGLE_WAS_CONNECTED = "turni_google_was_connected";
+  var GOOGLE_SCOPE = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email";
+
+  function hslToHex(h,s,l){
+    s = s / 100; l = l / 100;
+    function k(n){ return (n + h / 30) % 12; }
+    var a = s * Math.min(l, 1 - l);
+    function f(n){ return l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); }
+    function toHex(x){ var h2 = Math.round(255 * x).toString(16); return h2.length === 1 ? "0" + h2 : h2; }
+    return "#" + toHex(f(0)) + toHex(f(8)) + toHex(f(4));
+  }
+  function hexToRgb(hex){
+    hex = hex.replace("#","");
+    if(hex.length === 3) hex = hex.split("").map(function(c){ return c + c; }).join("");
+    var num = parseInt(hex, 16);
+    return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+  }
+  function rgbToHex(r,g,b){
+    function c(v){ v = Math.max(0, Math.min(255, Math.round(v))); var s = v.toString(16); return s.length === 1 ? "0" + s : s; }
+    return "#" + c(r) + c(g) + c(b);
+  }
+  function tintHex(hex, amount){
+    var c = hexToRgb(hex);
+    return rgbToHex(c.r + (255 - c.r) * amount, c.g + (255 - c.g) * amount, c.b + (255 - c.b) * amount);
+  }
+  function paletteColor(index){ return hslToHex((index * 137.508) % 360, 58, 48); }
+  function hashHue(str){ var h = 0; for(var i = 0; i < str.length; i++){ h = (h * 31 + str.charCodeAt(i)) % 360; } return h < 0 ? h + 360 : h; }
+
+  function defaultEmployees(){
+    return DEFAULT_NAMES.map(function(n, i){ return { name: n, color: paletteColor(i), sedi: [] }; });
+  }
+  function blankAbsence(){ return { people: [], note: "" }; }
+  function blankWeek(mondayISO){
+    var monday = fromISO(mondayISO); var days = [];
+    for(var i = 0; i < 6; i++){
+      var shifts = {};
+      for(var a = 0; a < AGENCIES.length; a++){ shifts[AGENCIES[a]] = { mattina: [], pomeriggio: [] }; }
+      days.push({ date: toISO(addDays(monday, i)), shifts: shifts, absence: blankAbsence(), shiftOverrides: {} });
+    }
+    return { start: mondayISO, days: days };
+  }
+  var DEFAULT_THEME = { accent: "#2F6F62", navy: "#223349", paper: "#F5F1E6" };
+
+  function normalizeState(st){
+    if(!st || typeof st !== "object") st = {};
+    if(!st.employees || !st.employees.length) st.employees = defaultEmployees();
+    for(var i = 0; i < st.employees.length; i++){
+      var e = st.employees[i];
+      if(!e.color) e.color = paletteColor(i);
+      if(!e.sedi) e.sedi = [];
+    }
+    if(!st.weeks) st.weeks = {};
+    if(!st.meta) st.meta = { lastExport: null, updatedAt: null, updatedBy: null };
+    if(typeof st.meta.updatedAt === "undefined") st.meta.updatedAt = null;
+    if(!st.theme) st.theme = {};
+    st.theme.accent = st.theme.accent || DEFAULT_THEME.accent;
+    st.theme.navy = st.theme.navy || DEFAULT_THEME.navy;
+    st.theme.paper = st.theme.paper || DEFAULT_THEME.paper;
+    if(!st.openingSchedule) st.openingSchedule = {};
+    if(typeof st.logo !== "string") st.logo = null;
+    if(!st.cloud) st.cloud = {};
+    st.cloud.fileId = st.cloud.fileId || null;
+    st.cloud.lastPush = st.cloud.lastPush || null;
+    st.cloud.lastPull = st.cloud.lastPull || null;
+    st.cloud.userEmail = st.cloud.userEmail || null;
+
+    var weekKeys = Object.keys(st.weeks);
+    for(var wIdx = 0; wIdx < weekKeys.length; wIdx++){
+      var w = st.weeks[weekKeys[wIdx]];
+      if(!w.days) w.days = [];
+      for(var dIdx = 0; dIdx < w.days.length; dIdx++){
+        var d = w.days[dIdx];
+        if(!d.shifts) d.shifts = {};
+        for(var aIdx = 0; aIdx < AGENCIES.length; aIdx++){
+          var aName = AGENCIES[aIdx];
+          if(!d.shifts[aName]) d.shifts[aName] = { mattina: [], pomeriggio: [] };
+          if(!d.shifts[aName].mattina) d.shifts[aName].mattina = [];
+          if(!d.shifts[aName].pomeriggio) d.shifts[aName].pomeriggio = [];
+        }
+        if(!d.absence) d.absence = { people: [], note: (typeof d.note === "string") ? d.note : "" };
+        if(!d.absence.people) d.absence.people = [];
+        if(typeof d.absence.note !== "string") d.absence.note = "";
+        if(!d.shiftOverrides) d.shiftOverrides = {};
+        if(d.closedAgencies && d.closedAgencies.length){
+          for(var cIdx = 0; cIdx < d.closedAgencies.length; cIdx++){
+            var cAgency = d.closedAgencies[cIdx];
+            d.shiftOverrides[cAgency + "_mattina"] = "closed";
+            d.shiftOverrides[cAgency + "_pomeriggio"] = "closed";
+          }
+          delete d.closedAgencies;
+        }
+      }
+    }
+    return st;
+  }
+
+  function migrateFromV1(){
+    var employees = defaultEmployees(); var weeks = {};
+    try{
+      var rawEmp = localStorage.getItem(LS_LEGACY_EMP);
+      if(rawEmp){
+        var names = JSON.parse(rawEmp);
+        employees = names.map(function(n, i){ return { name: n, color: paletteColor(i), sedi: [] }; });
+      }
+      var rawWeeks = localStorage.getItem(LS_LEGACY_WEEKS);
+      if(rawWeeks){
+        var oldWeeks = JSON.parse(rawWeeks);
+        var oKeys = Object.keys(oldWeeks);
+        for(var i = 0; i < oKeys.length; i++){
+          var k = oKeys[i];
+          var ow = oldWeeks[k];
+          weeks[k] = {
+            start: ow.start,
+            days: ow.days.map(function(d){
+              return { date: d.date, shifts: d.shifts, absence: { people: [], note: d.note || "" } };
+            })
+          };
+        }
+      }
+    }catch(e){}
+    return normalizeState({ employees: employees, weeks: weeks, meta: { lastExport: null } });
+  }
+
+  function loadState(){
+    try{ var raw = localStorage.getItem(LS_STATE); if(raw) return normalizeState(JSON.parse(raw)); }catch(e){}
+    return migrateFromV1();
+  }
+
+  var state = loadState();
+  var employees = state.employees;
+  var weeksStore = state.weeks;
+  var isDirty = false;
+  var currentMonday = getUpcomingMonday();
+  var cellCtx = null, absenceCtx = null;
+
+  function persistLocal(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(state)); }catch(e){} }
+  function markDirty(){
+    isDirty = true;
+    state.meta.updatedAt = new Date().toISOString();
+    if(googleUserEmail) state.meta.updatedBy = googleUserEmail;
+    persistLocal();
+    updateMemoryStatus();
+  }
+  function findEmployee(name){
+    for(var i = 0; i < employees.length; i++){ if(employees[i].name === name) return employees[i]; }
+    return null;
+  }
+  function colorFor(name){ var e = findEmployee(name); return (e && e.color) ? e.color : hslToHex(hashHue(name), 45, 55); }
+  function addEmployeeIfMissing(name){
+    var existing = findEmployee(name); if(existing) return existing;
+    var emp = { name: name, color: paletteColor(employees.length), sedi: [] };
+    employees.push(emp); state.employees = employees; markDirty(); return emp;
+  }
+  function removeEmployeeByName(name){
+    employees = employees.filter(function(e){ return e.name !== name; });
+    state.employees = employees; markDirty();
+  }
+
+  function pad(n){ return n < 10 ? "0" + n : "" + n; }
+  function toISO(d){ return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function fromISO(s){ var p = s.split("-").map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+  function getMonday(d){ d = new Date(d.getFullYear(), d.getMonth(), d.getDate()); var day = d.getDay(); var diff = (day === 0 ? -6 : 1 - day); d.setDate(d.getDate() + diff); return d; }
+  function addDays(d, n){ var nd = new Date(d.getFullYear(), d.getMonth(), d.getDate()); nd.setDate(nd.getDate() + n); return nd; }
+  function fmtIt(d){ return pad(d.getDate()) + "/" + pad(d.getMonth() + 1); }
+  function fmtItFull(d){ return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear(); }
+  function fmtDateTime(iso){
+    if(!iso) return null;
+    var d = new Date(iso);
+    return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  function getUpcomingMonday(){ return addDays(getMonday(new Date()), 7); }
+
+  function getWeek(mondayISO){
+    if(!weeksStore[mondayISO]) weeksStore[mondayISO] = blankWeek(mondayISO);
+    var w = weeksStore[mondayISO];
+    for(var d = 0; d < w.days.length; d++){
+      var day = w.days[d];
+      for(var a = 0; a < AGENCIES.length; a++){
+        var aName = AGENCIES[a];
+        if(!day.shifts[aName]) day.shifts[aName] = { mattina: [], pomeriggio: [] };
+        if(!day.shifts[aName].mattina) day.shifts[aName].mattina = [];
+        if(!day.shifts[aName].pomeriggio) day.shifts[aName].pomeriggio = [];
+      }
+      if(!day.absence) day.absence = blankAbsence();
+      if(!day.shiftOverrides) day.shiftOverrides = {};
+    }
+    return w;
+  }
+
+  function weekHasData(w){
+    if(!w || typeof w !== "object") return false;
+    var days = (w.days && Array.isArray(w.days)) ? w.days : null;
+    if(!days) return false;
+    for(var i = 0; i < days.length; i++){
+      var day = days[i];
+      if(!day) continue;
+      if(day.absence){
+        if(day.absence.people && day.absence.people.length > 0) return true;
+        if(typeof day.absence.note === "string" && day.absence.note.trim() !== "") return true;
+      }
+      if(day.shiftOverrides && Object.keys(day.shiftOverrides).length > 0) return true;
+      if(day.shifts){
+        for(var a = 0; a < AGENCIES.length; a++){
+          var sh = day.shifts[AGENCIES[a]];
+          if(sh){
+            if(sh.mattina && sh.mattina.length > 0) return true;
+            if(sh.pomeriggio && sh.pomeriggio.length > 0) return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  function computeConflicts(w){
+    var conflicts = [];
+    if(!w || !w.days || !Array.isArray(w.days)) return conflicts;
+    for(var dayIdx = 0; dayIdx < w.days.length; dayIdx++){
+      var day = w.days[dayIdx];
+      if(!day || !day.shifts) continue;
+      for(var s = 0; s < SHIFTS.length; s++){
+        var shiftKey = SHIFTS[s][0];
+        var map = {};
+        for(var a = 0; a < AGENCIES.length; a++){
+          var ag = AGENCIES[a];
+          var list = (day.shifts[ag] && day.shifts[ag][shiftKey]) ? day.shifts[ag][shiftKey] : [];
+          for(var n = 0; n < list.length; n++){
+            var name = list[n];
+            if(!map[name]) map[name] = [];
+            map[name].push(ag);
+          }
+        }
+        var mappedNames = Object.keys(map);
+        for(var m = 0; m < mappedNames.length; m++){
+          var mName = mappedNames[m];
+          if(map[mName].length > 1){
+            conflicts.push({ dayIdx: dayIdx, date: day.date, shift: shiftKey, name: mName, agencies: map[mName] });
+          }
+        }
+      }
+    }
+    return conflicts;
+  }
+
+  function computeGaps(w){
+    var gaps = [];
+    if(!w || !w.days || !Array.isArray(w.days)) return gaps;
+    for(var dayIdx = 0; dayIdx < w.days.length; dayIdx++){
+      var day = w.days[dayIdx];
+      if(!day || !day.shifts) continue;
+      for(var a = 0; a < AGENCIES.length; a++){
+        var agency = AGENCIES[a];
+        for(var s = 0; s < SHIFTS.length; s++){
+          var shiftKey = SHIFTS[s][0];
+          if(!isShiftOpen(agency, dayIdx, shiftKey, day)) continue;
+          var arr = (day.shifts[agency] && day.shifts[agency][shiftKey]) ? day.shifts[agency][shiftKey] : [];
+          if(arr.length === 0){
+            gaps.push({ dayIdx: dayIdx, date: day.date, agency: agency, shift: shiftKey });
+          }
+        }
+      }
+    }
+    return gaps;
+  }
+
+  /* ---- vista mensile ---- */
+  var monthViewDate = null;
+  var MONTH_NAMES = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+
+  function dayStatusFor(date){
+    var dow = date.getDay();
+    if(dow === 0) return "off";
+    var mondayISO = toISO(getMonday(date));
+    var w = weeksStore[mondayISO];
+    if(!w) return "empty";
+    var dayIdx = dow - 1;
+    var day = (w.days && w.days[dayIdx]) ? w.days[dayIdx] : null;
+    if(!day) return "empty";
+    var conflicts = computeConflicts(w).filter(function(c){ return c.dayIdx === dayIdx; });
+    if(conflicts.length) return "conflict";
+    var hasAny = false;
+    if(day.shifts){
+      for(var a = 0; a < AGENCIES.length; a++){
+        var ag = AGENCIES[a];
+        if(day.shifts[ag] && ((day.shifts[ag].mattina && day.shifts[ag].mattina.length) || (day.shifts[ag].pomeriggio && day.shifts[ag].pomeriggio.length))){
+          hasAny = true; break;
+        }
+      }
+    }
+    var hasClosure = day.shiftOverrides && Object.keys(day.shiftOverrides).length;
+    var hasAbsence = day.absence && ((day.absence.people && day.absence.people.length) || (day.absence.note && day.absence.note.trim()));
+    var gaps = computeGaps(w).filter(function(g){ return g.dayIdx === dayIdx; });
+    if(gaps.length && hasAny) return "gap";
+    if(hasAny || hasAbsence || hasClosure) return "ok";
+    return "empty";
+  }
+
+  function openMonthSheet(){
+    monthViewDate = new Date(currentMonday.getFullYear(), currentMonday.getMonth(), 1);
+    renderMonthGrid();
+    showSheet("monthSheetOverlay");
+  }
+
+  function renderMonthGrid(){
+    var year = monthViewDate.getFullYear();
+    var month = monthViewDate.getMonth();
+    document.getElementById("monthTitle").textContent = MONTH_NAMES[month] + " " + year;
+
+    var firstOfMonth = new Date(year, month, 1);
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+    var firstWeekday = firstOfMonth.getDay();
+    var leading = (firstWeekday === 0) ? 6 : firstWeekday - 1;
+
+    var cells = [];
+    for(var i = 0; i < leading; i++) cells.push(null);
+    for(var d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
+    while(cells.length % 7 !== 0) cells.push(null);
+
+    var grid = document.getElementById("monthGrid");
+    grid.innerHTML = "";
+    var dows = ["L","M","M","G","V","S","D"];
+    for(var k = 0; k < dows.length; k++){
+      var h = document.createElement("div");
+      h.className = "month-dow";
+      h.textContent = dows[k];
+      grid.appendChild(h);
+    }
+    var todayISO = toISO(new Date());
+    cells.forEach(function(date){
+      var cell = document.createElement("div");
+      if(!date){ cell.className = "month-cell empty"; grid.appendChild(cell); return; }
+      var status = dayStatusFor(date);
+      cell.className = "month-cell " + status;
+      if(toISO(date) === todayISO) cell.classList.add("today");
+      var dotHtml = (status !== "off" && status !== "empty") ? '<span class="month-dot"></span>' : "";
+      cell.innerHTML = '<span class="month-daynum">' + date.getDate() + '</span>' + dotHtml;
+      if(status !== "off"){
+        cell.addEventListener("click", function(){
+          currentMonday = getMonday(date);
+          hideSheet("monthSheetOverlay");
+          renderWeek();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
+      grid.appendChild(cell);
+    });
+  }
+
+  document.getElementById("weekLabel").addEventListener("click", openMonthSheet);
+  document.getElementById("monthPrevBtn").addEventListener("click", function(){
+    monthViewDate = new Date(monthViewDate.getFullYear(), monthViewDate.getMonth() - 1, 1);
+    renderMonthGrid();
+  });
+  document.getElementById("monthNextBtn").addEventListener("click", function(){
+    monthViewDate = new Date(monthViewDate.getFullYear(), monthViewDate.getMonth() + 1, 1);
+    renderMonthGrid();
+  });
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+    });
+  }
+  function chipHtml(name, absent){
+    var color = colorFor(name); var bg = tintHex(color, 0.82);
+    var cls = absent ? "chip chip-absent" : "chip";
+    return '<span class="' + cls + '" style="background:' + bg + ';border-color:' + color + ';"><span class="chip-dot" style="background:' + color + '"></span>' + escapeHtml(name) + '</span>';
+  }
+
+  function renderDays(w, conflicts){
+    var container = document.getElementById("daysList");
+    container.innerHTML = "";
+    var conflictKey = {};
+    for(var cIdx = 0; cIdx < conflicts.length; cIdx++){
+      var c = conflicts[cIdx];
+      for(var agIdx = 0; agIdx < c.agencies.length; agIdx++){
+        conflictKey[c.dayIdx + "|" + c.agencies[agIdx] + "|" + c.shift] = true;
+      }
+    }
+
+    w.days.forEach(function(day, dayIdx){
+      var d = fromISO(day.date);
+      var card = document.createElement("div");
+      card.className = "day-card";
+
+      var head = document.createElement("div");
+      head.className = "day-card-head";
+      head.innerHTML = '<div class="day-badge"><span class="num">' + d.getDate() + '</span><span class="name">' + DAY_NAMES[dayIdx] + '</span></div>';
+      card.appendChild(head);
+
+      var grid = document.createElement("div");
+      grid.className = "agency-grid";
+      AGENCIES.forEach(function(agency){
+        var block = document.createElement("div");
+        block.className = "agency-block";
+        block.innerHTML = '<div class="agency-label">' + agency + '</div>';
+        SHIFTS.forEach(function(sp){
+          var shiftKey = sp[0];
+          var open = isShiftOpen(agency, dayIdx, shiftKey, day);
+          var btn = document.createElement("button");
+          btn.className = "shift-btn" + (conflictKey[dayIdx + "|" + agency + "|" + shiftKey] ? " conflict" : "") + (!open ? " closed" : "");
+          var names = (day.shifts && day.shifts[agency] && day.shifts[agency][shiftKey]) ? day.shifts[agency][shiftKey] : [];
+          var chipsHtml;
+          if(!open) chipsHtml = '<span class="empty-hint">Chiuso</span>';
+          else chipsHtml = names.length ? names.map(function(n){ return chipHtml(n, false); }).join("") : '<span class="empty-hint">+ aggiungi</span>';
+          btn.innerHTML = '<span class="shift-tag">' + sp[1] + '</span><span class="shift-chips">' + chipsHtml + '</span>';
+          if(open) btn.addEventListener("click", function(){ openCellSheet(dayIdx, agency, shiftKey); });
+          else btn.disabled = true;
+          block.appendChild(btn);
+        });
+        grid.appendChild(block);
+      });
+      card.appendChild(grid);
+
+      var ferieBtn = document.createElement("button");
+      ferieBtn.className = "ferie-btn";
+      var people = (day.absence && day.absence.people) ? day.absence.people : [];
+      var fchips = people.length ? people.map(function(n){ return chipHtml(n, true); }).join("") : '<span class="empty-hint">nessuno</span>';
+      ferieBtn.innerHTML = '<span>🏖 Ferie/Permessi</span><span class="fchips">' + fchips + '</span>';
+      ferieBtn.addEventListener("click", function(){ openAbsenceSheet(dayIdx); });
+      card.appendChild(ferieBtn);
+
+      var closedBtn = document.createElement("button");
+      closedBtn.className = "ferie-btn closed-btn";
+      var overrides = day.shiftOverrides || {};
+      var overrideKeys = Object.keys(overrides);
+      var cchips = overrideKeys.length ? overrideKeys.map(function(key){
+        var idx = key.lastIndexOf("_");
+        var agency = key.slice(0, idx);
+        var shiftKey = key.slice(idx + 1);
+        var icon = overrides[key] === "open" ? "🔓" : "🔒";
+        return '<span class="empty-hint" style="font-style:normal;color:#8A6209;">' + icon + ' ' + AGENCY_CODES[agency] + ' ' + (shiftKey === "mattina" ? "mat" : "pom") + '</span>';
+      }).join(" ") : '<span class="empty-hint">nessuna</span>';
+      closedBtn.innerHTML = '<span>🔧 Orari straordinari</span><span class="fchips">' + cchips + '</span>';
+      closedBtn.addEventListener("click", function(){ openClosedSheet(dayIdx); });
+      card.appendChild(closedBtn);
+
+      container.appendChild(card);
+    });
+  }
+
+  function renderWeek(){
+    var mondayISO = toISO(currentMonday);
+    var w = getWeek(mondayISO);
+    var saturday = addDays(currentMonday, 5);
+    document.getElementById("weekLabel").innerHTML = "<b>" + fmtIt(currentMonday) + "</b> – " + fmtIt(saturday);
+    var conflicts = computeConflicts(w);
+    renderDays(w, conflicts);
+    renderConflictUI(conflicts);
+    renderGapUI(computeGaps(w), w);
+    updateMemoryStatus();
+    updateCloudStatus();
+  }
+
+  function renderGapUI(gaps, w){
+    var panel = document.getElementById("gapPanel");
+    var list = document.getElementById("gapListUI");
+    if(gaps.length === 0 || !weekHasData(w)){ panel.classList.add("hidden"); list.innerHTML = ""; return; }
+    panel.classList.remove("hidden");
+    list.innerHTML = gaps.map(function(g){
+      var d = fromISO(g.date);
+      return "<li>" + escapeHtml(g.agency) + " · " + DAY_NAMES[g.dayIdx] + " " + fmtIt(d) + " (" + (g.shift === "mattina" ? "mattina" : "pomeriggio") + "): nessuno assegnato</li>";
+    }).join("");
+  }
+
+  function renderConflictUI(conflicts){
+    var stamp = document.getElementById("conflictStamp");
+    var panel = document.getElementById("conflictPanel");
+    var list = document.getElementById("conflictListUI");
+    if(conflicts.length === 0){ stamp.textContent = "✓ ok"; stamp.classList.remove("alert"); panel.classList.add("hidden"); list.innerHTML = ""; return; }
+    stamp.textContent = "⚠ " + conflicts.length;
+    stamp.classList.add("alert");
+    panel.classList.remove("hidden");
+    list.innerHTML = conflicts.map(function(c){
+      var d = fromISO(c.date);
+      return "<li><b>" + escapeHtml(c.name) + "</b> · " + DAY_NAMES[c.dayIdx] + " " + fmtIt(d) + " (" + (c.shift === "mattina" ? "mattina" : "pomeriggio") + "): " + c.agencies.map(escapeHtml).join(" + ") + "</li>";
+    }).join("");
+  }
+
+  function updateMemoryStatus(){
+    var el = document.getElementById("memoryStatus");
+    var lastExport = state.meta.lastExport ? fmtDateTime(state.meta.lastExport) : null;
+    if(isDirty){
+      el.className = "status-line dirty";
+      el.textContent = "Modifiche non salvate su file" + (lastExport ? (" · ultimo backup: " + lastExport) : " · nessun backup esportato");
+    } else {
+      el.className = "status-line";
+      el.textContent = lastExport ? ("Backup esportato il " + lastExport) : "Nessun file di backup esportato finora";
+    }
+  }
+
+  function renderHistory(){
+    var ul = document.getElementById("historyList");
+    var keys = Object.keys(weeksStore).filter(function(k){ return weekHasData(weeksStore[k]); });
+    keys.sort(function(a, b){ return b.localeCompare(a); });
+    if(keys.length === 0){ ul.innerHTML = '<li class="empty">Nessuna settimana ancora compilata.</li>'; return; }
+    var currentISO = toISO(currentMonday);
+    ul.innerHTML = "";
+    keys.forEach(function(k){
+      var w = weeksStore[k]; var mon = fromISO(k); var sat = addDays(mon, 5); var conflicts = computeConflicts(w);
+      var li = document.createElement("li");
+      if(k === currentISO) li.classList.add("active");
+      li.innerHTML = '<span>' + fmtIt(mon) + ' – ' + fmtIt(sat) + ' \'' + String(mon.getFullYear()).slice(2) + '</span><span class="tag">' + (conflicts.length ? conflicts.length + " ⚠" : "ok") + '</span>';
+      li.addEventListener("click", function(){
+        currentMonday = mon; renderWeek(); hideSheet("historySheetOverlay"); window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      ul.appendChild(li);
+    });
+  }
+
+  function openCellSheet(dayIdx, agency, shiftKey){
+    var w = getWeek(toISO(currentMonday)); cellCtx = { dayIdx: dayIdx, agency: agency, shift: shiftKey };
+    var day = w.days[dayIdx]; var d = fromISO(day.date);
+    document.getElementById("cellSheetTitle").textContent = agency + " · " + (shiftKey === "mattina" ? "Mattina" : "Pomeriggio");
+    document.getElementById("cellSheetSub").textContent = DAY_NAMES[dayIdx] + " " + fmtItFull(d);
+    document.getElementById("cellShowAllSedi").checked = false;
+    renderCellEmpList(day, agency, shiftKey, day.shifts[agency][shiftKey], false);
+    document.getElementById("cellNewEmpInput").value = "";
+    showSheet("cellSheetOverlay");
+  }
+  function sedeMatches(emp, agency){ return !emp.sedi || emp.sedi.length === 0 || emp.sedi.indexOf(agency) !== -1; }
+  function isAbsentOn(day, name){ return day.absence && day.absence.people && day.absence.people.indexOf(name) !== -1; }
+  function renderCellEmpList(day, agency, shiftKey, selectedNames, showAllSedi){
+    var container = document.getElementById("cellEmpList"); container.innerHTML = "";
+    var sorted = employees.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'it'); });
+    sorted.forEach(function(emp){
+      var absent = isAbsentOn(day, emp.name);
+      var sedeOk = showAllSedi || sedeMatches(emp, agency);
+      var isSelected = selectedNames.indexOf(emp.name) !== -1;
+      if(!sedeOk && !isSelected) return;
+      var id = "emp_" + emp.name.replace(/[^a-zA-Z0-9]/g, "_");
+      var row = document.createElement("div");
+      row.className = "emp-row" + (absent ? " is-absent" : "");
+      var extra = absent ? '<span class="tag-absent">in ferie</span>' : (!sedeOk ? '<span class="tag-outsede">altra sede</span>' : "");
+      row.innerHTML = '<input type="checkbox" id="' + id + '" data-name="' + escapeHtml(emp.name) + '" ' + (isSelected ? "checked" : "") + (absent ? " disabled" : "") + '>' +
+        '<label for="' + id + '"><span class="chip-dot" style="background:' + emp.color + '"></span>' + escapeHtml(emp.name) + extra + '</label>';
+      container.appendChild(row);
+    });
+  }
+  document.getElementById("cellShowAllSedi").addEventListener("change", function(){
+    var w = getWeek(toISO(currentMonday)); var day = w.days[cellCtx.dayIdx];
+    var current = collectSelectedFromForm("cellEmpList", day.shifts[cellCtx.agency][cellCtx.shift]);
+    renderCellEmpList(day, cellCtx.agency, cellCtx.shift, current, this.checked);
+  });
+  document.getElementById("cellNewEmpBtn").addEventListener("click", function(){
+    var input = document.getElementById("cellNewEmpInput"); var val = input.value.trim(); if(!val) return;
+    addEmployeeIfMissing(val);
+    var w = getWeek(toISO(currentMonday)); var day = w.days[cellCtx.dayIdx];
+    var current = collectSelectedFromForm("cellEmpList", day.shifts[cellCtx.agency][cellCtx.shift]);
+    if(current.indexOf(val) === -1) current.push(val);
+    renderCellEmpList(day, cellCtx.agency, cellCtx.shift, current, document.getElementById("cellShowAllSedi").checked);
+    input.value = "";
+  });
+  function collectSelectedFromForm(listId, fallback){
+    var boxes = document.querySelectorAll("#" + listId + " input[type=checkbox]");
+    if(boxes.length === 0) return fallback.slice();
+    var out = []; boxes.forEach(function(b){ if(b.checked) out.push(b.getAttribute("data-name")); }); return out;
+  }
+  document.getElementById("cellSaveBtn").addEventListener("click", function(){
+    var w = getWeek(toISO(currentMonday));
+    w.days[cellCtx.dayIdx].shifts[cellCtx.agency][cellCtx.shift] = collectSelectedFromForm("cellEmpList", []);
+    markDirty(); hideSheet("cellSheetOverlay"); renderWeek();
+  });
+
+  function openAbsenceSheet(dayIdx){
+    var w = getWeek(toISO(currentMonday)); absenceCtx = { dayIdx: dayIdx };
+    var day = w.days[dayIdx]; var d = fromISO(day.date);
+    document.getElementById("absenceSheetSub").textContent = DAY_NAMES[dayIdx] + " " + fmtItFull(d);
+    var container = document.getElementById("absenceEmpList"); container.innerHTML = "";
+    var sorted = employees.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'it'); });
+    sorted.forEach(function(emp){
+      var id = "abs_" + emp.name.replace(/[^a-zA-Z0-9]/g, "_");
+      var checked = day.absence && day.absence.people && day.absence.people.indexOf(emp.name) !== -1;
+      var assignedIn = [];
+      AGENCIES.forEach(function(a){
+        SHIFTS.forEach(function(sp){
+          if(day.shifts && day.shifts[a] && day.shifts[a][sp[0]].indexOf(emp.name) !== -1){
+            assignedIn.push(AGENCY_CODES[a] + " " + (sp[0] === "mattina" ? "mat" : "pom"));
+          }
+        });
+      });
+      var row = document.createElement("div"); row.className = "emp-row";
+      var extra = assignedIn.length ? '<span class="tag-outsede">' + assignedIn.join(", ") + '</span>' : "";
+      row.innerHTML = '<input type="checkbox" id="' + id + '" data-name="' + escapeHtml(emp.name) + '" ' + (checked ? "checked" : "") + '>' +
+        '<label for="' + id + '"><span class="chip-dot" style="background:' + emp.color + '"></span>' + escapeHtml(emp.name) + extra + '</label>';
+      container.appendChild(row);
+    });
+    document.getElementById("absenceNoteInput").value = (day.absence && day.absence.note) ? day.absence.note : "";
+    showSheet("absenceSheetOverlay");
+  }
+  document.getElementById("absenceSaveBtn").addEventListener("click", function(){
+    var w = getWeek(toISO(currentMonday)); var day = w.days[absenceCtx.dayIdx];
+    var selected = collectSelectedFromForm("absenceEmpList", []);
+    var toRemove = [];
+    selected.forEach(function(name){
+      AGENCIES.forEach(function(a){
+        SHIFTS.forEach(function(sp){
+          var arr = day.shifts[a][sp[0]];
+          if(arr.indexOf(name) !== -1) toRemove.push({ name: name, agency: a, shift: sp[0] });
+        });
+      });
+    });
+    if(toRemove.length){
+      var lines = toRemove.map(function(c){ return "• " + c.name + " — " + c.agency + " (" + (c.shift === "mattina" ? "mattina" : "pomeriggio") + ")"; }).join("\n");
+      var msg = "Questi dipendenti sono ancora assegnati a un turno lo stesso giorno e verranno rimossi:\n\n" + lines + "\n\nContinuare?";
+      if(!window.confirm(msg)) return;
+      toRemove.forEach(function(c){
+        var arr = day.shifts[c.agency][c.shift];
+        var i = arr.indexOf(c.name);
+        if(i !== -1) arr.splice(i, 1);
+      });
+    }
+    day.absence.people = selected;
+    day.absence.note = document.getElementById("absenceNoteInput").value;
+    markDirty(); hideSheet("absenceSheetOverlay"); renderWeek();
+  });
+
+  var closedCtx = null;
+  var OVERRIDE_OPTIONS = [["", "Standard"], ["open", "Apri"], ["closed", "Chiudi"]];
+
+  function openClosedSheet(dayIdx){
+    var w = getWeek(toISO(currentMonday));
+    var day = w.days[dayIdx]; var d = fromISO(day.date);
+    closedCtx = { dayIdx: dayIdx, pending: {} };
+    Object.keys(day.shiftOverrides || {}).forEach(function(k){ closedCtx.pending[k] = day.shiftOverrides[k]; });
+    document.getElementById("closedSheetSub").textContent = DAY_NAMES[dayIdx] + " " + fmtItFull(d);
+    renderClosedSheetBody(day);
+    showSheet("closedSheetOverlay");
+  }
+
+  function renderClosedSheetBody(day){
+    var container = document.getElementById("closedAgencyList"); container.innerHTML = "";
+    var pending = closedCtx.pending;
+    AGENCIES.forEach(function(agency){
+      var block = document.createElement("div");
+      block.style.marginBottom = "16px";
+      var title = document.createElement("div");
+      title.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);font-weight:600;margin-bottom:8px;";
+      title.textContent = agency;
+      block.appendChild(title);
+
+      SHIFTS.forEach(function(sp){
+        var shiftKey = sp[0];
+        var key = agency + "_" + shiftKey;
+        var assignedCount = (day.shifts && day.shifts[agency] && day.shifts[agency][shiftKey]) ? day.shifts[agency][shiftKey].length : 0;
+
+        var row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;";
+        var label = document.createElement("span");
+        label.style.cssText = "font-size:12.5px;color:var(--ink-soft);min-width:78px;";
+        label.textContent = sp[1] + (assignedCount ? " (" + assignedCount + ")" : "");
+        row.appendChild(label);
+
+        var optionsWrap = document.createElement("div");
+        optionsWrap.style.cssText = "display:flex;gap:4px;";
+        OVERRIDE_OPTIONS.forEach(function(opt){
+          var btn = document.createElement("button");
+          var current = pending[key] || "";
+          btn.type = "button";
+          btn.className = "sede-btn" + (current === opt[0] ? " active" : "");
+          btn.textContent = opt[1];
+          btn.addEventListener("click", function(){
+            if(opt[0]) pending[key] = opt[0]; else delete pending[key];
+            renderClosedSheetBody(day);
+          });
+          optionsWrap.appendChild(btn);
+        });
+        row.appendChild(optionsWrap);
+        block.appendChild(row);
+      });
+      container.appendChild(block);
+    });
+  }
+
+  document.getElementById("closedSaveBtn").addEventListener("click", function(){
+    var w = getWeek(toISO(currentMonday)); var day = w.days[closedCtx.dayIdx];
+    var pending = closedCtx.pending;
+    var toRemove = [];
+    Object.keys(pending).forEach(function(key){
+      if(pending[key] !== "closed") return;
+      var idx = key.lastIndexOf("_");
+      var agency = key.slice(0, idx);
+      var shiftKey = key.slice(idx + 1);
+      var arr = day.shifts && day.shifts[agency] && day.shifts[agency][shiftKey];
+      if(arr && arr.length) toRemove.push({ agency: agency, shift: shiftKey, names: arr.slice() });
+    });
+    if(toRemove.length){
+      var lines = toRemove.map(function(c){ return "• " + c.agency + " — " + (c.shift === "mattina" ? "mattina" : "pomeriggio") + ": " + c.names.join(", "); }).join("\n");
+      var msg = "Questi turni hanno già persone assegnate e verranno svuotati perché li stai chiudendo:\n\n" + lines + "\n\nContinuare?";
+      if(!window.confirm(msg)) return;
+      toRemove.forEach(function(c){ day.shifts[c.agency][c.shift] = []; });
+    }
+    day.shiftOverrides = pending;
+    markDirty(); hideSheet("closedSheetOverlay"); renderWeek();
+  });
+
+  function renderMasterEmpList(){
+    var container = document.getElementById("masterEmpList"); container.innerHTML = "";
+    employees.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'it'); }).forEach(function(emp){
+      var row = document.createElement("div"); row.className = "emp-manage-row";
+      var colorInput = document.createElement("input"); colorInput.type = "color"; colorInput.value = emp.color;
+      colorInput.addEventListener("input", function(){ emp.color = colorInput.value; markDirty(); renderWeek(); });
+      row.appendChild(colorInput);
+      var nameSpan = document.createElement("span"); nameSpan.className = "emp-manage-name"; nameSpan.textContent = emp.name;
+      row.appendChild(nameSpan);
+      var toggles = document.createElement("div"); toggles.className = "sede-toggles";
+      AGENCIES.forEach(function(a){
+        var btn = document.createElement("button"); btn.className = "sede-btn" + (emp.sedi.indexOf(a) !== -1 ? " active" : "");
+        btn.textContent = AGENCY_CODES[a]; btn.title = a;
+        btn.addEventListener("click", function(){
+          var idx = emp.sedi.indexOf(a); if(idx === -1) emp.sedi.push(a); else emp.sedi.splice(idx, 1);
+          markDirty(); renderMasterEmpList();
+        });
+        toggles.appendChild(btn);
+      });
+      row.appendChild(toggles);
+      var removeBtn = document.createElement("button"); removeBtn.className = "emp-remove"; removeBtn.textContent = "✕";
+      removeBtn.addEventListener("click", function(){ removeEmployeeByName(emp.name); renderMasterEmpList(); });
+      row.appendChild(removeBtn);
+      container.appendChild(row);
+    });
+  }
+  document.getElementById("masterNewEmpBtn").addEventListener("click", function(){
+    var input = document.getElementById("masterNewEmpInput"); var val = input.value.trim(); if(!val) return;
+    addEmployeeIfMissing(val); renderMasterEmpList(); input.value = "";
+  });
+
+  function normalizeToMonday(dateStr){ if(!dateStr) return null; return getMonday(fromISO(dateStr)); }
+  function checkDupWarn(){
+    var targetInput = document.getElementById("dupTarget"); var warnBox = document.getElementById("dupWarn");
+    var mon = normalizeToMonday(targetInput.value); if(!mon){ warnBox.classList.remove("show"); return; }
+    var iso = toISO(mon);
+    if(weeksStore[iso] && weekHasData(weeksStore[iso])) warnBox.classList.add("show"); else warnBox.classList.remove("show");
+  }
+  document.getElementById("dupTarget").addEventListener("change", checkDupWarn);
+  document.getElementById("dupConfirmBtn").addEventListener("click", function(){
+    var sourceKey = document.getElementById("dupSource").value;
+    var targetMonday = normalizeToMonday(document.getElementById("dupTarget").value);
+    if(!targetMonday){ alert("Seleziona una data valida."); return; }
+    var targetISO = toISO(targetMonday);
+    var sourceWeek = getWeek(sourceKey);
+    var newWeek = blankWeek(targetISO);
+    newWeek.days.forEach(function(day, idx){
+      var srcDay = sourceWeek.days[idx];
+      day.absence = { people: srcDay.absence.people.slice(), note: srcDay.absence.note };
+      AGENCIES.forEach(function(a){
+        day.shifts[a].mattina = srcDay.shifts[a].mattina.slice();
+        day.shifts[a].pomeriggio = srcDay.shifts[a].pomeriggio.slice();
+      });
+    });
+    weeksStore[targetISO] = newWeek;
+    markDirty(); currentMonday = targetMonday;
+    hideSheet("dupSheetOverlay"); renderWeek(); window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  function applyImportedState(parsed){
+    state = normalizeState(parsed);
+    employees = state.employees;
+    weeksStore = state.weeks;
+    isDirty = false;
+    persistLocal();
+    applyTheme();
+    renderLogoPreview();
+    renderWeek();
+  }
+
+  document.getElementById("exportMemoriaBtn").addEventListener("click", function(){
+    state.meta.lastExport = new Date().toISOString(); isDirty = false; persistLocal();
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    shareOrDownload(blob, "turni_memoria.json", "application/json").then(function(){
+      updateMemoryStatus();
+    });
+  });
+  document.getElementById("importMemoriaBtn").addEventListener("click", function(){ document.getElementById("importMemoriaInput").click(); });
+  document.getElementById("importMemoriaInput").addEventListener("change", function(e){
+    var file = e.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        var parsed = JSON.parse(evt.target.result);
+        if(!parsed || typeof parsed !== "object") throw new Error("formato non riconosciuto");
+        applyImportedState(parsed);
+        alert("Memoria importata da \u201c" + file.name + "\u201d.");
+      }catch(err){ alert("Impossibile leggere il file: " + err.message); }
+    };
+    reader.readAsText(file); e.target.value = "";
+  });
+
+  var googleTokenClient = null;
+  var googleAccessToken = null;
+  var googleUserEmail = null;
+  var isSyncing = false;
+
+  function getStoredClientId(){
+    try{ return localStorage.getItem(LS_GOOGLE_CLIENT_ID) || ""; }catch(e){ return ""; }
+  }
+  function setStoredClientId(id){
+    try{ localStorage.setItem(LS_GOOGLE_CLIENT_ID, id); }catch(e){}
+  }
+  function getWasConnected(){
+    try{ return localStorage.getItem(LS_GOOGLE_WAS_CONNECTED) === "1"; }catch(e){ return false; }
+  }
+  function setWasConnected(v){
+    try{ localStorage.setItem(LS_GOOGLE_WAS_CONNECTED, v ? "1" : "0"); }catch(e){}
+  }
+
+  function fetchGoogleUserEmail(){
+    if(!googleAccessToken) return Promise.resolve(null);
+    return fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { "Authorization": "Bearer " + googleAccessToken }
+    }).then(function(r){ return r.json(); }).then(function(data){
+      googleUserEmail = (data && data.email) ? data.email : null;
+      if(googleUserEmail) state.cloud.userEmail = googleUserEmail;
+      refreshCloudSheetUI();
+      return googleUserEmail;
+    }).catch(function(){ return null; });
+  }
+
+  function updateCloudStatus(msg){
+    var el = document.getElementById("cloudStatus");
+    var headerBadge = document.getElementById("headerCloudStatus");
+    if(msg && el){ el.textContent = msg; }
+    if(headerBadge){
+      if(isSyncing){
+        headerBadge.className = "m-cloud-indicator syncing";
+        headerBadge.innerHTML = "☁️ Sincronizzazione…";
+      } else if(googleAccessToken || googleUserEmail){
+        headerBadge.className = "m-cloud-indicator synced";
+        var label = googleUserEmail ? googleUserEmail.split("@")[0] : "Connesso";
+        headerBadge.innerHTML = "☁️ " + escapeHtml(label);
+      } else {
+        headerBadge.className = "m-cloud-indicator";
+        headerBadge.innerHTML = "☁️ Non collegato";
+      }
+    }
+    if(!msg && el){
+      var parts = [];
+      if(googleAccessToken || googleUserEmail){
+        parts.push(googleUserEmail ? ("Connesso come " + googleUserEmail) : "Connesso a Google Drive");
+      } else {
+        parts.push("Non collegato.");
+      }
+      if(state.cloud.lastPush) parts.push("Ultimo upload: " + fmtDateTime(state.cloud.lastPush));
+      if(state.cloud.lastPull) parts.push("Ultimo download: " + fmtDateTime(state.cloud.lastPull));
+      el.textContent = parts.join(" · ");
+    }
+  }
+
+  function refreshCloudSheetUI(){
+    document.getElementById("cloudClientIdInput").value = getStoredClientId();
+    var isConnected = !!(googleAccessToken || getWasConnected());
+    document.getElementById("cloudActionsBlock").style.display = isConnected ? "" : "none";
+    document.getElementById("cloudSetupBlock").style.display = isConnected ? "none" : "";
+    updateCloudStatus();
+  }
+
+  document.getElementById("headerCloudStatus").addEventListener("click", function(){
+    showSheet("cloudSheetOverlay");
+  });
+
+  function showToast(msg){
+    var el = document.getElementById("autoSyncToast");
+    el.textContent = msg;
+    el.classList.remove("hidden");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ el.classList.add("hidden"); }, 4000);
+  }
+
+  function ensureTokenClient(clientId, onTokenCallback){
+    if(typeof google === "undefined" || !google.accounts || !google.accounts.oauth2){
+      return null;
+    }
+    if(!googleTokenClient || googleTokenClient._clientId !== clientId){
+      googleTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: GOOGLE_SCOPE,
+        callback: function(resp){
+          if(resp && resp.access_token){
+            googleAccessToken = resp.access_token;
+            setWasConnected(true);
+            fetchGoogleUserEmail().then(function(){
+              if(typeof onTokenCallback === "function"){
+                onTokenCallback();
+              } else {
+                updateCloudStatus();
+                showToast("☁️ Account Google connesso.");
+              }
+            });
+          } else {
+            isSyncing = false;
+            updateCloudStatus("Accesso non riuscito.");
+          }
+        }
+      });
+      googleTokenClient._clientId = clientId;
+    }
+    return googleTokenClient;
+  }
+
+  document.getElementById("cloudConnectBtn").addEventListener("click", function(){
+    var clientId = document.getElementById("cloudClientIdInput").value.trim();
+    if(!clientId){ alert("Inserisci il Client ID di Google OAuth."); return; }
+    setStoredClientId(clientId);
+    var tc = ensureTokenClient(clientId, function(){
+      showToast("☁️ Connessione a Google Drive riuscita!");
+    });
+    if(!tc){ alert("Libreria Google non ancora caricata. Verifica la connessione e riprova tra pochi secondi."); return; }
+    tc.requestAccessToken({ prompt: "consent" });
+  });
+
+  document.getElementById("cloudDisconnectBtn").addEventListener("click", function(){
+    if(googleAccessToken && typeof google !== "undefined" && google.accounts && google.accounts.oauth2){
+      google.accounts.oauth2.revoke(googleAccessToken, function(){});
+    }
+    googleAccessToken = null;
+    googleUserEmail = null;
+    setWasConnected(false);
+    state.cloud.fileId = null;
+    state.cloud.userEmail = null;
+    persistLocal();
+    refreshCloudSheetUI();
+    showToast("Account Google disconnesso.");
+  });
+
+  function driveApiFetch(url, options){
+    return fetch(url, options).then(function(r){
+      if(!r.ok){
+        return r.text().then(function(txt){
+          throw new Error("HTTP " + r.status + " " + r.statusText + (txt ? (" — " + txt.slice(0, 200)) : ""));
+        });
+      }
+      return r;
+    });
+  }
+
+  function driveFindLatestFile(){
+    var q = encodeURIComponent("name='" + DRIVE_FILENAME + "' and trashed=false");
+    var url = "https://www.googleapis.com/drive/v3/files?q=" + q + "&orderBy=modifiedTime desc&fields=files(id,name,modifiedTime,createdTime)&spaces=drive";
+    return driveApiFetch(url, {
+      headers: { "Authorization": "Bearer " + googleAccessToken }
+    }).then(function(r){ return r.json(); }).then(function(data){
+      var files = data && data.files ? data.files : [];
+      if(!files.length) return null;
+      return files[0];
+    });
+  }
+
+  function driveCreateFile(content){
+    var boundary = "turniboundary_" + Date.now();
+    var metadata = { name: DRIVE_FILENAME, mimeType: "application/json" };
+    var body =
+      "--" + boundary + "\r\n" +
+      "Content-Type: application/json; charset=UTF-8\r\n\r\n" +
+      JSON.stringify(metadata) + "\r\n" +
+      "--" + boundary + "\r\n" +
+      "Content-Type: application/json\r\n\r\n" +
+      content + "\r\n" +
+      "--" + boundary + "--";
+    return driveApiFetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,modifiedTime", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + googleAccessToken, "Content-Type": "multipart/related; boundary=" + boundary },
+      body: body
+    }).then(function(r){ return r.json(); });
+  }
+
+  function driveUpdateFile(fileId, content){
+    return driveApiFetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media&fields=id,modifiedTime", {
+      method: "PATCH",
+      headers: { "Authorization": "Bearer " + googleAccessToken, "Content-Type": "application/json" },
+      body: content
+    }).then(function(r){ return r.json(); });
+  }
+
+  function driveDownloadFile(fileId){
+    return driveApiFetch("https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media", {
+      headers: { "Authorization": "Bearer " + googleAccessToken }
+    }).then(function(r){ return r.text(); });
+  }
+
+  document.getElementById("cloudSyncBtn").addEventListener("click", function(){
+    if(!googleAccessToken){
+      var clientId = getStoredClientId();
+      if(!clientId){ alert("Inserisci prima il Client ID."); return; }
+      var tc = ensureTokenClient(clientId, function(){ executeSync(); });
+      if(tc) tc.requestAccessToken();
+      return;
+    }
+    executeSync();
+  });
+
+  function executeSync(){
+    if(!googleAccessToken) return;
+    isSyncing = true;
+    updateCloudStatus("Sincronizzazione in corso…");
+
+    driveFindLatestFile().then(function(latest){
+      if(!latest){
+        var content = JSON.stringify(state, null, 2);
+        return driveCreateFile(content).then(function(res){
+          state.cloud.fileId = res.id;
+          state.cloud.lastPush = new Date().toISOString();
+          persistLocal();
+          isSyncing = false;
+          refreshCloudSheetUI();
+          showToast("☁️ Archivio creato e sincronizzato su Google Drive.");
+        });
+      }
+
+      state.cloud.fileId = latest.id;
+      return driveDownloadFile(latest.id).then(function(remoteText){
+        var parsed;
+        try{ parsed = JSON.parse(remoteText); }catch(e){ throw new Error("File cloud non leggibile"); }
+
+        var remoteUpdated = (parsed.meta && parsed.meta.updatedAt) ? new Date(parsed.meta.updatedAt).getTime() : 0;
+        var localUpdated = (state.meta && state.meta.updatedAt) ? new Date(state.meta.updatedAt).getTime() : 0;
+
+        if(remoteUpdated > localUpdated){
+          applyImportedState(parsed);
+          state.cloud.fileId = latest.id;
+          state.cloud.lastPull = new Date().toISOString();
+          persistLocal();
+          isSyncing = false;
+          refreshCloudSheetUI();
+          showToast("☁️ Scaricata versione più recente da Drive.");
+        } else if(localUpdated > remoteUpdated){
+          var content = JSON.stringify(state, null, 2);
+          return driveUpdateFile(latest.id, content).then(function(){
+            state.cloud.lastPush = new Date().toISOString();
+            persistLocal();
+            isSyncing = false;
+            refreshCloudSheetUI();
+            showToast("☁️ Caricata versione più recente su Drive.");
+          });
+        } else {
+          isSyncing = false;
+          refreshCloudSheetUI();
+          showToast("☁️ Già sincronizzato: nessuna modifica.");
+        }
+      });
+    }).catch(function(err){
+      isSyncing = false;
+      updateCloudStatus("Errore: " + (err && err.message ? err.message : err));
+    });
+  }
+
+  document.getElementById("cloudForcePullBtn").addEventListener("click", function(){
+    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
+    if(!confirm("Vuoi sostituire tutti i dati di questo dispositivo con la versione salvata su Google Drive?")) return;
+    isSyncing = true;
+    updateCloudStatus("Scaricamento da Drive…");
+    driveFindLatestFile().then(function(latest){
+      if(!latest){ alert("Nessun file trovato su Google Drive."); isSyncing = false; updateCloudStatus(); return; }
+      return driveDownloadFile(latest.id).then(function(txt){
+        var parsed = JSON.parse(txt);
+        applyImportedState(parsed);
+        state.cloud.fileId = latest.id;
+        state.cloud.lastPull = new Date().toISOString();
+        persistLocal();
+        isSyncing = false;
+        refreshCloudSheetUI();
+        showToast("⬇️ Dati scaricati con successo da Google Drive.");
+      });
+    }).catch(function(err){
+      isSyncing = false;
+      alert("Errore scaricamento: " + (err && err.message ? err.message : err));
+      updateCloudStatus();
+    });
+  });
+
+  document.getElementById("cloudForcePushBtn").addEventListener("click", function(){
+    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
+    if(!confirm("Vuoi sovrascrivere il file su Google Drive con la versione presente su questo dispositivo?")) return;
+    isSyncing = true;
+    updateCloudStatus("Caricamento su Drive…");
+    var content = JSON.stringify(state, null, 2);
+    driveFindLatestFile().then(function(latest){
+      var op = latest ? driveUpdateFile(latest.id, content) : driveCreateFile(content);
+      return op.then(function(res){
+        state.cloud.fileId = res.id || (latest ? latest.id : null);
+        state.cloud.lastPush = new Date().toISOString();
+        persistLocal();
+        isSyncing = false;
+        refreshCloudSheetUI();
+        showToast("⬆️ Dati caricati con successo su Google Drive.");
+      });
+    }).catch(function(err){
+      isSyncing = false;
+      alert("Errore caricamento: " + (err && err.message ? err.message : err));
+      updateCloudStatus();
+    });
+  });
+
+  (function attemptSilentGoogleAuth(){
+    var clientId = getStoredClientId();
+    if(!clientId || !getWasConnected()) return;
+    var attempts = 0;
+    function tryInit(){
+      attempts++;
+      if(typeof google === "undefined" || !google.accounts || !google.accounts.oauth2){
+        if(attempts < 20) setTimeout(tryInit, 300);
+        return;
+      }
+      var tc = ensureTokenClient(clientId, function(){
+        updateCloudStatus();
+      });
+      if(tc) tc.requestAccessToken({ prompt: "" });
+    }
+    setTimeout(tryInit, 500);
+  })();
+
+  function showSheet(id){
+    if(id === "empSheetOverlay") renderMasterEmpList();
+    if(id === "historySheetOverlay") renderHistory();
+    if(id === "openingSheetOverlay") renderOpeningBody();
+    if(id === "paletteSheetOverlay") initPaletteInputs();
+    if(id === "logoSheetOverlay") renderLogoPreview();
+    if(id === "cloudSheetOverlay") refreshCloudSheetUI();
+    if(id === "statsSheetOverlay") renderStats();
+    if(id === "dupSheetOverlay"){
+      var sourceSel = document.getElementById("dupSource");
+      var keys = Object.keys(weeksStore).filter(function(k){ return weekHasData(weeksStore[k]); });
+      keys.sort(function(a, b){ return b.localeCompare(a); });
+      if(keys.indexOf(toISO(currentMonday)) === -1) keys.unshift(toISO(currentMonday));
+      sourceSel.innerHTML = keys.map(function(k){
+        var mon = fromISO(k); var sat = addDays(mon, 5); var sel = (k === toISO(currentMonday)) ? "selected" : "";
+        return '<option value="' + k + '" ' + sel + '>' + fmtIt(mon) + ' – ' + fmtIt(sat) + ' \'' + String(mon.getFullYear()).slice(2) + '</option>';
+      }).join("");
+      document.getElementById("dupTarget").value = toISO(addDays(currentMonday, 7));
+      checkDupWarn();
+    }
+    document.getElementById(id).classList.remove("hidden");
+  }
+  function hideSheet(id){ document.getElementById(id).classList.add("hidden"); }
+  document.querySelectorAll("[data-close]").forEach(function(btn){ btn.addEventListener("click", function(){ hideSheet(btn.getAttribute("data-close")); }); });
+  document.querySelectorAll(".sheet-overlay").forEach(function(ov){ ov.addEventListener("click", function(e){ if(e.target === ov) hideSheet(ov.id); }); });
+  document.querySelectorAll("[data-open]").forEach(function(btn){ btn.addEventListener("click", function(){ showSheet(btn.getAttribute("data-open")); }); });
+
+  document.getElementById("prevWeek").addEventListener("click", function(){ currentMonday = addDays(currentMonday, -7); renderWeek(); });
+  document.getElementById("nextWeek").addEventListener("click", function(){ currentMonday = addDays(currentMonday, 7); renderWeek(); });
+  document.getElementById("gotoUpcoming").addEventListener("click", function(){ currentMonday = getUpcomingMonday(); renderWeek(); });
+
+  function exportFilenameBase(){ var sat = addDays(currentMonday, 5); return "turni_" + toISO(currentMonday) + "_" + toISO(sat); }
+  function shareOrDownload(blob, filename, mimeType){
+    var canTryShare = false;
+    var file;
+    try{
+      if(navigator.canShare){
+        file = new File([blob], filename, { type: mimeType });
+        canTryShare = navigator.canShare({ files: [file] });
+      }
+    }catch(e){ canTryShare = false; }
+
+    function fallbackDownload(){
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.href = url; link.download = filename;
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    }
+
+    if(canTryShare){
+      return navigator.share({ files: [file] }).catch(function(err){
+        if(err && err.name === "AbortError") return;
+        fallbackDownload();
+      });
+    }
+    fallbackDownload();
+    return Promise.resolve();
+  }
+
+  function addCanvasAsMultipagePdf(pdf, canvas, marginPt){
+    var pageW = pdf.internal.pageSize.getWidth();
+    var pageH = pdf.internal.pageSize.getHeight();
+    var usableW = pageW - marginPt * 2;
+    var usableH = pageH - marginPt * 2;
+    var ratio = usableW / canvas.width;
+    var pxPerPage = usableH / ratio;
+    var totalPages = Math.max(1, Math.ceil(canvas.height / pxPerPage));
+    for(var p = 0; p < totalPages; p++){
+      var sy = p * pxPerPage;
+      var sh = Math.min(pxPerPage, canvas.height - sy);
+      var pageCanvas = document.createElement("canvas");
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sh;
+      var ctx = pageCanvas.getContext("2d");
+      ctx.drawImage(canvas, 0, sy, canvas.width, sh, 0, 0, canvas.width, sh);
+      var imgData = pageCanvas.toDataURL("image/png");
+      if(p > 0) pdf.addPage();
+      var hPt = sh * ratio;
+      pdf.addImage(imgData, "PNG", marginPt, marginPt, usableW, hPt);
+    }
+  }
+
+  function librariesReady(needPdf){
+    if(typeof html2canvas === "undefined"){ alert("Libreria immagine non caricata. Ricarica e riprova."); return false; }
+    if(needPdf && typeof window.jspdf === "undefined"){ alert("Libreria PDF non caricata. Ricarica e riprova."); return false; }
+    return true;
+  }
+  function captureSheetArea(){
+    var el = document.getElementById("exportArea");
+    return html2canvas(el, { scale: 2, backgroundColor: "#F5F1E6", useCORS: true, allowTaint: true, logging: false });
+  }
+
+  document.getElementById("copyPngBtn").addEventListener("click", function(){
+    if(!librariesReady(false)) return;
+    var btn = this;
+    var originalText = btn.innerHTML;
+    btn.textContent = "⏳ Copia in corso…";
+    btn.disabled = true;
+
+    captureSheetArea().then(function(canvas){
+      canvas.toBlob(function(blob){
+        if(!blob){
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          alert("Esportazione PNG non riuscita.");
+          return;
+        }
+
+        if(!navigator.clipboard || typeof window.ClipboardItem === "undefined"){
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          alert("Il tuo browser non supporta la copia diretta delle immagini negli appunti. Usa 'Salva / Condividi PNG'.");
+          return;
+        }
+
+        navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob })
+        ]).then(function(){
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          hideSheet("exportSheetOverlay");
+          showToast("📋 Immagine copiata! Incollala direttamente su WhatsApp");
+        }).catch(function(err){
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          alert("Impossibile copiare negli appunti: " + (err && err.message ? err.message : err) + "\n\nSu alcuni dispositivi mobili potrebbe essere necessario usare il pulsante Condividi.");
+        });
+      }, "image/png");
+    }).catch(function(err){
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      alert("Errore generazione immagine: " + (err && err.message ? err.message : err));
+    });
+  });
+
+  document.getElementById("exportPngBtn").addEventListener("click", function(){
+    if(!librariesReady(false)) return;
+    captureSheetArea().then(function(canvas){
+      canvas.toBlob(function(blob){
+        if(!blob){ alert("Esportazione PNG non riuscita."); return; }
+        shareOrDownload(blob, exportFilenameBase() + ".png", "image/png");
+      }, "image/png");
+    }).catch(function(err){ alert("Esportazione PNG non riuscita: " + (err && err.message ? err.message : err)); });
+  });
+
+  document.getElementById("exportPdfBtn").addEventListener("click", function(){
+    if(!librariesReady(true)) return;
+    captureSheetArea().then(function(canvas){
+      var jsPDFCtor = window.jspdf.jsPDF;
+      var pdf = new jsPDFCtor({ orientation: "p", unit: "pt", format: "a4" });
+      addCanvasAsMultipagePdf(pdf, canvas, 16);
+      var blob = pdf.output("blob");
+      shareOrDownload(blob, exportFilenameBase() + ".pdf", "application/pdf");
+    }).catch(function(err){ alert("Esportazione PDF non riuscita: " + (err && err.message ? err.message : err)); });
+  });
+
+  function applyTheme(){
+    var root = document.documentElement;
+    root.style.setProperty("--accent", state.theme.accent);
+    root.style.setProperty("--accent-2", tintHex(state.theme.accent, 0.25));
+    root.style.setProperty("--navy", state.theme.navy);
+    root.style.setProperty("--paper", state.theme.paper);
+    root.style.setProperty("--paper-2", shadeHex(state.theme.paper, 0.05));
+  }
+  function shadeHex(hex, amount){
+    var c = hexToRgb(hex);
+    return rgbToHex(c.r * (1 - amount), c.g * (1 - amount), c.b * (1 - amount));
+  }
+  function initPaletteInputs(){
+    document.getElementById("paletteAccent").value = state.theme.accent;
+    document.getElementById("paletteNavy").value = state.theme.navy;
+    document.getElementById("palettePaper").value = state.theme.paper;
+  }
+  document.getElementById("paletteAccent").addEventListener("input", function(){
+    state.theme.accent = this.value; applyTheme(); markDirty();
+  });
+  document.getElementById("paletteNavy").addEventListener("input", function(){
+    state.theme.navy = this.value; applyTheme(); markDirty();
+  });
+  document.getElementById("palettePaper").addEventListener("input", function(){
+    state.theme.paper = this.value; applyTheme(); markDirty();
+  });
+  document.getElementById("paletteResetBtn").addEventListener("click", function(){
+    state.theme.accent = DEFAULT_THEME.accent;
+    state.theme.navy = DEFAULT_THEME.navy;
+    state.theme.paper = DEFAULT_THEME.paper;
+    applyTheme(); initPaletteInputs(); markDirty();
+  });
+
+  var OPENING_LABELS = { closed: "Chiuso", morningOnly: "Solo mattina", fullDay: "Mattina e pomeriggio" };
+  var OPENING_DAY_NAMES = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+  function openingKey(agency, dayIndex){ return agency + "_" + dayIndex; }
+  function openingStatus(agency, dayIndex){
+    return state.openingSchedule[openingKey(agency, dayIndex)] || "fullDay";
+  }
+  function isShiftOpen(agency, dayIndex, shiftKey, day){
+    if(day && day.shiftOverrides){
+      var override = day.shiftOverrides[agency + "_" + shiftKey];
+      if(override === "closed") return false;
+      if(override === "open") return true;
+    }
+    var status = openingStatus(agency, dayIndex);
+    if(status === "closed") return false;
+    if(status === "morningOnly") return shiftKey === "mattina";
+    return true;
+  }
+
+  function computeEmployeeStats(scopeAllWeeks, currentWeek){
+    var counts = {};
+    function tally(w){
+      if(!w || !w.days) return;
+      w.days.forEach(function(day){
+        AGENCIES.forEach(function(agency){
+          SHIFTS.forEach(function(sp){
+            if(day.shifts && day.shifts[agency] && day.shifts[agency][sp[0]]){
+              day.shifts[agency][sp[0]].forEach(function(name){
+                if(!counts[name]) counts[name] = { mattina: 0, pomeriggio: 0 };
+                counts[name][sp[0]]++;
+              });
+            }
+          });
+        });
+      });
+    }
+    if(scopeAllWeeks){
+      Object.keys(weeksStore).forEach(function(k){ tally(weeksStore[k]); });
+    } else {
+      tally(currentWeek);
+    }
+    return counts;
+  }
+
+  function renderStats(){
+    var scope = document.getElementById("statsScopeSelect").value;
+    var w = getWeek(toISO(currentMonday));
+    var counts = computeEmployeeStats(scope === "all", w);
+    var list = document.getElementById("statsList");
+    var names = Object.keys(counts).sort(function(a, b){
+      var ta = counts[a].mattina + counts[a].pomeriggio;
+      var tb = counts[b].mattina + counts[b].pomeriggio;
+      return tb - ta;
+    });
+    if(names.length === 0){
+      list.innerHTML = '<li style="padding:12px 4px;color:var(--ink-soft);font-style:italic;">Nessun turno assegnato.</li>';
+    } else {
+      var maxTotal = Math.max.apply(null, names.map(function(n){ return counts[n].mattina + counts[n].pomeriggio; })) || 1;
+      list.innerHTML = names.map(function(name){
+        var c = counts[name];
+        var total = c.mattina + c.pomeriggio;
+        var color = colorFor(name);
+        var lightTint = tintHex(color, 0.6);
+        var matPct = (c.mattina / maxTotal * 100);
+        var pomPct = (c.pomeriggio / maxTotal * 100);
+        return '<li style="padding:10px 6px;border-bottom:1px solid var(--line);">' +
+          '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px;">' +
+            '<span style="font-size:13.5px;display:flex;align-items:center;gap:6px;min-width:0;"><span class="chip-dot" style="background:' + color + ';flex-shrink:0;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(name) + '</span></span>' +
+            '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10.5px;color:var(--ink-soft);flex-shrink:0;">' + c.mattina + ' mat · ' + c.pomeriggio + ' pom · <b style="color:var(--ink);">' + total + '</b></span>' +
+          '</div>' +
+          '<div style="display:flex;height:11px;border-radius:6px;overflow:hidden;background:var(--paper-2);">' +
+            '<div style="width:' + matPct + '%;background:' + lightTint + ';"></div>' +
+            '<div style="width:' + pomPct + '%;background:' + color + ';"></div>' +
+          '</div>' +
+          '</li>';
+      }).join("");
+    }
+    document.getElementById("statsSub").textContent = scope === "all" ? "Tutto lo storico salvato" : ("Settimana del " + fmtItFull(currentMonday));
+  }
+  document.getElementById("statsScopeSelect").addEventListener("change", renderStats);
+
+  function renderOpeningBody(){
+    var container = document.getElementById("openingBody");
+    container.innerHTML = "";
+    AGENCIES.forEach(function(agency){
+      var title = document.createElement("div");
+      title.className = "opening-agency-title";
+      title.textContent = agency;
+      container.appendChild(title);
+      for(var d = 0; d < 6; d++){
+        (function(dayIndex){
+          var row = document.createElement("div");
+          row.className = "opening-day-row";
+          var select = document.createElement("select");
+          Object.keys(OPENING_LABELS).forEach(function(key){
+            var opt = document.createElement("option");
+            opt.value = key; opt.textContent = OPENING_LABELS[key];
+            if(openingStatus(agency, dayIndex) === key) opt.selected = true;
+            select.appendChild(opt);
+          });
+          select.addEventListener("change", function(){
+            state.openingSchedule[openingKey(agency, dayIndex)] = select.value;
+            markDirty(); renderWeek();
+          });
+          row.innerHTML = "<label>" + OPENING_DAY_NAMES[dayIndex] + "</label>";
+          row.appendChild(select);
+          container.appendChild(row);
+        })(d);
+      }
+    });
+  }
+
+  function renderLogoPreview(){
+    var preview = document.getElementById("logoPreview");
+    var removeBtn = document.getElementById("logoRemoveBtn");
+    if(state.logo){
+      preview.innerHTML = '<img src="' + state.logo + '" alt="Logo">';
+      removeBtn.style.display = "block";
+    } else {
+      preview.innerHTML = "Nessun logo";
+      removeBtn.style.display = "none";
+    }
+    renderAppLogoHeader();
+  }
+  function renderAppLogoHeader(){
+    var el = document.getElementById("appLogoHeader");
+    if(!el) return;
+    el.innerHTML = state.logo ? '<img src="' + state.logo + '" alt="Logo">' : "";
+  }
+  function cropImageToSquareDataURL(file, callback){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var side = Math.min(img.width, img.height);
+        var sx = (img.width - side) / 2;
+        var sy = (img.height - side) / 2;
+        var targetSide = Math.min(side, 500);
+        var canvas = document.createElement("canvas");
+        canvas.width = targetSide; canvas.height = targetSide;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, targetSide, targetSide);
+        callback(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = function(){ callback(null); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function(){ callback(null); };
+    reader.readAsDataURL(file);
+  }
+  document.getElementById("logoChooseBtn").addEventListener("click", function(){
+    document.getElementById("logoFileInput").click();
+  });
+  document.getElementById("logoFileInput").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    cropImageToSquareDataURL(file, function(dataUrl){
+      if(!dataUrl){ alert("Impossibile leggere questa immagine."); return; }
+      state.logo = dataUrl;
+      renderLogoPreview();
+      markDirty();
+    });
+    e.target.value = "";
+  });
+  document.getElementById("logoRemoveBtn").addEventListener("click", function(){
+    state.logo = null;
+    renderLogoPreview();
+    markDirty();
+  });
+
+  applyTheme();
+  initPaletteInputs();
+  renderLogoPreview();
+  document.getElementById("appVersionBadge").textContent = "v" + APP_VERSION;
+  document.getElementById("settingsVersionLine").textContent = "Registro Turni · versione " + APP_VERSION;
+
+  renderWeek();
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").then(function(reg){
+        if(reg.waiting){
+          showUpdateBanner(reg.waiting);
+        }
+        reg.addEventListener("updatefound", function(){
+          var newWorker = reg.installing;
+          if(!newWorker) return;
+          newWorker.addEventListener("statechange", function(){
+            if(newWorker.state === "installed" && navigator.serviceWorker.controller){
+              showUpdateBanner(newWorker);
+            }
+          });
+        });
+      }).catch(function(){});
+
+      var reloadedAfterUpdate = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function(){
+        if(reloadedAfterUpdate) return;
+        reloadedAfterUpdate = true;
+        window.location.reload();
+      });
+    });
+  }
+
+  function showUpdateBanner(waitingWorker){
+    var banner = document.getElementById("updateBanner");
+    banner.classList.remove("hidden");
+    document.getElementById("updateBannerBtn").onclick = function(){
+      waitingWorker.postMessage({ type: "SKIP_WAITING" });
+      banner.classList.add("hidden");
+    };
+  }
+})();
+</script>
+</body>
+</html>
