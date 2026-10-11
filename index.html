@@ -195,7 +195,12 @@
     cursor: pointer;
   }
 
-  main.m-main { padding: 14px 12px 20px; max-width: 900px; margin: 0 auto; }
+  main.m-main {
+    padding: 14px 16px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
   .m-conflict {
     background: var(--alert-bg);
     border: 1px solid #E2B4AA;
@@ -237,10 +242,22 @@
   .day-badge .num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 24px; color: var(--navy); line-height: 1; }
   .day-badge .name { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; color: var(--ink-soft); letter-spacing: 1px; }
 
-  .agency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
-  @media(min-width: 680px) {
+  .agency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media(min-width: 768px) {
     .agency-grid { grid-template-columns: repeat(4, 1fr); }
   }
+
+  @media(min-width: 1200px) {
+    #daysList {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .day-card {
+      margin-bottom: 0;
+    }
+  }
+
   .agency-label {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10.5px;
@@ -255,7 +272,7 @@
     flex-direction: column;
     align-items: flex-start;
     width: 100%;
-    min-height: 46px;
+    min-height: 50px;
     text-align: left;
     border: 1.4px solid var(--line-strong);
     border-radius: 10px;
@@ -367,11 +384,14 @@
     border-top: 3px solid var(--accent);
     display: flex;
     padding: 6px 4px calc(6px + var(--safe-b));
-    max-width: 900px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
+    justify-content: center;
   }
   nav.m-tabbar button {
     flex: 1;
+    max-width: 180px;
     background: none;
     border: none;
     color: #B8C0CB;
@@ -858,7 +878,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.2.3";
+  var APP_VERSION = "2.2.4";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -870,7 +890,7 @@
   var DRIVE_FILENAME = "turni_memoria_pwa.json";
   var LS_GOOGLE_CLIENT_ID = "turni_google_client_id";
   var LS_GOOGLE_WAS_CONNECTED = "turni_google_was_connected";
-  var GOOGLE_SCOPE = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email";
+  var GOOGLE_SCOPE = "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email";
 
   function hslToHex(h,s,l){
     s = s / 100; l = l / 100;
@@ -1805,7 +1825,7 @@
   }
 
   function driveFindLatestFile(){
-    var q = encodeURIComponent("name='" + DRIVE_FILENAME + "' and trashed=false");
+    var q = encodeURIComponent("name = '" + DRIVE_FILENAME + "' and trashed = false");
     var url = "https://www.googleapis.com/drive/v3/files?q=" + q + "&orderBy=modifiedTime desc&fields=files(id,name,modifiedTime,createdTime)&spaces=drive";
     return driveApiFetch(url, {
       headers: { "Authorization": "Bearer " + googleAccessToken }
@@ -1873,26 +1893,30 @@
           persistLocal();
           isSyncing = false;
           refreshCloudSheetUI();
-          showToast("☁️ Archivio creato e sincronizzato su Google Drive.");
+          showToast("☁️ Primo archivio creato su Google Drive.");
         });
       }
 
       state.cloud.fileId = latest.id;
       return driveDownloadFile(latest.id).then(function(remoteText){
         var parsed;
-        try{ parsed = JSON.parse(remoteText); }catch(e){ throw new Error("File cloud non leggibile"); }
+        try{ 
+          parsed = JSON.parse(remoteText); 
+        } catch(e){ 
+          throw new Error("File cloud corrotto o non leggibile"); 
+        }
 
         var remoteUpdated = (parsed.meta && parsed.meta.updatedAt) ? new Date(parsed.meta.updatedAt).getTime() : 0;
         var localUpdated = (state.meta && state.meta.updatedAt) ? new Date(state.meta.updatedAt).getTime() : 0;
 
-        if(remoteUpdated > localUpdated){
+        if(remoteUpdated > localUpdated || (!localUpdated && remoteUpdated > 0)){
           applyImportedState(parsed);
           state.cloud.fileId = latest.id;
           state.cloud.lastPull = new Date().toISOString();
           persistLocal();
           isSyncing = false;
           refreshCloudSheetUI();
-          showToast("☁️ Scaricata versione più recente da Drive.");
+          showToast("☁️ Dati aggiornati dal Drive con successo!");
         } else if(localUpdated > remoteUpdated){
           var content = JSON.stringify(state, null, 2);
           return driveUpdateFile(latest.id, content).then(function(){
@@ -1900,17 +1924,17 @@
             persistLocal();
             isSyncing = false;
             refreshCloudSheetUI();
-            showToast("☁️ Caricata versione più recente su Drive.");
+            showToast("☁️ Modifiche caricate su Drive con successo!");
           });
         } else {
           isSyncing = false;
           refreshCloudSheetUI();
-          showToast("☁️ Già sincronizzato: nessuna modifica.");
+          showToast("☁️ Dispositivi già allineati.");
         }
       });
     }).catch(function(err){
       isSyncing = false;
-      updateCloudStatus("Errore: " + (err && err.message ? err.message : err));
+      updateCloudStatus("Errore sync: " + (err && err.message ? err.message : err));
     });
   }
 
