@@ -767,7 +767,8 @@
       <select id="dupSource"></select>
       <label class="field-label">Su settimana che inizia lunedì</label>
       <input type="date" id="dupTarget">
-      <div class="warn-box" id="dupWarn">La settimana di destinazione contiene già dati: verranno sovrascritti.</div>
+      <div class="warn-box" id="dupWarn">La settimana di destinazione contiene già dati: i turni verranno sostituiti (ferie e orari straordinari già inseriti restano).</div>
+      <div class="companion-note">Vengono copiati solo i turni. Ferie/permessi e orari straordinari restano legati alle loro date; chi è in ferie o un turno chiuso nella settimana di destinazione viene saltato.</div>
     </div>
     <div class="sheet-foot">
       <button class="btn btn-ghost" data-close="dupSheetOverlay">Annulla</button>
@@ -878,7 +879,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.2.4";
+  var APP_VERSION = "2.3.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -943,6 +944,8 @@
     if(!st.weeks) st.weeks = {};
     if(!st.meta) st.meta = { lastExport: null, updatedAt: null, updatedBy: null };
     if(typeof st.meta.updatedAt === "undefined") st.meta.updatedAt = null;
+    if(typeof st.meta.settingsUpdatedAt === "undefined") st.meta.settingsUpdatedAt = null;
+    if(!st.deletedWeeks || typeof st.deletedWeeks !== "object") st.deletedWeeks = {};
     if(!st.theme) st.theme = {};
     st.theme.accent = st.theme.accent || DEFAULT_THEME.accent;
     st.theme.navy = st.theme.navy || DEFAULT_THEME.navy;
@@ -1025,9 +1028,18 @@
   var cellCtx = null, absenceCtx = null;
 
   function persistLocal(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(state)); }catch(e){} }
-  function markDirty(){
+  /* markDirty(weekISO): se viene passata una settimana, marca solo quella come modificata;
+     senza argomenti marca le impostazioni (dipendenti, colori, aperture, logo).
+     I timestamp separati permettono alla sincronizzazione di unire le modifiche di più dispositivi. */
+  function markDirty(weekISO){
     isDirty = true;
-    state.meta.updatedAt = new Date().toISOString();
+    var nowISO = new Date().toISOString();
+    state.meta.updatedAt = nowISO;
+    if(typeof weekISO === "string"){
+      if(weeksStore[weekISO]) weeksStore[weekISO].updatedAt = nowISO;
+    } else {
+      state.meta.settingsUpdatedAt = nowISO;
+    }
     if(googleUserEmail) state.meta.updatedBy = googleUserEmail;
     persistLocal();
     updateMemoryStatus();
@@ -1292,10 +1304,16 @@
           btn.className = "shift-btn" + (conflictKey[dayIdx + "|" + agency + "|" + shiftKey] ? " conflict" : "") + (!open ? " closed" : "");
           var names = (day.shifts && day.shifts[agency] && day.shifts[agency][shiftKey]) ? day.shifts[agency][shiftKey] : [];
           var chipsHtml;
-          if(!open) chipsHtml = '<span class="empty-hint">Chiuso</span>';
+          var closedWithPeople = !open && names.length > 0;
+          if(closedWithPeople){
+            // Turno chiuso ma con persone ancora assegnate: le mostriamo, così si possono togliere.
+            btn.className += " conflict";
+            chipsHtml = '<span class="empty-hint" style="font-style:normal;color:var(--alert);">⚠ Chiuso ma assegnato:</span>' + names.map(function(n){ return chipHtml(n, false); }).join("");
+          }
+          else if(!open) chipsHtml = '<span class="empty-hint">Chiuso</span>';
           else chipsHtml = names.length ? names.map(function(n){ return chipHtml(n, false); }).join("") : '<span class="empty-hint">+ aggiungi</span>';
           btn.innerHTML = '<span class="shift-tag">' + sp[1] + '</span><span class="shift-chips">' + chipsHtml + '</span>';
-          if(open) btn.addEventListener("click", function(){ openCellSheet(dayIdx, agency, shiftKey); });
+          if(open || closedWithPeople) btn.addEventListener("click", function(){ openCellSheet(dayIdx, agency, shiftKey); });
           else btn.disabled = true;
           block.appendChild(btn);
         });
@@ -1450,7 +1468,7 @@
   document.getElementById("cellSaveBtn").addEventListener("click", function(){
     var w = getWeek(toISO(currentMonday));
     w.days[cellCtx.dayIdx].shifts[cellCtx.agency][cellCtx.shift] = collectSelectedFromForm("cellEmpList", []);
-    markDirty(); hideSheet("cellSheetOverlay"); renderWeek();
+    markDirty(toISO(currentMonday)); hideSheet("cellSheetOverlay"); renderWeek();
   });
 
   function openAbsenceSheet(dayIdx){
@@ -1503,7 +1521,7 @@
     }
     day.absence.people = selected;
     day.absence.note = document.getElementById("absenceNoteInput").value;
-    markDirty(); hideSheet("absenceSheetOverlay"); renderWeek();
+    markDirty(toISO(currentMonday)); hideSheet("absenceSheetOverlay"); renderWeek();
   });
 
   var closedCtx = null;
@@ -1582,7 +1600,7 @@
       toRemove.forEach(function(c){ day.shifts[c.agency][c.shift] = []; });
     }
     day.shiftOverrides = pending;
-    markDirty(); hideSheet("closedSheetOverlay"); renderWeek();
+    markDirty(toISO(currentMonday)); hideSheet("closedSheetOverlay"); renderWeek();
   });
 
   function renderMasterEmpList(){
@@ -1629,30 +1647,107 @@
     var targetMonday = normalizeToMonday(document.getElementById("dupTarget").value);
     if(!targetMonday){ alert("Seleziona una data valida."); return; }
     var targetISO = toISO(targetMonday);
+    if(targetISO === sourceKey){ alert("La settimana di destinazione coincide con quella di origine."); return; }
     var sourceWeek = getWeek(sourceKey);
-    var newWeek = blankWeek(targetISO);
-    newWeek.days.forEach(function(day, idx){
+    // Si copiano solo i turni. Ferie/permessi e orari straordinari sono legati alle date:
+    // quelli già presenti nella settimana di destinazione restano, quelli della settimana di origine non vengono copiati.
+    var targetWeek = getWeek(targetISO);
+    var skipped = [];
+    targetWeek.days.forEach(function(day, idx){
       var srcDay = sourceWeek.days[idx];
-      day.absence = { people: srcDay.absence.people.slice(), note: srcDay.absence.note };
       AGENCIES.forEach(function(a){
-        day.shifts[a].mattina = srcDay.shifts[a].mattina.slice();
-        day.shifts[a].pomeriggio = srcDay.shifts[a].pomeriggio.slice();
+        SHIFTS.forEach(function(sp){
+          var sk = sp[0];
+          var src = (srcDay && srcDay.shifts[a] && srcDay.shifts[a][sk]) ? srcDay.shifts[a][sk] : [];
+          if(!isShiftOpen(a, idx, sk, day)){
+            day.shifts[a][sk] = [];
+            if(src.length) skipped.push(DAY_NAMES[idx] + " " + AGENCY_CODES[a] + " " + (sk === "mattina" ? "mat" : "pom") + " (chiuso)");
+            return;
+          }
+          day.shifts[a][sk] = src.filter(function(n){
+            if(isAbsentOn(day, n)){ skipped.push(DAY_NAMES[idx] + " " + n + " (in ferie)"); return false; }
+            return true;
+          });
+        });
       });
     });
-    weeksStore[targetISO] = newWeek;
-    markDirty(); currentMonday = targetMonday;
+    if(skipped.length) alert("Settimana duplicata. Non copiati perché non applicabili:\n\n• " + skipped.join("\n• "));
+    markDirty(targetISO); currentMonday = targetMonday;
     hideSheet("dupSheetOverlay"); renderWeek(); window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
-  function applyImportedState(parsed){
+  function applyImportedState(parsed, keepDirty){
+    // Le informazioni di collegamento a Drive appartengono a questo dispositivo: non vanno sovrascritte.
+    var localCloud = state.cloud;
     state = normalizeState(parsed);
+    state.cloud = localCloud;
     employees = state.employees;
     weeksStore = state.weeks;
-    isDirty = false;
+    if(!keepDirty) isDirty = false;
     persistLocal();
     applyTheme();
     renderLogoPreview();
     renderWeek();
+  }
+
+  /* ---- unione tra versione locale e versione su Drive ----
+     Ogni settimana viene confrontata singolarmente (vince la modifica più recente di quella settimana);
+     le impostazioni hanno un loro timestamp; le settimane eliminate restano segnate in deletedWeeks. */
+  function tsOf(iso){ var t = iso ? new Date(iso).getTime() : 0; return isNaN(t) ? 0 : t; }
+  function deepCopy(x){ return x === undefined ? undefined : JSON.parse(JSON.stringify(x)); }
+  function canonical(x){
+    if(Array.isArray(x)) return "[" + x.map(canonical).join(",") + "]";
+    if(x && typeof x === "object"){
+      return "{" + Object.keys(x).sort().map(function(k){ return JSON.stringify(k) + ":" + canonical(x[k]); }).join(",") + "}";
+    }
+    return JSON.stringify(x === undefined ? null : x);
+  }
+  function contentSignature(st){
+    var weeks = {};
+    Object.keys(st.weeks || {}).forEach(function(k){ if(weekHasData(st.weeks[k])) weeks[k] = st.weeks[k]; });
+    return canonical({ employees: st.employees, weeks: weeks, theme: st.theme, openingSchedule: st.openingSchedule, logo: st.logo, deletedWeeks: st.deletedWeeks });
+  }
+  function mergeStates(local, remote){
+    var remoteIsNewerOverall = tsOf(remote.meta.updatedAt) > tsOf(local.meta.updatedAt);
+    function pickSide(lTs, rTs){
+      if(rTs > lTs) return "remote";
+      if(lTs > rTs) return "local";
+      return remoteIsNewerOverall ? "remote" : "local";
+    }
+    var merged = deepCopy(local);
+
+    if(pickSide(tsOf(local.meta.settingsUpdatedAt), tsOf(remote.meta.settingsUpdatedAt)) === "remote"){
+      merged.employees = deepCopy(remote.employees);
+      merged.theme = deepCopy(remote.theme);
+      merged.openingSchedule = deepCopy(remote.openingSchedule);
+      merged.logo = remote.logo;
+      merged.meta.settingsUpdatedAt = remote.meta.settingsUpdatedAt;
+    }
+
+    var deleted = {};
+    [local.deletedWeeks || {}, remote.deletedWeeks || {}].forEach(function(t){
+      Object.keys(t).forEach(function(k){ if(!deleted[k] || tsOf(t[k]) > tsOf(deleted[k])) deleted[k] = t[k]; });
+    });
+
+    var keys = {};
+    Object.keys(local.weeks || {}).forEach(function(k){ keys[k] = true; });
+    Object.keys(remote.weeks || {}).forEach(function(k){ keys[k] = true; });
+    merged.weeks = {};
+    Object.keys(keys).forEach(function(k){
+      var lw = local.weeks[k], rw = remote.weeks[k], chosen;
+      if(lw && !rw) chosen = lw;
+      else if(rw && !lw) chosen = rw;
+      else {
+        var lTs = tsOf(lw.updatedAt), rTs = tsOf(rw.updatedAt);
+        if(lTs === rTs && weekHasData(lw) !== weekHasData(rw)) chosen = weekHasData(lw) ? lw : rw;
+        else chosen = pickSide(lTs, rTs) === "remote" ? rw : lw;
+      }
+      if(deleted[k] && tsOf(deleted[k]) >= tsOf(chosen.updatedAt)) return;
+      merged.weeks[k] = deepCopy(chosen);
+    });
+    merged.deletedWeeks = deleted;
+    merged.meta.updatedAt = remoteIsNewerOverall ? remote.meta.updatedAt : local.meta.updatedAt;
+    return normalizeState(merged);
   }
 
   document.getElementById("exportMemoriaBtn").addEventListener("click", function(){
@@ -1680,7 +1775,12 @@
   var googleTokenClient = null;
   var googleAccessToken = null;
   var googleUserEmail = null;
+  var googleTokenExpiresAt = 0;
+  var pendingTokenCallback = null;
   var isSyncing = false;
+
+  function hasValidToken(){ return !!googleAccessToken && Date.now() < googleTokenExpiresAt - 60000; }
+  function clearToken(){ googleAccessToken = null; googleTokenExpiresAt = 0; }
 
   function getStoredClientId(){
     try{ return localStorage.getItem(LS_GOOGLE_CLIENT_ID) || ""; }catch(e){ return ""; }
@@ -1715,10 +1815,13 @@
       if(isSyncing){
         headerBadge.className = "m-cloud-indicator syncing";
         headerBadge.innerHTML = "☁️ Sincronizzazione…";
-      } else if(googleAccessToken || googleUserEmail){
+      } else if(hasValidToken()){
         headerBadge.className = "m-cloud-indicator synced";
         var label = googleUserEmail ? googleUserEmail.split("@")[0] : "Connesso";
         headerBadge.innerHTML = "☁️ " + escapeHtml(label);
+      } else if(getWasConnected()){
+        headerBadge.className = "m-cloud-indicator";
+        headerBadge.innerHTML = "☁️ Tocca per sincronizzare";
       } else {
         headerBadge.className = "m-cloud-indicator";
         headerBadge.innerHTML = "☁️ Non collegato";
@@ -1726,8 +1829,10 @@
     }
     if(!msg && el){
       var parts = [];
-      if(googleAccessToken || googleUserEmail){
+      if(hasValidToken()){
         parts.push(googleUserEmail ? ("Connesso come " + googleUserEmail) : "Connesso a Google Drive");
+      } else if(getWasConnected()){
+        parts.push("Sessione Google da rinnovare: verrà richiesta al prossimo comando" + (state.cloud.userEmail ? (" (" + state.cloud.userEmail + ")") : ""));
       } else {
         parts.push("Non collegato.");
       }
@@ -1746,6 +1851,11 @@
   }
 
   document.getElementById("headerCloudStatus").addEventListener("click", function(){
+    // Se l'account era collegato ma la sessione è scaduta, un tocco rinnova l'accesso e sincronizza.
+    if(getWasConnected() && !hasValidToken() && getStoredClientId() && !isSyncing){
+      withGoogleToken(executeSync);
+      return;
+    }
     showSheet("cloudSheetOverlay");
   });
 
@@ -1757,7 +1867,9 @@
     showToast._t = setTimeout(function(){ el.classList.add("hidden"); }, 4000);
   }
 
-  function ensureTokenClient(clientId, onTokenCallback){
+  /* Il token client di Google ha una sola callback: l'azione da eseguire dopo l'accesso
+     viene messa in pendingTokenCallback, così ogni pulsante può eseguire la propria. */
+  function ensureTokenClient(clientId){
     if(typeof google === "undefined" || !google.accounts || !google.accounts.oauth2){
       return null;
     }
@@ -1766,21 +1878,27 @@
         client_id: clientId,
         scope: GOOGLE_SCOPE,
         callback: function(resp){
+          var cb = pendingTokenCallback;
+          pendingTokenCallback = null;
           if(resp && resp.access_token){
             googleAccessToken = resp.access_token;
+            googleTokenExpiresAt = Date.now() + ((parseInt(resp.expires_in, 10) || 3600) * 1000);
             setWasConnected(true);
             fetchGoogleUserEmail().then(function(){
-              if(typeof onTokenCallback === "function"){
-                onTokenCallback();
-              } else {
-                updateCloudStatus();
-                showToast("☁️ Account Google connesso.");
-              }
+              updateCloudStatus();
+              if(typeof cb === "function") cb();
+              else showToast("☁️ Account Google connesso.");
             });
           } else {
             isSyncing = false;
             updateCloudStatus("Accesso non riuscito.");
           }
+        },
+        error_callback: function(err){
+          pendingTokenCallback = null;
+          isSyncing = false;
+          var popupProblem = err && (err.type === "popup_failed_to_open" || err.type === "popup_closed");
+          updateCloudStatus(popupProblem ? "Finestra di accesso Google chiusa o bloccata. Riprova." : "Accesso non riuscito.");
         }
       });
       googleTokenClient._clientId = clientId;
@@ -1788,22 +1906,35 @@
     return googleTokenClient;
   }
 
+  /* Esegue action con un token valido. Se il token manca o è scaduto (dura ~1 ora)
+     lo richiede: va chiamata direttamente dal click dell'utente, altrimenti il browser blocca la finestra. */
+  function withGoogleToken(action, forceConsent){
+    if(!forceConsent && hasValidToken()){ action(); return; }
+    var clientId = getStoredClientId();
+    if(!clientId){ alert("Inserisci prima il Client ID di Google OAuth."); showSheet("cloudSheetOverlay"); return; }
+    var tc = ensureTokenClient(clientId);
+    if(!tc){ alert("Libreria Google non ancora caricata. Verifica la connessione e riprova tra pochi secondi."); return; }
+    clearToken();
+    pendingTokenCallback = action;
+    updateCloudStatus("Accesso a Google in corso…");
+    tc.requestAccessToken({ prompt: forceConsent ? "consent" : "" });
+  }
+
   document.getElementById("cloudConnectBtn").addEventListener("click", function(){
     var clientId = document.getElementById("cloudClientIdInput").value.trim();
     if(!clientId){ alert("Inserisci il Client ID di Google OAuth."); return; }
     setStoredClientId(clientId);
-    var tc = ensureTokenClient(clientId, function(){
+    withGoogleToken(function(){
+      refreshCloudSheetUI();
       showToast("☁️ Connessione a Google Drive riuscita!");
-    });
-    if(!tc){ alert("Libreria Google non ancora caricata. Verifica la connessione e riprova tra pochi secondi."); return; }
-    tc.requestAccessToken({ prompt: "consent" });
+    }, true);
   });
 
   document.getElementById("cloudDisconnectBtn").addEventListener("click", function(){
     if(googleAccessToken && typeof google !== "undefined" && google.accounts && google.accounts.oauth2){
       google.accounts.oauth2.revoke(googleAccessToken, function(){});
     }
-    googleAccessToken = null;
+    clearToken();
     googleUserEmail = null;
     setWasConnected(false);
     state.cloud.fileId = null;
@@ -1815,6 +1946,10 @@
 
   function driveApiFetch(url, options){
     return fetch(url, options).then(function(r){
+      if(r.status === 401){
+        clearToken();
+        throw new Error("sessione Google scaduta. Premi di nuovo il pulsante per ricollegarti.");
+      }
       if(!r.ok){
         return r.text().then(function(txt){
           throw new Error("HTTP " + r.status + " " + r.statusText + (txt ? (" — " + txt.slice(0, 200)) : ""));
@@ -1828,7 +1963,8 @@
     var q = encodeURIComponent("name = '" + DRIVE_FILENAME + "' and trashed = false");
     var url = "https://www.googleapis.com/drive/v3/files?q=" + q + "&orderBy=modifiedTime desc&fields=files(id,name,modifiedTime,createdTime)&spaces=drive";
     return driveApiFetch(url, {
-      headers: { "Authorization": "Bearer " + googleAccessToken }
+      headers: { "Authorization": "Bearer " + googleAccessToken },
+      cache: "no-store"
     }).then(function(r){ return r.json(); }).then(function(data){
       var files = data && data.files ? data.files : [];
       if(!files.length) return null;
@@ -1864,73 +2000,69 @@
 
   function driveDownloadFile(fileId){
     return driveApiFetch("https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media", {
-      headers: { "Authorization": "Bearer " + googleAccessToken }
+      headers: { "Authorization": "Bearer " + googleAccessToken },
+      cache: "no-store"
     }).then(function(r){ return r.text(); });
   }
 
+  // Copia da caricare su Drive: senza le informazioni di collegamento di questo dispositivo.
+  function stateForUpload(st){
+    var copy = deepCopy(st);
+    delete copy.cloud;
+    return JSON.stringify(copy, null, 2);
+  }
+
   document.getElementById("cloudSyncBtn").addEventListener("click", function(){
-    if(!googleAccessToken){
-      var clientId = getStoredClientId();
-      if(!clientId){ alert("Inserisci prima il Client ID."); return; }
-      var tc = ensureTokenClient(clientId, function(){ executeSync(); });
-      if(tc) tc.requestAccessToken();
-      return;
-    }
-    executeSync();
+    if(isSyncing) return;
+    withGoogleToken(executeSync);
   });
 
+  function finishSync(toastMsg){
+    isSyncing = false;
+    refreshCloudSheetUI();
+    if(toastMsg) showToast(toastMsg);
+  }
+
   function executeSync(){
-    if(!googleAccessToken) return;
+    if(!hasValidToken()) return;
     isSyncing = true;
     updateCloudStatus("Sincronizzazione in corso…");
 
     driveFindLatestFile().then(function(latest){
       if(!latest){
-        var content = JSON.stringify(state, null, 2);
-        return driveCreateFile(content).then(function(res){
+        return driveCreateFile(stateForUpload(state)).then(function(res){
           state.cloud.fileId = res.id;
           state.cloud.lastPush = new Date().toISOString();
           persistLocal();
-          isSyncing = false;
-          refreshCloudSheetUI();
-          showToast("☁️ Primo archivio creato su Google Drive.");
+          finishSync("☁️ Primo archivio creato su Google Drive.");
         });
       }
 
       state.cloud.fileId = latest.id;
       return driveDownloadFile(latest.id).then(function(remoteText){
-        var parsed;
-        try{ 
-          parsed = JSON.parse(remoteText); 
-        } catch(e){ 
-          throw new Error("File cloud corrotto o non leggibile"); 
-        }
+        var remote;
+        try{ remote = normalizeState(JSON.parse(remoteText)); }
+        catch(e){ throw new Error("File cloud corrotto o non leggibile"); }
 
-        var remoteUpdated = (parsed.meta && parsed.meta.updatedAt) ? new Date(parsed.meta.updatedAt).getTime() : 0;
-        var localUpdated = (state.meta && state.meta.updatedAt) ? new Date(state.meta.updatedAt).getTime() : 0;
+        var merged = mergeStates(state, remote);
+        var mergedSig = contentSignature(merged);
+        var localChanged = mergedSig !== contentSignature(state);
+        var remoteChanged = mergedSig !== contentSignature(remote);
 
-        if(remoteUpdated > localUpdated || (!localUpdated && remoteUpdated > 0)){
-          applyImportedState(parsed);
+        if(localChanged){
+          applyImportedState(merged, true);
           state.cloud.fileId = latest.id;
           state.cloud.lastPull = new Date().toISOString();
           persistLocal();
-          isSyncing = false;
-          refreshCloudSheetUI();
-          showToast("☁️ Dati aggiornati dal Drive con successo!");
-        } else if(localUpdated > remoteUpdated){
-          var content = JSON.stringify(state, null, 2);
-          return driveUpdateFile(latest.id, content).then(function(){
+        }
+        if(remoteChanged){
+          return driveUpdateFile(latest.id, stateForUpload(state)).then(function(){
             state.cloud.lastPush = new Date().toISOString();
             persistLocal();
-            isSyncing = false;
-            refreshCloudSheetUI();
-            showToast("☁️ Modifiche caricate su Drive con successo!");
+            finishSync(localChanged ? "☁️ Modifiche unite: dispositivo e Drive aggiornati." : "☁️ Modifiche caricate su Drive con successo!");
           });
-        } else {
-          isSyncing = false;
-          refreshCloudSheetUI();
-          showToast("☁️ Dispositivi già allineati.");
         }
+        finishSync(localChanged ? "☁️ Dati aggiornati dal Drive con successo!" : "☁️ Dispositivi già allineati.");
       });
     }).catch(function(err){
       isSyncing = false;
@@ -1939,69 +2071,54 @@
   }
 
   document.getElementById("cloudForcePullBtn").addEventListener("click", function(){
-    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
+    if(isSyncing) return;
     if(!confirm("Vuoi sostituire tutti i dati di questo dispositivo con la versione salvata su Google Drive?")) return;
-    isSyncing = true;
-    updateCloudStatus("Scaricamento da Drive…");
-    driveFindLatestFile().then(function(latest){
-      if(!latest){ alert("Nessun file trovato su Google Drive."); isSyncing = false; updateCloudStatus(); return; }
-      return driveDownloadFile(latest.id).then(function(txt){
-        var parsed = JSON.parse(txt);
-        applyImportedState(parsed);
-        state.cloud.fileId = latest.id;
-        state.cloud.lastPull = new Date().toISOString();
-        persistLocal();
+    withGoogleToken(function(){
+      isSyncing = true;
+      updateCloudStatus("Scaricamento da Drive…");
+      driveFindLatestFile().then(function(latest){
+        if(!latest){ alert("Nessun file trovato su Google Drive."); isSyncing = false; updateCloudStatus(); return; }
+        return driveDownloadFile(latest.id).then(function(txt){
+          var parsed = JSON.parse(txt);
+          applyImportedState(parsed);
+          state.cloud.fileId = latest.id;
+          state.cloud.lastPull = new Date().toISOString();
+          persistLocal();
+          finishSync("⬇️ Dati scaricati con successo da Google Drive.");
+        });
+      }).catch(function(err){
         isSyncing = false;
-        refreshCloudSheetUI();
-        showToast("⬇️ Dati scaricati con successo da Google Drive.");
+        alert("Errore scaricamento: " + (err && err.message ? err.message : err));
+        updateCloudStatus();
       });
-    }).catch(function(err){
-      isSyncing = false;
-      alert("Errore scaricamento: " + (err && err.message ? err.message : err));
-      updateCloudStatus();
     });
   });
 
   document.getElementById("cloudForcePushBtn").addEventListener("click", function(){
-    if(!googleAccessToken){ alert("Accedi prima con Google."); return; }
+    if(isSyncing) return;
     if(!confirm("Vuoi sovrascrivere il file su Google Drive con la versione presente su questo dispositivo?")) return;
-    isSyncing = true;
-    updateCloudStatus("Caricamento su Drive…");
-    var content = JSON.stringify(state, null, 2);
-    driveFindLatestFile().then(function(latest){
-      var op = latest ? driveUpdateFile(latest.id, content) : driveCreateFile(content);
-      return op.then(function(res){
-        state.cloud.fileId = res.id || (latest ? latest.id : null);
-        state.cloud.lastPush = new Date().toISOString();
-        persistLocal();
+    withGoogleToken(function(){
+      isSyncing = true;
+      updateCloudStatus("Caricamento su Drive…");
+      var content = stateForUpload(state);
+      driveFindLatestFile().then(function(latest){
+        var op = latest ? driveUpdateFile(latest.id, content) : driveCreateFile(content);
+        return op.then(function(res){
+          state.cloud.fileId = res.id || (latest ? latest.id : null);
+          state.cloud.lastPush = new Date().toISOString();
+          persistLocal();
+          finishSync("⬆️ Dati caricati con successo su Google Drive.");
+        });
+      }).catch(function(err){
         isSyncing = false;
-        refreshCloudSheetUI();
-        showToast("⬆️ Dati caricati con successo su Google Drive.");
+        alert("Errore caricamento: " + (err && err.message ? err.message : err));
+        updateCloudStatus();
       });
-    }).catch(function(err){
-      isSyncing = false;
-      alert("Errore caricamento: " + (err && err.message ? err.message : err));
-      updateCloudStatus();
     });
   });
 
-  (function attemptSilentGoogleAuth(){
-    var clientId = getStoredClientId();
-    if(!clientId || !getWasConnected()) return;
-    var attempts = 0;
-    function tryInit(){
-      attempts++;
-      if(typeof google === "undefined" || !google.accounts || !google.accounts.oauth2){
-        if(attempts < 20) setTimeout(tryInit, 300);
-        return;
-      }
-      var tc = ensureTokenClient(clientId, function(){
-        updateCloudStatus();
-      });
-      if(tc) tc.requestAccessToken({ prompt: "" });
-    }
-    setTimeout(tryInit, 500);
-  })();
+  // Nessun accesso automatico all'avvio: i browser bloccano la finestra di Google se non nasce da un tocco.
+  // Quando la sessione è scaduta l'intestazione mostra "Tocca per sincronizzare".
 
   function showSheet(id){
     if(id === "empSheetOverlay") renderMasterEmpList();
@@ -2293,7 +2410,33 @@
             select.appendChild(opt);
           });
           select.addEventListener("change", function(){
-            state.openingSchedule[openingKey(agency, dayIndex)] = select.value;
+            var key = openingKey(agency, dayIndex);
+            var previous = state.openingSchedule[key];
+            state.openingSchedule[key] = select.value;
+            // Dalla settimana in corso in avanti: le persone già assegnate a turni che ora risultano chiusi
+            // verrebbero nascoste. Chiediamo conferma e le togliamo. Lo storico passato non viene toccato.
+            var fromISO_ = toISO(getMonday(new Date()));
+            var affected = [];
+            Object.keys(weeksStore).forEach(function(wk){
+              if(wk < fromISO_) return;
+              var day = weeksStore[wk].days && weeksStore[wk].days[dayIndex];
+              if(!day || !day.shifts || !day.shifts[agency]) return;
+              SHIFTS.forEach(function(sp){
+                var arr = day.shifts[agency][sp[0]] || [];
+                if(arr.length && !isShiftOpen(agency, dayIndex, sp[0], day)){
+                  affected.push({ week: wk, day: day, shift: sp[0], names: arr.slice() });
+                }
+              });
+            });
+            if(affected.length){
+              var lines = affected.map(function(a){ return "• " + fmtItFull(fromISO(a.day.date)) + " " + (a.shift === "mattina" ? "mattina" : "pomeriggio") + ": " + a.names.join(", "); }).join("\n");
+              if(!window.confirm("Con il nuovo orario di " + agency + " questi turni risultano chiusi e le persone assegnate verranno tolte:\n\n" + lines + "\n\nContinuare?")){
+                if(typeof previous === "undefined") delete state.openingSchedule[key]; else state.openingSchedule[key] = previous;
+                select.value = openingStatus(agency, dayIndex);
+                return;
+              }
+              affected.forEach(function(a){ a.day.shifts[agency][a.shift] = []; markDirty(a.week); });
+            }
             markDirty(); renderWeek();
           });
           row.innerHTML = "<label>" + OPENING_DAY_NAMES[dayIndex] + "</label>";
@@ -2369,6 +2512,21 @@
   document.getElementById("settingsVersionLine").textContent = "Registro Turni · versione " + APP_VERSION;
 
   renderWeek();
+
+  // Se lo storico (o un'altra scheda) modifica i dati, ricarichiamo lo stato invece di sovrascriverlo al prossimo salvataggio.
+  window.addEventListener("storage", function(e){
+    if(e.key !== LS_STATE || !e.newValue) return;
+    try{
+      var localCloud = state.cloud;
+      state = normalizeState(JSON.parse(e.newValue));
+      state.cloud = localCloud;
+      employees = state.employees;
+      weeksStore = state.weeks;
+      applyTheme();
+      renderLogoPreview();
+      renderWeek();
+    }catch(err){}
+  });
 
   if("serviceWorker" in navigator){
     window.addEventListener("load", function(){

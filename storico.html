@@ -137,7 +137,7 @@
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
   var DAY_NAMES = ["Lun","Mar","Mer","Gio","Ven","Sab"];
-  var APP_VERSION = "1.9";
+  var APP_VERSION = "2.3.0"; // tenere allineata a index.html
   var LS_STATE = "turni_state_v2";
 
   function hexToRgb(hex){ hex=hex.replace("#",""); if(hex.length===3) hex=hex.split("").map(function(c){return c+c;}).join(""); var num=parseInt(hex,16); return {r:(num>>16)&255,g:(num>>8)&255,b:num&255}; }
@@ -176,6 +176,7 @@
     if(!st.employees) st.employees=[];
     if(!st.weeks) st.weeks={};
     if(!st.meta) st.meta={lastExport:null};
+    if(!st.deletedWeeks || typeof st.deletedWeeks!=="object") st.deletedWeeks={};
     Object.keys(st.weeks).forEach(function(k){
       var w=st.weeks[k]; if(!w.days) w.days=[];
       w.days.forEach(function(d){
@@ -231,7 +232,7 @@
     var el = document.getElementById("statusLine");
     var count = Object.keys(state.weeks).filter(function(k){ return weekHasData(state.weeks[k]); }).length;
     if(count === 0){ el.textContent = "Nessuna settimana caricata."; return; }
-    var src = loadedFromLocal ? "dati trovati in questo browser" : "dati importati da file";
+    var src = loadedFromLocal ? "dati di questo dispositivo" : "file importato · sola consultazione";
     el.textContent = count + " settiman" + (count===1?"a":"e") + " disponibili · " + src;
   }
 
@@ -339,12 +340,18 @@
       delBtn.addEventListener("click", function(e){
         e.stopPropagation();
         if(confirm("Eliminare definitivamente la settimana "+fmtIt(mon)+" – "+fmtIt(sat)+" dallo storico?")){
+          // Rilegge i dati più recenti dell'app (potrebbero essere cambiati in un'altra scheda) prima di eliminare.
+          tryLoadLocal();
+          var nowISO = new Date().toISOString();
           delete state.weeks[k];
+          state.deletedWeeks[k] = nowISO;   // segna l'eliminazione, così la sincronizzazione non la fa ricomparire
+          state.meta.updatedAt = nowISO;
           persistLocal();
+          updateStatus();
           renderWeeks();
         }
       });
-      actions.appendChild(pngBtn); actions.appendChild(pdfBtn); actions.appendChild(delBtn);
+      actions.appendChild(pngBtn); actions.appendChild(pdfBtn); if(loadedFromLocal) actions.appendChild(delBtn);
       detail.appendChild(actions);
 
       card.appendChild(detail);
@@ -464,21 +471,20 @@
     reader.onload = function(evt){
       try{
         var parsed = JSON.parse(evt.target.result);
+        // Solo consultazione: il file importato NON sostituisce i dati dell'app su questo dispositivo.
         state = normalizeState(parsed);
         loadedFromLocal = false;
-        persistLocal();
         populateEmployeeFilter();
         updateStatus();
         renderWeeks();
-        alert("Storico caricato da \u201c"+file.name+"\u201d.");
+        alert("Storico caricato da \u201c"+file.name+"\u201d in sola consultazione.\nI dati dell'app non sono stati modificati: per ripristinare un backup usa \u201cImporta memoria\u201d nell'app principale.");
       }catch(err){ alert("Impossibile leggere il file: "+err.message); }
     };
     reader.readAsText(file); e.target.value="";
   });
 
   document.getElementById("exportBtn").addEventListener("click", function(){
-    state.meta.lastExport = new Date().toISOString();
-    persistLocal();
+    if(loadedFromLocal){ tryLoadLocal(); state.meta.lastExport = new Date().toISOString(); persistLocal(); }
     var blob = new Blob([JSON.stringify(state,null,2)], { type:"application/json" });
     shareOrDownload(blob, "turni_memoria.json", "application/json");
   });

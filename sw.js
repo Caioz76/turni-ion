@@ -1,4 +1,6 @@
-var CACHE_NAME = "turni-cache-v12";
+// Registro Turni — service worker
+// IMPORTANTE: aumentare CACHE_NAME a ogni release, insieme ad APP_VERSION in index.html e storico.html.
+var CACHE_NAME = "turni-cache-v13-2.3.0";
 var CORE_ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +12,10 @@ var CORE_ASSETS = [
   "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
 ];
+
+// Solo queste origini esterne possono essere messe in cache (librerie statiche e font).
+// Google Drive, OAuth e userinfo NON devono mai passare dalla cache.
+var CACHEABLE_EXTERNAL_HOSTS = ["cdnjs.cloudflare.com", "fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", function(event){
   event.waitUntil(
@@ -35,29 +41,46 @@ self.addEventListener("activate", function(event){
   );
 });
 
+function putInCache(req, res){
+  if(!res || (res.status !== 200 && res.type !== "opaque")) return;
+  var resClone = res.clone();
+  caches.open(CACHE_NAME).then(function(cache){ return cache.put(req, resClone); }).catch(function(){});
+}
+
 self.addEventListener("fetch", function(event){
   var req = event.request;
-  var isOwnPage = req.url.indexOf(self.location.origin) === 0 && (req.url.endsWith(".html") || req.url.endsWith("/"));
+  if(req.method !== "GET") return; // POST/PATCH (es. upload su Drive) vanno sempre in rete
 
-  if(isOwnPage){
+  var url = new URL(req.url);
+  var sameOrigin = url.origin === self.location.origin;
+  var cacheableExternal = CACHEABLE_EXTERNAL_HOSTS.indexOf(url.hostname) !== -1;
+  if(!sameOrigin && !cacheableExternal) return; // Google APIs ecc.: il browser gestisce la richiesta normalmente
+
+  var isPage = sameOrigin && (req.mode === "navigate" || /\.html$/.test(url.pathname) || /\/$/.test(url.pathname));
+
+  if(isPage){
+    // Rete prima, cache come riserva offline
     event.respondWith(
       fetch(req).then(function(res){
-        var resClone = res.clone();
-        caches.open(CACHE_NAME).then(function(cache){ cache.put(req, resClone); });
+        putInCache(req, res);
         return res;
-      }).catch(function(){ return caches.match(req).then(function(r){ return r || caches.match("./index.html"); }); })
+      }).catch(function(){
+        return caches.match(req, { ignoreSearch: true }).then(function(r){
+          return r || caches.match("./index.html");
+        });
+      })
     );
     return;
   }
 
+  // Risorse statiche: cache prima, poi rete
   event.respondWith(
     caches.match(req).then(function(cached){
       if(cached) return cached;
       return fetch(req).then(function(res){
-        var resClone = res.clone();
-        caches.open(CACHE_NAME).then(function(cache){ cache.put(req, resClone); });
+        putInCache(req, res);
         return res;
-      }).catch(function(){});
+      });
     })
   );
 });
