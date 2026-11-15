@@ -557,6 +557,9 @@
   .time-row span { min-width: 82px; color: var(--ink-soft); }
   .time-row input[type=time] { padding: 7px 8px; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 14px; background: #fff; }
   details.times-box { margin-top: 14px; font-size: 13px; }
+  .abs-parts { display: flex; gap: 4px; flex-shrink: 0; }
+  .abs-parts .sede-btn.active { background: var(--alert); border-color: var(--alert); }
+  .chip-part { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; opacity: .8; margin-left: 3px; }
   details.times-box summary { cursor: pointer; color: var(--ink-soft); font-weight: 600; }
 </style>
 </head>
@@ -598,7 +601,7 @@
 
 <main class="m-main" id="exportArea">
   <div class="app-logo-header" id="appLogoHeader"></div>
-  <div class="m-conflict hidden" id="conflictPanel"><h3>⚠ Sovrapposizioni</h3><ul id="conflictListUI"></ul></div>
+  <div class="m-conflict hidden" id="conflictPanel"><h3>⚠ Sovrapposizioni e ferie</h3><ul id="conflictListUI"></ul></div>
   <div class="m-gap hidden" id="gapPanel"><h3>🕳 Copertura mancante</h3><ul id="gapListUI"></ul></div>
   <div id="daysList"></div>
 </main>
@@ -638,7 +641,7 @@
     <div class="sheet-handle"></div>
     <div class="sheet-head"><h3>Ferie &amp; permessi</h3><div class="sub" id="absenceSheetSub"></div></div>
     <div class="sheet-body">
-      <div class="emp-hint">Chi selezioni qui viene rimosso automaticamente dai turni dello stesso giorno.</div>
+      <div class="emp-hint">Per ogni persona scegli <b>Giorno</b> (giornata intera), <b>Mat</b> (solo mattina) o <b>Pom</b> (solo pomeriggio); tocca di nuovo per togliere. Chi è assente viene tolto dai turni coperti dall'assenza.</div>
       <div class="emp-list" id="absenceEmpList"></div>
       <label class="field-label">Nota (facoltativa)</label>
       <textarea class="note-input" id="absenceNoteInput" placeholder="es. malattia, corso…"></textarea>
@@ -950,7 +953,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.4.0";
+  var APP_VERSION = "2.5.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -1053,6 +1056,11 @@
         if(!d.absence) d.absence = { people: [], note: (typeof d.note === "string") ? d.note : "" };
         if(!d.absence.people) d.absence.people = [];
         if(typeof d.absence.note !== "string") d.absence.note = "";
+        if(!d.absence.parts || typeof d.absence.parts !== "object") d.absence.parts = {};
+        Object.keys(d.absence.parts).forEach(function(n){
+          var pt = d.absence.parts[n];
+          if(d.absence.people.indexOf(n) === -1 || (pt !== "mattina" && pt !== "pomeriggio")) delete d.absence.parts[n];
+        });
         if(!d.shiftOverrides) d.shiftOverrides = {};
         if(d.closedAgencies && d.closedAgencies.length){
           for(var cIdx = 0; cIdx < d.closedAgencies.length; cIdx++){
@@ -1229,6 +1237,10 @@
           var mName = mappedNames[m];
           if(map[mName].length > 1){
             conflicts.push({ dayIdx: dayIdx, date: day.date, shift: shiftKey, name: mName, agencies: map[mName] });
+          }
+          // Errore: assegnato a un turno coperto dalle sue ferie/permesso
+          if(isAbsentForShift(day, mName, shiftKey)){
+            conflicts.push({ dayIdx: dayIdx, date: day.date, shift: shiftKey, name: mName, agencies: map[mName], absent: true });
           }
         }
       }
@@ -1415,7 +1427,11 @@
       var ferieBtn = document.createElement("button");
       ferieBtn.className = "ferie-btn";
       var people = (day.absence && day.absence.people) ? day.absence.people : [];
-      var fchips = people.length ? people.map(function(n){ return chipHtml(n, true); }).join("") : '<span class="empty-hint">nessuno</span>';
+      var fchips = people.length ? people.map(function(n){
+        var pt = absencePart(day, n);
+        var chip = chipHtml(n, true);
+        return pt === "giorno" ? chip : chip.replace(/<\/span>$/, '<span class="chip-part">' + (pt === "mattina" ? "mat" : "pom") + '</span></span>');
+      }).join("") : '<span class="empty-hint">nessuno</span>';
       ferieBtn.innerHTML = '<span>🏖 Ferie/Permessi</span><span class="fchips">' + fchips + '</span>';
       ferieBtn.addEventListener("click", function(){ openAbsenceSheet(dayIdx); });
       card.appendChild(ferieBtn);
@@ -1473,6 +1489,7 @@
     panel.classList.remove("hidden");
     list.innerHTML = conflicts.map(function(c){
       var d = fromISO(c.date);
+      if(c.absent) return "<li><b>" + escapeHtml(c.name) + "</b> · " + DAY_NAMES[c.dayIdx] + " " + fmtIt(d) + " (" + (c.shift === "mattina" ? "mattina" : "pomeriggio") + "): in ferie/permesso ma assegnato a " + c.agencies.map(escapeHtml).join(" + ") + "</li>";
       return "<li><b>" + escapeHtml(c.name) + "</b> · " + DAY_NAMES[c.dayIdx] + " " + fmtIt(d) + " (" + (c.shift === "mattina" ? "mattina" : "pomeriggio") + "): " + c.agencies.map(escapeHtml).join(" + ") + "</li>";
     }).join("");
   }
@@ -1520,18 +1537,31 @@
   }
   function sedeMatches(emp, agency){ return !emp.sedi || emp.sedi.length === 0 || emp.sedi.indexOf(agency) !== -1; }
   function isAbsentOn(day, name){ return day.absence && day.absence.people && day.absence.people.indexOf(name) !== -1; }
+  /* Ferie a mezza giornata (v2.5.0): absence.people elenca tutti gli assenti; absence.parts[nome] vale
+     "mattina" o "pomeriggio" per le assenze parziali (se manca = giornata intera).
+     Le versioni precedenti dell'app vedono comunque la persona come assente tutto il giorno. */
+  function absencePart(day, name){
+    if(!isAbsentOn(day, name)) return null;
+    var pt = day.absence.parts && day.absence.parts[name];
+    return (pt === "mattina" || pt === "pomeriggio") ? pt : "giorno";
+  }
+  function isAbsentForShift(day, name, shiftKey){
+    var pt = absencePart(day, name);
+    return pt === "giorno" || pt === shiftKey;
+  }
+  function absenceLabel(pt){ return pt === "mattina" ? "mattina" : (pt === "pomeriggio" ? "pomeriggio" : "giornata"); }
   function renderCellEmpList(day, agency, shiftKey, selectedNames, showAllSedi){
     var container = document.getElementById("cellEmpList"); container.innerHTML = "";
     var sorted = employees.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'it'); });
     sorted.forEach(function(emp, empIdx){
-      var absent = isAbsentOn(day, emp.name);
+      var absent = isAbsentForShift(day, emp.name, shiftKey);
       var sedeOk = showAllSedi || sedeMatches(emp, agency);
       var isSelected = selectedNames.indexOf(emp.name) !== -1;
       if(!sedeOk && !isSelected) return;
       var id = "emp_" + empIdx; // indice: nomi simili ("Anna M." / "Anna M") non devono avere lo stesso id
       var row = document.createElement("div");
       row.className = "emp-row" + (absent ? " is-absent" : "");
-      var extra = absent ? '<span class="tag-absent">in ferie</span>' : (!sedeOk ? '<span class="tag-outsede">altra sede</span>' : "");
+      var extra = absent ? '<span class="tag-absent">in ferie (' + absenceLabel(absencePart(day, emp.name)) + ')</span>' : (!sedeOk ? '<span class="tag-outsede">altra sede</span>' : "");
       row.innerHTML = '<input type="checkbox" id="' + id + '" data-name="' + escapeHtml(emp.name) + '" ' + (isSelected ? "checked" : "") + (absent ? " disabled" : "") + '>' +
         '<label for="' + id + '"><span class="chip-dot" style="background:' + emp.color + '"></span>' + escapeHtml(emp.name) + extra + '</label>';
       container.appendChild(row);
@@ -1570,7 +1600,7 @@
     var sorted = employees.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'it'); });
     sorted.forEach(function(emp, empIdx){
       var id = "abs_" + empIdx;
-      var checked = day.absence && day.absence.people && day.absence.people.indexOf(emp.name) !== -1;
+      var part = absencePart(day, emp.name);
       var assignedIn = [];
       AGENCIES.forEach(function(a){
         SHIFTS.forEach(function(sp){
@@ -1580,9 +1610,25 @@
         });
       });
       var row = document.createElement("div"); row.className = "emp-row";
+      row.setAttribute("data-name", emp.name);
+      row.setAttribute("data-part", part || "");
       var extra = assignedIn.length ? '<span class="tag-outsede">' + assignedIn.join(", ") + '</span>' : "";
-      row.innerHTML = '<input type="checkbox" id="' + id + '" data-name="' + escapeHtml(emp.name) + '" ' + (checked ? "checked" : "") + '>' +
-        '<label for="' + id + '"><span class="chip-dot" style="background:' + emp.color + '"></span>' + escapeHtml(emp.name) + extra + '</label>';
+      row.innerHTML = '<label id="' + id + '"><span class="chip-dot" style="background:' + emp.color + '"></span>' + escapeHtml(emp.name) + extra + '</label>';
+      var parts = document.createElement("div"); parts.className = "abs-parts";
+      [["giorno","Giorno"],["mattina","Mat"],["pomeriggio","Pom"]].forEach(function(opt){
+        var b = document.createElement("button"); b.type = "button";
+        b.className = "sede-btn" + (part === opt[0] ? " active" : "");
+        b.textContent = opt[1];
+        b.addEventListener("click", function(){
+          var cur = row.getAttribute("data-part");
+          var next = (cur === opt[0]) ? "" : opt[0];
+          row.setAttribute("data-part", next);
+          parts.querySelectorAll("button").forEach(function(x){ x.classList.remove("active"); });
+          if(next) b.classList.add("active");
+        });
+        parts.appendChild(b);
+      });
+      row.appendChild(parts);
       container.appendChild(row);
     });
     document.getElementById("absenceNoteInput").value = (day.absence && day.absence.note) ? day.absence.note : "";
@@ -1590,11 +1636,20 @@
   }
   document.getElementById("absenceSaveBtn").addEventListener("click", function(){
     var w = getWeek(toISO(currentMonday)); var day = w.days[absenceCtx.dayIdx];
-    var selected = collectSelectedFromForm("absenceEmpList", []);
+    var selected = [], newParts = {};
+    document.querySelectorAll("#absenceEmpList .emp-row").forEach(function(row){
+      var pt = row.getAttribute("data-part");
+      if(!pt) return;
+      var name = row.getAttribute("data-name");
+      selected.push(name);
+      if(pt === "mattina" || pt === "pomeriggio") newParts[name] = pt;
+    });
     var toRemove = [];
     selected.forEach(function(name){
+      var pt = newParts[name] || "giorno";
       AGENCIES.forEach(function(a){
         SHIFTS.forEach(function(sp){
+          if(pt !== "giorno" && pt !== sp[0]) return; // assenza parziale: solo il turno coperto
           var arr = day.shifts[a][sp[0]];
           if(arr.indexOf(name) !== -1) toRemove.push({ name: name, agency: a, shift: sp[0] });
         });
@@ -1611,6 +1666,7 @@
       });
     }
     day.absence.people = selected;
+    day.absence.parts = newParts;
     day.absence.note = document.getElementById("absenceNoteInput").value;
     markDirty(toISO(currentMonday)); hideSheet("absenceSheetOverlay"); renderWeek();
   });
@@ -1759,7 +1815,7 @@
             return;
           }
           day.shifts[a][sk] = src.filter(function(n){
-            if(isAbsentOn(day, n)){ skipped.push(DAY_NAMES[idx] + " " + n + " (in ferie)"); return false; }
+            if(isAbsentForShift(day, n, sk)){ skipped.push(DAY_NAMES[idx] + " " + n + " (in ferie " + absenceLabel(absencePart(day, n)) + ")"); return false; }
             return true;
           });
         });
@@ -2661,7 +2717,7 @@
     function eligible(slot){
       var day = w.days[slot.dayIdx];
       return employees.filter(function(emp){
-        return sedeMatches(emp, slot.agency) && !isAbsentOn(day, emp.name) && !busyInShift(day, slot.dayIdx, slot.shift, emp.name);
+        return sedeMatches(emp, slot.agency) && !isAbsentForShift(day, emp.name, slot.shift) && !busyInShift(day, slot.dayIdx, slot.shift, emp.name);
       });
     }
 
@@ -2766,7 +2822,8 @@
             });
           });
         }
-        items.push({ date: date, dayIdx: dayIdx, absent: !!(day && isAbsentOn(day, name)), shifts: shifts });
+        var part = day ? absencePart(day, name) : null;
+        items.push({ date: date, dayIdx: dayIdx, absent: part === "giorno", absentPart: (part === "mattina" || part === "pomeriggio") ? part : null, shifts: shifts });
       }
     }
     return items;
@@ -2779,13 +2836,15 @@
     items.forEach(function(it){
       var label = DAY_NAMES[it.dayIdx] + " " + fmtIt(fromISO(it.date));
       if(it.absent){ lines.push("• " + label + " — ferie/permesso"); any = true; return; }
+      var partTxt = it.absentPart ? ("ferie/permesso " + it.absentPart) : "";
       if(it.shifts.length){
         any = true;
         lines.push("• " + label + " — " + it.shifts.map(function(s){
           return s.agency + ", " + (s.shift === "mattina" ? "mattina" : "pomeriggio") + " (" + shiftTimeLabel(s.shift) + ")";
-        }).join(" + "));
+        }).join(" + ") + (partTxt ? " · " + partTxt : ""));
         return;
       }
+      if(partTxt){ any = true; lines.push("• " + label + " — " + partTxt); return; }
       if(nWeeks === 1) lines.push("• " + label + " — libero");
     });
     if(!any) lines.push("Nessun turno assegnato in questo periodo.");
@@ -2806,6 +2865,12 @@
           "DTSTART;VALUE=DATE:" + icsDate(it.date), "DTEND;VALUE=DATE:" + icsDate(next),
           "SUMMARY:" + icsEscape("Ferie/permesso"), "END:VEVENT");
         return;
+      }
+      if(it.absentPart){
+        var tp = state.shiftTimes[it.absentPart];
+        out.push("BEGIN:VEVENT", "UID:" + uidBase + "-ferie-" + it.absentPart + "@turni-ion", "DTSTAMP:" + stamp,
+          "DTSTART:" + icsDateTime(it.date, tp.start), "DTEND:" + icsDateTime(it.date, tp.end),
+          "SUMMARY:" + icsEscape("Ferie/permesso " + it.absentPart), "END:VEVENT");
       }
       it.shifts.forEach(function(s){
         var t = state.shiftTimes[s.shift];

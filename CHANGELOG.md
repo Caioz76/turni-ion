@@ -2,6 +2,17 @@
 
 > A ogni release aggiornare insieme: `APP_VERSION` in `index.html` e `storico.html`, `CACHE_NAME` in `sw.js`, e questo file.
 
+## v2.5.0 — 15/11/2026 · Ferie a mezza giornata
+
+- **Ferie/permessi per giornata, mattina o pomeriggio**: nella scheda Ferie ogni persona ha i pulsanti *Giorno*, *Mat*, *Pom* (tocca di nuovo per togliere).
+- Salvando, la persona viene tolta solo dai turni coperti dall'assenza (es. ferie al mattino → resta assegnata al pomeriggio).
+- **Nuovo errore**: se qualcuno risulta assegnato a un turno coperto dalle sue ferie (es. dati arrivati da un altro dispositivo), compare nel riquadro "⚠ Sovrapposizioni e ferie", la casella diventa rossa e il contatore in alto lo segnala.
+- Nella scelta del turno la persona è disattivata solo per il turno in cui è assente, con l'indicazione "in ferie (mattina)".
+- Riempimento automatico e Duplica settimana rispettano le assenze parziali.
+- Turni del collega: messaggio WhatsApp e calendario .ics mostrano anche le ferie di mezza giornata.
+- Le assenze parziali sono indicate con "mat"/"pom" accanto al nome, anche nello storico.
+- Compatibilità: un dispositivo con una versione precedente vede l'assenza parziale come giornata intera finché non si aggiorna.
+
 ## v2.4.0 — 15/11/2026 · Novità
 
 ### ✨ Riempimento automatico
