@@ -2,6 +2,15 @@
 
 > A ogni release aggiornare insieme: `APP_VERSION` in `index.html` e `storico.html`, `CACHE_NAME` in `sw.js`, e questo file.
 
+## v2.9.0 — 15/11/2026 · Ferie per periodo
+
+- **Ferie per periodo (dal… al…)**: si apre dalla scheda Ferie di un giorno ("📅 Inserisci ferie per un periodo") o da Colleghi ("🏖 Ferie per un periodo").
+  - Scegli collega, date di inizio e fine, giornata intera / solo mattina / solo pomeriggio, nota facoltativa.
+  - Vale per tutti i giorni da lunedì a sabato del periodo (le domeniche sono escluse), anche su più settimane.
+  - Anteprima prima di salvare: quanti giorni e quali turni già assegnati verranno liberati; chiede conferma.
+  - **Togli ferie** sullo stesso periodo, anche solo per mezza giornata (es. togliere le mattine lascia l'assenza al pomeriggio).
+- **Bug corretto**: salvando la scheda Ferie o un turno, le persone non più presenti nell'elenco dipendenti venivano cancellate da quel giorno senza avviso. Ora restano.
+
 ## v2.8.0 — 15/11/2026 · Immagine WhatsApp ridisegnata
 
 - **Nuovo design**: ogni sede ha il suo colore (Somma Lombardo verde petrolio, Busto Arsizio blu cobalto, Tradate prugna, Oleggio ocra), con una scheda per sede, due per riga.
