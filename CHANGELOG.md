@@ -2,6 +2,22 @@
 
 > A ogni release aggiornare insieme: `APP_VERSION` in `index.html` e `storico.html`, `CACHE_NAME` in `sw.js`, e questo file.
 
+## v2.4.0 — 15/11/2026 · Novità
+
+### ✨ Riempimento automatico
+- Nuovo pulsante **"✨ Riempi automatico"** sotto la settimana.
+- Compila solo i turni aperti ancora vuoti (o con meno persone del previsto): quelli già compilati non vengono toccati.
+- Rispetta sedi assegnate, ferie/permessi, aperture standard e orari straordinari, e non crea sovrapposizioni.
+- Distribuisce i turni in modo equo: prima chi ne ha meno questa settimana, poi chi ha quella sede assegnata, poi chi ne ha fatti meno nelle ultime 4 settimane.
+- Persone per turno: "come nelle ultime settimane" (mediana delle ultime 8 settimane compilate) oppure 1, 2 o 3.
+- Dopo il riempimento compare **"Annulla"** per tornare indietro con un tocco.
+
+### 👥 Turni del collega
+- Nuovo pulsante **"Colleghi"** nella barra in basso.
+- Mostra i turni di una persona per la settimana visualizzata o per 4 settimane, con ferie e giorni liberi.
+- **Invia su WhatsApp** (al numero del collega, se inserito), **Copia testo**, **Scarica calendario (.ics)** da aprire in Google Calendar, Outlook o iPhone.
+- Orari di mattina e pomeriggio modificabili (predefiniti 09:00–13:00 e 14:30–19:00); vengono sincronizzati con gli altri dispositivi.
+
 ## v2.3.1 — 15/11/2026 · Correzione bug minori
 
 - **Rimozione dipendente**: ora chiede conferma (prima bastava un tocco sulla ✕).
