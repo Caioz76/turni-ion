@@ -843,7 +843,7 @@
 <div class="sheet-overlay hidden" id="exportSheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><h3>Esporta settimana</h3><div class="sub">Immagine o PDF della settimana visualizzata</div></div>
+    <div class="sheet-head"><h3>Esporta settimana</h3><div class="sub">Immagine pronta per il gruppo WhatsApp: due sedi per riga, con orari e ferie</div></div>
     <div class="sheet-body">
       <button class="btn btn-primary btn-block" id="copyPngBtn">📋 Copia PNG negli appunti</button>
       <button class="btn btn-outline btn-block" id="exportPngBtn">🖼 Salva / Condividi PNG</button>
@@ -957,7 +957,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.6.0";
+  var APP_VERSION = "2.7.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -2402,61 +2402,157 @@
     if(needPdf && typeof window.jspdf === "undefined"){ alert("Libreria PDF non caricata. Ricarica e riprova."); return false; }
     return true;
   }
+  /* ================= v2.7.0 · Immagine per WhatsApp =================
+     Layout dedicato, sempre largo 1080px (uguale da telefono e da computer):
+     intestazione, due blocchi con due sedi affiancate, ferie/permessi, orari nelle caselle.
+     Non contiene pannelli interni (sovrapposizioni, copertura) né pulsanti. */
+  var EXPORT_PAIRS = [["Somma Lombardo","Busto Arsizio"],["Tradate","Oleggio"]];
+  var DAY_NAMES_FULL = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+  function shortTime(t){ return t.replace(/^0/, "").replace(/:00$/, ""); }
+
+  function exportChip(name, suffix){
+    var color = colorFor(name), bg = tintHex(color, 0.82);
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:' + bg + ';border:1.5px solid ' + color +
+      ';border-radius:14px;padding:3px 11px;margin:2px 4px 2px 0;font-size:17px;font-weight:600;color:#23211D;white-space:nowrap;">' +
+      escapeHtml(name) +
+      (suffix ? '<span style="font-size:12px;font-weight:500;opacity:.75;">' + suffix + '</span>' : "") + '</span>';
+  }
+
+  function buildExportNode(w){
+    var navy = state.theme.navy, accent = state.theme.accent, paper = state.theme.paper;
+    var line = "#D8CDB2";
+    var sat = addDays(currentMonday, 5);
+    var html = '<div style="width:1080px;box-sizing:border-box;padding:32px;background:' + paper + ';font-family:\'IBM Plex Sans\',Arial,sans-serif;color:#23211D;">';
+
+    // Intestazione
+    html += '<div style="display:flex;align-items:center;gap:18px;background:' + navy + ';color:#fff;border-radius:16px;padding:20px 26px;margin-bottom:22px;">';
+    if(state.logo) html += '<img src="' + state.logo + '" style="width:64px;height:64px;border-radius:12px;object-fit:cover;background:#fff;">';
+    html += '<div style="flex:1;"><div style="font-family:Fraunces,Georgia,serif;font-size:30px;font-weight:700;letter-spacing:.5px;">Turni della settimana</div>' +
+      '<div style="font-size:19px;opacity:.85;margin-top:2px;">da lunedì ' + fmtItFull(currentMonday) + ' a sabato ' + fmtItFull(sat) + '</div></div></div>';
+
+    // Blocchi con due sedi
+    EXPORT_PAIRS.forEach(function(pair){
+      html += '<table style="width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1.5px solid ' + line + ';border-radius:14px;overflow:hidden;margin-bottom:22px;table-layout:fixed;">';
+      html += '<colgroup><col style="width:112px">' + '<col><col><col><col>' + '</colgroup>';
+      html += '<tr><th style="background:' + navy + ';"></th>';
+      pair.forEach(function(ag){
+        html += '<th colspan="2" style="background:' + accent + ';color:#fff;font-size:21px;font-weight:700;padding:12px 8px;text-align:center;border-left:3px solid #fff;letter-spacing:.3px;">' + escapeHtml(ag) + '</th>';
+      });
+      html += '</tr><tr><th style="background:' + navy + ';"></th>';
+      pair.forEach(function(){
+        html += '<th style="background:' + tintHex(accent, 0.8) + ';font-size:13px;text-transform:uppercase;letter-spacing:.6px;padding:6px;color:' + navy + ';border-left:3px solid #fff;">Mattina</th>' +
+                '<th style="background:' + tintHex(accent, 0.8) + ';font-size:13px;text-transform:uppercase;letter-spacing:.6px;padding:6px;color:' + navy + ';border-left:1px solid #fff;">Pomeriggio</th>';
+      });
+      html += '</tr>';
+      w.days.forEach(function(day, dayIdx){
+        var d = fromISO(day.date);
+        var rowBg = dayIdx % 2 ? "#FBF8F1" : "#fff";
+        html += '<tr><td style="background:' + navy + ';color:#fff;padding:10px 8px;text-align:center;border-top:1px solid rgba(255,255,255,.15);">' +
+          '<div style="font-size:15px;opacity:.8;">' + DAY_NAMES[dayIdx] + '</div><div style="font-size:26px;font-weight:700;line-height:1.1;">' + d.getDate() + '</div></td>';
+        pair.forEach(function(ag){
+          SHIFTS.forEach(function(sp, sIdx){
+            var sk = sp[0];
+            var open = isShiftOpen(ag, dayIdx, sk, day);
+            var names = (day.shifts[ag] && day.shifts[ag][sk]) ? day.shifts[ag][sk] : [];
+            var border = 'border-top:1px solid ' + line + ';border-left:' + (sIdx === 0 ? '3px solid ' + line : '1px solid ' + line) + ';';
+            if(!open){
+              html += '<td style="' + border + 'background:#EDE8DC;color:#9A927F;font-size:14px;text-align:center;font-style:italic;padding:8px;">chiuso</td>';
+              return;
+            }
+            var hrs = shiftHours(ag, dayIdx, sk);
+            var content = names.length ? names.map(function(n){ return exportChip(n); }).join("") : '<span style="color:#B13B2E;font-size:15px;font-weight:600;">—</span>';
+            html += '<td style="' + border + 'background:' + rowBg + ';padding:8px 8px 9px;vertical-align:top;">' +
+              '<div style="font-size:12px;color:#8A8371;font-family:\'IBM Plex Mono\',monospace;margin-bottom:3px;">' + shortTime(hrs.start) + '–' + shortTime(hrs.end) + '</div>' + content + '</td>';
+          });
+        });
+        html += '</tr>';
+      });
+      html += '</table>';
+    });
+
+    // Ferie / permessi e note
+    var absRows = [];
+    w.days.forEach(function(day, dayIdx){
+      var people = (day.absence && day.absence.people) ? day.absence.people : [];
+      var note = (day.absence && day.absence.note) ? day.absence.note.trim() : "";
+      if(!people.length && !note) return;
+      var chips = people.map(function(n){
+        var pt = absencePart(day, n);
+        return exportChip(n, pt === "mattina" ? "mattina" : (pt === "pomeriggio" ? "pomeriggio" : ""));
+      }).join("");
+      absRows.push('<div style="display:flex;gap:14px;align-items:flex-start;padding:8px 0;border-top:1px solid ' + line + ';">' +
+        '<div style="width:150px;flex-shrink:0;font-size:17px;font-weight:600;padding-top:4px;">' + DAY_NAMES_FULL[dayIdx] + ' ' + fmtIt(fromISO(day.date)) + '</div>' +
+        '<div style="flex:1;">' + chips + (note ? '<div style="font-size:15px;color:#5B564A;margin-top:3px;font-style:italic;">' + escapeHtml(note) + '</div>' : "") + '</div></div>');
+    });
+    if(absRows.length){
+      html += '<div style="background:#fff;border:1.5px solid ' + line + ';border-radius:14px;padding:14px 20px 8px;margin-bottom:18px;">' +
+        '<div style="font-size:20px;font-weight:700;margin-bottom:6px;">🏖 Ferie e permessi</div>' + absRows.join("") + '</div>';
+    }
+    html += '<div style="text-align:right;font-size:12px;color:#8A8371;">Registro Turni · v' + APP_VERSION + '</div></div>';
+
+    var holder = document.createElement("div");
+    holder.style.cssText = "position:fixed;left:-20000px;top:0;z-index:-1;";
+    holder.innerHTML = html;
+    return holder;
+  }
+
+  // Restituisce una Promise<canvas> con l'immagine della settimana visualizzata.
   function captureSheetArea(){
-    var el = document.getElementById("exportArea");
-    return html2canvas(el, { scale: 2, backgroundColor: "#F5F1E6", useCORS: true, allowTaint: true, logging: false });
+    var w = getWeek(toISO(currentMonday));
+    var holder = buildExportNode(w);
+    document.body.appendChild(holder);
+    var target = holder.firstChild;
+    var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    return ready.then(function(){
+      return html2canvas(target, { scale: 2, backgroundColor: state.theme.paper, useCORS: true, allowTaint: true, logging: false, windowWidth: 1200 });
+    }).then(function(canvas){
+      holder.remove(); return canvas;
+    }, function(err){
+      holder.remove(); throw err;
+    });
+  }
+  function captureBlob(){
+    return captureSheetArea().then(function(canvas){
+      return new Promise(function(resolve, reject){
+        canvas.toBlob(function(blob){ blob ? resolve(blob) : reject(new Error("immagine vuota")); }, "image/png");
+      });
+    });
   }
 
   document.getElementById("copyPngBtn").addEventListener("click", function(){
     if(!librariesReady(false)) return;
     var btn = this;
     var originalText = btn.innerHTML;
+    if(!navigator.clipboard || typeof window.ClipboardItem === "undefined"){
+      alert("Il tuo browser non supporta la copia diretta delle immagini negli appunti. Usa 'Salva / Condividi PNG'.");
+      return;
+    }
     btn.textContent = "⏳ Copia in corso…";
     btn.disabled = true;
+    function done(){ btn.innerHTML = originalText; btn.disabled = false; }
 
-    captureSheetArea().then(function(canvas){
-      canvas.toBlob(function(blob){
-        if(!blob){
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-          alert("Esportazione PNG non riuscita.");
-          return;
-        }
-
-        if(!navigator.clipboard || typeof window.ClipboardItem === "undefined"){
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-          alert("Il tuo browser non supporta la copia diretta delle immagini negli appunti. Usa 'Salva / Condividi PNG'.");
-          return;
-        }
-
-        navigator.clipboard.write([
-          new ClipboardItem({ "image/png": blob })
-        ]).then(function(){
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-          hideSheet("exportSheetOverlay");
-          showToast("📋 Immagine copiata! Incollala direttamente su WhatsApp");
-        }).catch(function(err){
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-          alert("Impossibile copiare negli appunti: " + (err && err.message ? err.message : err) + "\n\nSu alcuni dispositivi mobili potrebbe essere necessario usare il pulsante Condividi.");
-        });
-      }, "image/png");
+    // Safari (iPhone/iPad) accetta la copia solo se ClipboardItem viene creato subito nel tocco,
+    // passando la Promise dell'immagine. Se il browser non lo supporta, riproviamo con l'immagine pronta.
+    var blobPromise = captureBlob();
+    var writeP;
+    try{ writeP = navigator.clipboard.write([new ClipboardItem({ "image/png": blobPromise })]); }
+    catch(e){ writeP = Promise.reject(e); }
+    writeP.catch(function(){
+      return blobPromise.then(function(blob){ return navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); });
+    }).then(function(){
+      done();
+      hideSheet("exportSheetOverlay");
+      showToast("📋 Immagine copiata! Incollala direttamente su WhatsApp");
     }).catch(function(err){
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      alert("Errore generazione immagine: " + (err && err.message ? err.message : err));
+      done();
+      alert("Impossibile copiare negli appunti: " + (err && err.message ? err.message : err) + "\n\nUsa 'Salva / Condividi PNG' e scegli WhatsApp.");
     });
   });
 
   document.getElementById("exportPngBtn").addEventListener("click", function(){
     if(!librariesReady(false)) return;
-    captureSheetArea().then(function(canvas){
-      canvas.toBlob(function(blob){
-        if(!blob){ alert("Esportazione PNG non riuscita."); return; }
-        shareOrDownload(blob, exportFilenameBase() + ".png", "image/png");
-      }, "image/png");
+    captureBlob().then(function(blob){
+      shareOrDownload(blob, exportFilenameBase() + ".png", "image/png");
     }).catch(function(err){ alert("Esportazione PNG non riuscita: " + (err && err.message ? err.message : err)); });
   });
 
