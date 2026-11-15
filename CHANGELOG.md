@@ -2,6 +2,18 @@
 
 > A ogni release aggiornare insieme: `APP_VERSION` in `index.html` e `storico.html`, `CACHE_NAME` in `sw.js`, e questo file.
 
+## v2.7.0 — 15/11/2026 · Immagine per WhatsApp
+
+- **Nuova immagine esportata**, uguale da telefono e da computer (larghezza fissa, alta risoluzione):
+  - intestazione con logo e date della settimana;
+  - due blocchi con **due sedi affiancate** (Somma Lombardo + Busto Arsizio, Tradate + Oleggio), mattina e pomeriggio per ogni giorno;
+  - **orari** della fascia in ogni casella (es. 9–12, 14–16), turni chiusi in grigio, turni scoperti segnati con "—";
+  - riquadro **Ferie e permessi** con mezze giornate e note.
+- L'immagine non contiene più i pannelli interni (sovrapposizioni, copertura mancante) né i pulsanti dell'app.
+- Lo sfondo segue la palette colori scelta.
+- **Copia negli appunti su iPhone/iPad**: corretta (prima Safari poteva bloccarla).
+- Il PDF usa lo stesso layout.
+
 ## v2.6.0 — 15/11/2026 · Orari reali per agenzia
 
 - **Orari diversi per agenzia e giorno**, impostati sugli orari reali:
