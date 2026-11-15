@@ -137,7 +137,7 @@
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
   var DAY_NAMES = ["Lun","Mar","Mer","Gio","Ven","Sab"];
-  var APP_VERSION = "2.4.0"; // tenere allineata a index.html
+  var APP_VERSION = "2.5.0"; // tenere allineata a index.html
   var LS_STATE = "turni_state_v2";
 
   function hexToRgb(hex){ hex=hex.replace("#",""); if(hex.length===3) hex=hex.split("").map(function(c){return c+c;}).join(""); var num=parseInt(hex,16); return {r:(num>>16)&255,g:(num>>8)&255,b:num&255}; }
@@ -165,6 +165,11 @@
 
   function findEmployee(name){ return state.employees.filter(function(e){ return e.name===name; })[0]; }
   function colorFor(name){ var e=findEmployee(name); return (e&&e.color) ? e.color : hslToHex(hashHue(name),45,55); }
+  function absChip(day, n){
+    var pt = day.absence.parts && day.absence.parts[n];
+    var chip = chipHtml(n, true);
+    return (pt === "mattina" || pt === "pomeriggio") ? chip.replace(/<\/span>$/, ' <small>('+(pt==="mattina"?"mat":"pom")+')</small></span>') : chip;
+  }
   function chipHtml(name, absent){
     var color=colorFor(name); var bg=tintHex(color,0.85);
     var cls=absent?"chip chip-absent":"chip";
@@ -189,6 +194,7 @@
         if(!d.absence) d.absence={ people:[], note:(typeof d.note==="string")?d.note:"" };
         if(!d.absence.people) d.absence.people=[];
         if(typeof d.absence.note!=="string") d.absence.note="";
+        if(!d.absence.parts || typeof d.absence.parts!=="object") d.absence.parts={};
       });
     });
     return st;
@@ -314,7 +320,7 @@
         });
         var absPeople = day.absence.people.filter(function(n){ return !empFilter || n===empFilter; });
         if(!empFilter || absPeople.length){
-          var absChips = day.absence.people.length ? day.absence.people.map(function(n){ return chipHtml(n,true); }).join("") : '<span class="none-txt">nessuno</span>';
+          var absChips = day.absence.people.length ? day.absence.people.map(function(n){ return absChip(day,n); }).join("") : '<span class="none-txt">nessuno</span>';
           body += '<div class="agency-line"><b>Ferie/Permessi:</b><br>'+absChips;
           if(day.absence.note && day.absence.note.trim()) body += '<div class="abs-note-text">'+escapeHtml(day.absence.note)+'</div>';
           body += '</div>';
@@ -435,7 +441,7 @@
           body += '<div class="agency-line"><b>'+AGENCY_CODES[agency]+' '+sp[1]+':</b> '+chips+'</div>';
         });
       });
-      var absChips = day.absence.people.length ? day.absence.people.map(function(n){ return chipHtml(n,true); }).join("") : '<span class="none-txt">nessuno</span>';
+      var absChips = day.absence.people.length ? day.absence.people.map(function(n){ return absChip(day,n); }).join("") : '<span class="none-txt">nessuno</span>';
       body += '<div class="agency-line"><b>Ferie/Permessi:</b> '+absChips+'</div>';
       html += '<div class="day-row"><div class="day-row-title">'+DAY_NAMES[dayIdx]+' '+fmtIt(d)+'</div><div class="day-row-body">'+body+'</div></div>';
     });
