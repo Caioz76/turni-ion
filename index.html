@@ -525,6 +525,14 @@
   .opening-agency-title:first-child { margin-top: 0; }
   .opening-day-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 2px; border-bottom: 1px solid var(--line); }
   .opening-day-row label { font-size: 13.5px; flex: 0 0 90px; }
+  .hours-row { flex-direction: column; align-items: stretch; gap: 6px; }
+  .hours-row label { flex: none; font-weight: 600; }
+  .hours-shifts { display: flex; flex-direction: column; gap: 6px; }
+  .hours-line { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .hours-line input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0; }
+  .hours-line .hours-name { width: 30px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); }
+  .hours-line input[type=time] { padding: 5px 6px; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 13px; background: #fff; min-width: 0; width: 0; flex: 1 1 0; max-width: 150px; }
+  .hours-line.is-closed input[type=time] { opacity: .35; }
   .opening-day-row select { flex: 1; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 13px; background: #fff; }
 
   .logo-preview {
@@ -680,7 +688,7 @@
       <button class="settings-row" data-open="logoSheetOverlay"><span>🖼 Logo</span><span class="chev">›</span></button>
       <div class="settings-section-label">Organizzazione</div>
       <button class="settings-row" data-open="empSheetOverlay"><span>👤 Elenco dipendenti</span><span class="chev">›</span></button>
-      <button class="settings-row" data-open="openingSheetOverlay"><span>🏬 Aperture agenzie</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="openingSheetOverlay"><span>🏬 Aperture e orari agenzie</span><span class="chev">›</span></button>
       <button class="settings-row" data-open="statsSheetOverlay"><span>📊 Conteggio turni</span><span class="chev">›</span></button>
       <div class="settings-section-label">Memoria &amp; Cloud</div>
       <button class="settings-row" data-open="cloudSheetOverlay"><span>☁️ Sincronizza con Google Drive</span><span class="chev">›</span></button>
@@ -719,7 +727,7 @@
 <div class="sheet-overlay hidden" id="openingSheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><h3>Aperture agenzie</h3><div class="sub">Per ogni agenzia e giorno della settimana</div></div>
+    <div class="sheet-head"><h3>Aperture e orari</h3><div class="sub">Per ogni agenzia e giorno della settimana</div></div>
     <div class="sheet-body" id="openingBody"></div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="openingSheetOverlay">Chiudi</button></div>
   </div>
@@ -938,11 +946,7 @@
       <button class="btn btn-primary btn-block" id="colleagueWaBtn">💬 Invia su WhatsApp</button>
       <button class="btn btn-outline btn-block" id="colleagueCopyBtn">📋 Copia testo</button>
       <button class="btn btn-outline btn-block" id="colleagueIcsBtn">📅 Scarica calendario (.ics)</button>
-      <details class="times-box">
-        <summary>Orari dei turni (usati nel messaggio e nel calendario)</summary>
-        <div class="time-row"><span>Mattina</span><input type="time" id="timeMatStart"> – <input type="time" id="timeMatEnd"></div>
-        <div class="time-row"><span>Pomeriggio</span><input type="time" id="timePomStart"> – <input type="time" id="timePomEnd"></div>
-      </details>
+      <div class="companion-note">Gli orari di ogni agenzia si modificano in <b>Impostazioni → Aperture e orari agenzie</b>.</div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="colleagueSheetOverlay">Chiudi</button></div>
   </div>
@@ -953,7 +957,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.5.0";
+  var APP_VERSION = "2.6.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -1006,7 +1010,23 @@
     return { start: mondayISO, days: days };
   }
   var DEFAULT_THEME = { accent: "#2F6F62", navy: "#223349", paper: "#F5F1E6" };
-  var DEFAULT_SHIFT_TIMES = { mattina: { start: "09:00", end: "13:00" }, pomeriggio: { start: "14:30", end: "19:00" } };
+  var DEFAULT_SHIFT_TIMES = { mattina: { start: "09:00", end: "12:00" }, pomeriggio: { start: "14:00", end: "17:00" } };
+  // Orari reali delle agenzie (v2.6.0). Indici giorno: 0 = lunedì … 5 = sabato. null = chiuso.
+  var DEFAULT_AGENCY_HOURS = (function(){
+    function day(m, p){ return { mattina: m, pomeriggio: p }; }
+    var M = ["09:00","12:00"], P17 = ["14:00","17:00"], P16 = ["14:00","16:00"];
+    return {
+      "Somma Lombardo": [day(M,P17), day(M,P17), day(M,P17), day(M,P17), day(M,P17), day(M,null)],
+      "Busto Arsizio":  [day(M,P16), day(M,P16), day(M,P16), day(M,P16), day(M,P16), day(M,null)],
+      "Tradate":        [day(M,null), day(M,null), day(M,P16), day(M,null), day(M,null), day(M,null)],
+      "Oleggio":        [day(M,null), day(M,P16), day(M,null), day(M,P16), day(M,null), day(null,null)]
+    };
+  })();
+  function defaultShiftHours(agency, d, shiftKey){
+    var src = DEFAULT_AGENCY_HOURS[agency] && DEFAULT_AGENCY_HOURS[agency][d] && DEFAULT_AGENCY_HOURS[agency][d][shiftKey];
+    var fb = DEFAULT_SHIFT_TIMES[shiftKey];
+    return src ? { open: true, start: src[0], end: src[1] } : { open: false, start: fb.start, end: fb.end };
+  }
 
   function normalizeState(st){
     if(!st || typeof st !== "object") st = {};
@@ -1026,6 +1046,20 @@
     st.theme.navy = st.theme.navy || DEFAULT_THEME.navy;
     st.theme.paper = st.theme.paper || DEFAULT_THEME.paper;
     if(!st.openingSchedule) st.openingSchedule = {};
+    if(!st.agencyHours || typeof st.agencyHours !== "object") st.agencyHours = {};
+    AGENCIES.forEach(function(a){
+      if(!Array.isArray(st.agencyHours[a])) st.agencyHours[a] = [];
+      for(var dd = 0; dd < 6; dd++){
+        if(!st.agencyHours[a][dd] || typeof st.agencyHours[a][dd] !== "object") st.agencyHours[a][dd] = {};
+        ["mattina","pomeriggio"].forEach(function(sk){
+          var cur = st.agencyHours[a][dd][sk];
+          if(!cur || typeof cur !== "object" || typeof cur.open !== "boolean" || !cur.start || !cur.end){
+            st.agencyHours[a][dd][sk] = defaultShiftHours(a, dd, sk);
+          }
+        });
+      }
+    });
+    syncOpeningScheduleFromHours(st);
     if(!st.shiftTimes || typeof st.shiftTimes !== "object") st.shiftTimes = {};
     ["mattina","pomeriggio"].forEach(function(k){
       var def = DEFAULT_SHIFT_TIMES[k];
@@ -1855,7 +1889,7 @@
   function contentSignature(st){
     var weeks = {};
     Object.keys(st.weeks || {}).forEach(function(k){ if(weekHasData(st.weeks[k])) weeks[k] = st.weeks[k]; });
-    return canonical({ employees: st.employees, weeks: weeks, theme: st.theme, openingSchedule: st.openingSchedule, logo: st.logo, shiftTimes: st.shiftTimes, deletedWeeks: st.deletedWeeks });
+    return canonical({ employees: st.employees, weeks: weeks, theme: st.theme, openingSchedule: st.openingSchedule, agencyHours: st.agencyHours, logo: st.logo, shiftTimes: st.shiftTimes, deletedWeeks: st.deletedWeeks });
   }
   function mergeStates(local, remote){
     var remoteIsNewerOverall = tsOf(remote.meta.updatedAt) > tsOf(local.meta.updatedAt);
@@ -1870,6 +1904,7 @@
       merged.employees = deepCopy(remote.employees);
       merged.theme = deepCopy(remote.theme);
       merged.openingSchedule = deepCopy(remote.openingSchedule);
+      merged.agencyHours = deepCopy(remote.agencyHours);
       merged.logo = remote.logo;
       merged.shiftTimes = deepCopy(remote.shiftTimes);
       merged.meta.settingsUpdatedAt = remote.meta.settingsUpdatedAt;
@@ -2469,11 +2504,30 @@
     applyTheme(); initPaletteInputs(); markDirty();
   });
 
-  var OPENING_LABELS = { closed: "Chiuso", morningOnly: "Solo mattina", fullDay: "Mattina e pomeriggio" };
   var OPENING_DAY_NAMES = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
   function openingKey(agency, dayIndex){ return agency + "_" + dayIndex; }
+
+  /* v2.6.0 · Orari per agenzia e giorno. agencyHours[agenzia][giorno][turno] = { open, start, end }.
+     Sono l'unica fonte per sapere se un turno è aperto e con quali orari.
+     openingSchedule viene ricalcolato da qui per compatibilità con le versioni precedenti. */
   function openingStatus(agency, dayIndex){
-    return state.openingSchedule[openingKey(agency, dayIndex)] || "fullDay";
+    var h = state.agencyHours[agency][dayIndex];
+    if(!h.mattina.open && !h.pomeriggio.open) return "closed";
+    if(h.mattina.open && !h.pomeriggio.open) return "morningOnly";
+    return "fullDay";
+  }
+  function syncOpeningScheduleFromHours(st){
+    st.openingSchedule = {};
+    AGENCIES.forEach(function(a){
+      for(var d = 0; d < 6; d++){
+        var h = st.agencyHours[a][d];
+        st.openingSchedule[openingKey(a, d)] = (!h.mattina.open && !h.pomeriggio.open) ? "closed" : ((h.mattina.open && !h.pomeriggio.open) ? "morningOnly" : "fullDay");
+      }
+    });
+  }
+  function hoursFor(agency, dayIndex, shiftKey){
+    var h = state.agencyHours[agency] && state.agencyHours[agency][dayIndex] && state.agencyHours[agency][dayIndex][shiftKey];
+    return (h && h.open) ? h : null;
   }
   function isShiftOpen(agency, dayIndex, shiftKey, day){
     if(day && day.shiftOverrides){
@@ -2481,10 +2535,7 @@
       if(override === "closed") return false;
       if(override === "open") return true;
     }
-    var status = openingStatus(agency, dayIndex);
-    if(status === "closed") return false;
-    if(status === "morningOnly") return shiftKey === "mattina";
-    return true;
+    return !!hoursFor(agency, dayIndex, shiftKey);
   }
 
   function computeEmployeeStats(scopeAllWeeks, currentWeek){
@@ -2549,9 +2600,27 @@
   }
   document.getElementById("statsScopeSelect").addEventListener("change", renderStats);
 
+  // Turni che risulterebbero chiusi (da questa settimana in avanti) e hanno ancora persone assegnate.
+  function closedAssignmentsFor(agency, dayIndex){
+    var fromISO_ = toISO(getMonday(new Date()));
+    var affected = [];
+    Object.keys(weeksStore).forEach(function(wk){
+      if(wk < fromISO_) return;
+      var day = weeksStore[wk].days && weeksStore[wk].days[dayIndex];
+      if(!day || !day.shifts || !day.shifts[agency]) return;
+      SHIFTS.forEach(function(sp){
+        var arr = day.shifts[agency][sp[0]] || [];
+        if(arr.length && !isShiftOpen(agency, dayIndex, sp[0], day)){
+          affected.push({ week: wk, day: day, shift: sp[0], names: arr.slice() });
+        }
+      });
+    });
+    return affected;
+  }
+
   function renderOpeningBody(){
     var container = document.getElementById("openingBody");
-    container.innerHTML = "";
+    container.innerHTML = '<div class="emp-hint">Spunta i turni in cui l\'agenzia è aperta e indica gli orari: valgono per i turni, il riempimento automatico, i messaggi WhatsApp e il calendario dei colleghi. Per festività o eccezioni usa "Orari straordinari" nel singolo giorno.</div>';
     AGENCIES.forEach(function(agency){
       var title = document.createElement("div");
       title.className = "opening-agency-title";
@@ -2560,46 +2629,48 @@
       for(var d = 0; d < 6; d++){
         (function(dayIndex){
           var row = document.createElement("div");
-          row.className = "opening-day-row";
-          var select = document.createElement("select");
-          Object.keys(OPENING_LABELS).forEach(function(key){
-            var opt = document.createElement("option");
-            opt.value = key; opt.textContent = OPENING_LABELS[key];
-            if(openingStatus(agency, dayIndex) === key) opt.selected = true;
-            select.appendChild(opt);
-          });
-          select.addEventListener("change", function(){
-            var key = openingKey(agency, dayIndex);
-            var previous = state.openingSchedule[key];
-            state.openingSchedule[key] = select.value;
-            // Dalla settimana in corso in avanti: le persone già assegnate a turni che ora risultano chiusi
-            // verrebbero nascoste. Chiediamo conferma e le togliamo. Lo storico passato non viene toccato.
-            var fromISO_ = toISO(getMonday(new Date()));
-            var affected = [];
-            Object.keys(weeksStore).forEach(function(wk){
-              if(wk < fromISO_) return;
-              var day = weeksStore[wk].days && weeksStore[wk].days[dayIndex];
-              if(!day || !day.shifts || !day.shifts[agency]) return;
-              SHIFTS.forEach(function(sp){
-                var arr = day.shifts[agency][sp[0]] || [];
-                if(arr.length && !isShiftOpen(agency, dayIndex, sp[0], day)){
-                  affected.push({ week: wk, day: day, shift: sp[0], names: arr.slice() });
+          row.className = "opening-day-row hours-row";
+          var lbl = document.createElement("label"); lbl.textContent = OPENING_DAY_NAMES[dayIndex];
+          row.appendChild(lbl);
+          var shiftsBox = document.createElement("div"); shiftsBox.className = "hours-shifts";
+          SHIFTS.forEach(function(sp){
+            var shiftKey = sp[0];
+            var h = state.agencyHours[agency][dayIndex][shiftKey];
+            var line = document.createElement("div"); line.className = "hours-line" + (h.open ? "" : " is-closed");
+            var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = h.open;
+            cb.setAttribute("aria-label", sp[1] + " aperto");
+            var name = document.createElement("span"); name.className = "hours-name"; name.textContent = shiftKey === "mattina" ? "Mat" : "Pom";
+            var tStart = document.createElement("input"); tStart.type = "time"; tStart.value = h.start;
+            var dash = document.createElement("span"); dash.textContent = "–";
+            var tEnd = document.createElement("input"); tEnd.type = "time"; tEnd.value = h.end;
+            tStart.disabled = tEnd.disabled = !h.open;
+            cb.addEventListener("change", function(){
+              h.open = cb.checked;
+              if(!h.open){
+                var affected = closedAssignmentsFor(agency, dayIndex);
+                if(affected.length){
+                  var lines = affected.map(function(a){ return "• " + fmtItFull(fromISO(a.day.date)) + " " + (a.shift === "mattina" ? "mattina" : "pomeriggio") + ": " + a.names.join(", "); }).join("\n");
+                  if(!window.confirm("Con il nuovo orario di " + agency + " questi turni risultano chiusi e le persone assegnate verranno tolte:\n\n" + lines + "\n\nContinuare?")){
+                    h.open = true; cb.checked = true; return;
+                  }
+                  affected.forEach(function(a){ a.day.shifts[agency][a.shift] = []; markDirty(a.week); });
                 }
-              });
-            });
-            if(affected.length){
-              var lines = affected.map(function(a){ return "• " + fmtItFull(fromISO(a.day.date)) + " " + (a.shift === "mattina" ? "mattina" : "pomeriggio") + ": " + a.names.join(", "); }).join("\n");
-              if(!window.confirm("Con il nuovo orario di " + agency + " questi turni risultano chiusi e le persone assegnate verranno tolte:\n\n" + lines + "\n\nContinuare?")){
-                if(typeof previous === "undefined") delete state.openingSchedule[key]; else state.openingSchedule[key] = previous;
-                select.value = openingStatus(agency, dayIndex);
-                return;
               }
-              affected.forEach(function(a){ a.day.shifts[agency][a.shift] = []; markDirty(a.week); });
+              syncOpeningScheduleFromHours(state);
+              tStart.disabled = tEnd.disabled = !h.open;
+              line.className = "hours-line" + (h.open ? "" : " is-closed");
+              markDirty(); renderWeek();
+            });
+            function onTime(){
+              if(!tStart.value || !tEnd.value) return;
+              if(tEnd.value <= tStart.value){ alert("L'orario di fine deve essere dopo l'inizio."); tStart.value = h.start; tEnd.value = h.end; return; }
+              h.start = tStart.value; h.end = tEnd.value; markDirty();
             }
-            markDirty(); renderWeek();
+            tStart.addEventListener("change", onTime); tEnd.addEventListener("change", onTime);
+            line.appendChild(cb); line.appendChild(name); line.appendChild(tStart); line.appendChild(dash); line.appendChild(tEnd);
+            shiftsBox.appendChild(line);
           });
-          row.innerHTML = "<label>" + OPENING_DAY_NAMES[dayIndex] + "</label>";
-          row.appendChild(select);
+          row.appendChild(shiftsBox);
           container.appendChild(row);
         })(d);
       }
@@ -2800,9 +2871,25 @@
 
   /* ================= v2.4.0 · Turni del singolo collega ================= */
 
-  function shiftTimeLabel(shiftKey){
-    var t = state.shiftTimes[shiftKey];
-    return t.start + "–" + t.end;
+  // Orari del turno in quella agenzia/giorno; se il turno è aperto solo per un'eccezione usa gli orari generici.
+  function shiftHours(agency, dayIdx, shiftKey){
+    var h = hoursFor(agency, dayIdx, shiftKey) || state.agencyHours[agency][dayIdx][shiftKey];
+    return { start: h.start, end: h.end };
+  }
+  function shiftTimeLabel(agency, dayIdx, shiftKey){
+    var h = shiftHours(agency, dayIdx, shiftKey);
+    return h.start + "–" + h.end;
+  }
+  // Fascia oraria di un'assenza parziale: dal primo inizio all'ultima fine tra le agenzie aperte quel giorno.
+  function absenceWindow(dayIdx, part){
+    var start = null, end = null;
+    AGENCIES.forEach(function(a){
+      var h = hoursFor(a, dayIdx, part);
+      if(!h) return;
+      if(!start || h.start < start) start = h.start;
+      if(!end || h.end > end) end = h.end;
+    });
+    return start ? { start: start, end: end } : DEFAULT_SHIFT_TIMES[part];
   }
   function colleagueItems(name, startMonday, nWeeks){
     var items = [];
@@ -2840,7 +2927,7 @@
       if(it.shifts.length){
         any = true;
         lines.push("• " + label + " — " + it.shifts.map(function(s){
-          return s.agency + ", " + (s.shift === "mattina" ? "mattina" : "pomeriggio") + " (" + shiftTimeLabel(s.shift) + ")";
+          return s.agency + ", " + (s.shift === "mattina" ? "mattina" : "pomeriggio") + " (" + shiftTimeLabel(s.agency, it.dayIdx, s.shift) + ")";
         }).join(" + ") + (partTxt ? " · " + partTxt : ""));
         return;
       }
@@ -2867,13 +2954,13 @@
         return;
       }
       if(it.absentPart){
-        var tp = state.shiftTimes[it.absentPart];
+        var tp = absenceWindow(it.dayIdx, it.absentPart);
         out.push("BEGIN:VEVENT", "UID:" + uidBase + "-ferie-" + it.absentPart + "@turni-ion", "DTSTAMP:" + stamp,
           "DTSTART:" + icsDateTime(it.date, tp.start), "DTEND:" + icsDateTime(it.date, tp.end),
           "SUMMARY:" + icsEscape("Ferie/permesso " + it.absentPart), "END:VEVENT");
       }
       it.shifts.forEach(function(s){
-        var t = state.shiftTimes[s.shift];
+        var t = shiftHours(s.agency, it.dayIdx, s.shift);
         out.push("BEGIN:VEVENT", "UID:" + uidBase + "-" + AGENCY_CODES[s.agency] + "-" + s.shift + "@turni-ion", "DTSTAMP:" + stamp,
           "DTSTART:" + icsDateTime(it.date, t.start), "DTEND:" + icsDateTime(it.date, t.end),
           "SUMMARY:" + icsEscape("Turno " + (s.shift === "mattina" ? "mattina" : "pomeriggio") + " · " + s.agency),
@@ -2891,10 +2978,6 @@
     var names = employees.map(function(e){ return e.name; }).sort(function(a, b){ return a.localeCompare(b, "it"); });
     if(!colleagueSelected || names.indexOf(colleagueSelected) === -1) colleagueSelected = names[0] || null;
     sel.innerHTML = names.map(function(n){ return '<option value="' + escapeHtml(n) + '"' + (n === colleagueSelected ? " selected" : "") + ">" + escapeHtml(n) + "</option>"; }).join("");
-    document.getElementById("timeMatStart").value = state.shiftTimes.mattina.start;
-    document.getElementById("timeMatEnd").value = state.shiftTimes.mattina.end;
-    document.getElementById("timePomStart").value = state.shiftTimes.pomeriggio.start;
-    document.getElementById("timePomEnd").value = state.shiftTimes.pomeriggio.end;
     renderColleaguePreview();
   }
   function renderColleaguePreview(){
@@ -2918,14 +3001,6 @@
     var emp = findEmployee(colleagueSelected); if(!emp) return;
     emp.phone = this.value.trim();
     markDirty();
-  });
-  [["timeMatStart","mattina","start"],["timeMatEnd","mattina","end"],["timePomStart","pomeriggio","start"],["timePomEnd","pomeriggio","end"]].forEach(function(cfg){
-    document.getElementById(cfg[0]).addEventListener("change", function(){
-      if(!this.value) return;
-      state.shiftTimes[cfg[1]][cfg[2]] = this.value;
-      markDirty();
-      renderColleaguePreview();
-    });
   });
   document.getElementById("colleagueWaBtn").addEventListener("click", function(){
     if(!colleagueSelected) return;
