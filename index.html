@@ -650,6 +650,7 @@
     <div class="sheet-head"><h3>Ferie &amp; permessi</h3><div class="sub" id="absenceSheetSub"></div></div>
     <div class="sheet-body">
       <div class="emp-hint">Per ogni persona scegli <b>Giorno</b> (giornata intera), <b>Mat</b> (solo mattina) o <b>Pom</b> (solo pomeriggio); tocca di nuovo per togliere. Chi è assente viene tolto dai turni coperti dall'assenza.</div>
+      <button class="btn btn-outline btn-block" id="absencePeriodBtn" type="button">📅 Inserisci ferie per un periodo (dal… al…)</button>
       <div class="emp-list" id="absenceEmpList"></div>
       <label class="field-label">Nota (facoltativa)</label>
       <textarea class="note-input" id="absenceNoteInput" placeholder="es. malattia, corso…"></textarea>
@@ -946,9 +947,44 @@
       <button class="btn btn-primary btn-block" id="colleagueWaBtn">💬 Invia su WhatsApp</button>
       <button class="btn btn-outline btn-block" id="colleagueCopyBtn">📋 Copia testo</button>
       <button class="btn btn-outline btn-block" id="colleagueIcsBtn">📅 Scarica calendario (.ics)</button>
+      <button class="btn btn-outline btn-block" id="colleaguePeriodBtn">🏖 Ferie per un periodo</button>
       <div class="companion-note">Gli orari di ogni agenzia si modificano in <b>Impostazioni → Aperture e orari agenzie</b>.</div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="colleagueSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<!-- ===== Sheet: ferie per periodo (v2.9.0) ===== -->
+<div class="sheet-overlay hidden" id="periodSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>🏖 Ferie per periodo</h3><div class="sub">Dal… al…, per un collega</div></div>
+    <div class="sheet-body">
+      <label class="field-label" for="periodAction">Cosa vuoi fare</label>
+      <select id="periodAction">
+        <option value="add">Inserisci ferie / permesso</option>
+        <option value="remove">Togli ferie / permesso</option>
+      </select>
+      <label class="field-label" for="periodEmp">Collega</label>
+      <select id="periodEmp"></select>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;"><label class="field-label" for="periodFrom">Dal</label><input type="date" id="periodFrom"></div>
+        <div style="flex:1;"><label class="field-label" for="periodTo">Al</label><input type="date" id="periodTo"></div>
+      </div>
+      <label class="field-label" for="periodPart">Ogni giorno</label>
+      <select id="periodPart">
+        <option value="giorno">Giornata intera</option>
+        <option value="mattina">Solo mattina</option>
+        <option value="pomeriggio">Solo pomeriggio</option>
+      </select>
+      <label class="field-label" for="periodNote">Nota (facoltativa)</label>
+      <input type="text" id="periodNote" placeholder="es. ferie estive, malattia…">
+      <div class="colleague-preview" id="periodPreview"></div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="periodSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="periodSaveBtn">Salva</button>
+    </div>
   </div>
 </div>
 
@@ -957,7 +993,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.8.0";
+  var APP_VERSION = "2.9.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -1622,7 +1658,10 @@
   }
   document.getElementById("cellSaveBtn").addEventListener("click", function(){
     var w = getWeek(toISO(currentMonday));
-    w.days[cellCtx.dayIdx].shifts[cellCtx.agency][cellCtx.shift] = collectSelectedFromForm("cellEmpList", []);
+    var prevNames = w.days[cellCtx.dayIdx].shifts[cellCtx.agency][cellCtx.shift] || [];
+    // Chi non è più nell'elenco dipendenti non compare tra le caselle: non va cancellato dal turno.
+    var kept = prevNames.filter(function(n){ return !findEmployee(n); });
+    w.days[cellCtx.dayIdx].shifts[cellCtx.agency][cellCtx.shift] = kept.concat(collectSelectedFromForm("cellEmpList", []).filter(function(n){ return kept.indexOf(n) === -1; }));
     markDirty(toISO(currentMonday)); hideSheet("cellSheetOverlay"); renderWeek();
   });
 
@@ -1699,6 +1738,12 @@
         if(i !== -1) arr.splice(i, 1);
       });
     }
+    // Assenze di persone non più in elenco: non compaiono nella scheda, quindi le conserviamo.
+    (day.absence.people || []).forEach(function(n){
+      if(findEmployee(n) || selected.indexOf(n) !== -1) return;
+      selected.push(n);
+      if(day.absence.parts && day.absence.parts[n]) newParts[n] = day.absence.parts[n];
+    });
     day.absence.people = selected;
     day.absence.parts = newParts;
     day.absence.note = document.getElementById("absenceNoteInput").value;
@@ -3149,6 +3194,159 @@
     var blob = new Blob([ics], { type: "text/calendar" });
     var fname = "turni_" + colleagueSelected.replace(/[^A-Za-z0-9]+/g, "_") + "_" + toISO(currentMonday) + ".ics";
     shareOrDownload(blob, fname, "text/calendar");
+  });
+
+  /* ================= v2.9.0 · Ferie per periodo ================= */
+  var periodCtx = { preselect: null };
+  function openPeriodSheet(fromDateISO, name){
+    var sel = document.getElementById("periodEmp");
+    var names = employees.map(function(e){ return e.name; }).sort(function(a, b){ return a.localeCompare(b, "it"); });
+    var chosen = (name && names.indexOf(name) !== -1) ? name : (sel.value && names.indexOf(sel.value) !== -1 ? sel.value : names[0]);
+    sel.innerHTML = names.map(function(n){ return '<option value="' + escapeHtml(n) + '"' + (n === chosen ? " selected" : "") + ">" + escapeHtml(n) + "</option>"; }).join("");
+    var from = fromDateISO || toISO(currentMonday);
+    document.getElementById("periodFrom").value = from;
+    document.getElementById("periodTo").value = from;
+    document.getElementById("periodPart").value = "giorno";
+    document.getElementById("periodAction").value = "add";
+    document.getElementById("periodNote").value = "";
+    showSheet("periodSheetOverlay");
+    renderPeriodPreview();
+  }
+
+  // Elenco dei giorni lun–sab dell'intervallo (la domenica non ha turni).
+  function periodDays(fromISO_, toISO_){
+    var out = [];
+    if(!fromISO_ || !toISO_) return out;
+    var d = fromISO(fromISO_), end = fromISO(toISO_);
+    var guard = 0;
+    while(d <= end && guard < 400){
+      if(d.getDay() !== 0) out.push(new Date(d));
+      d = addDays(d, 1); guard++;
+    }
+    return out;
+  }
+
+  // Calcola cosa succederebbe, senza modificare nulla.
+  function planPeriod(){
+    var name = document.getElementById("periodEmp").value;
+    var fromV = document.getElementById("periodFrom").value, toV = document.getElementById("periodTo").value;
+    var part = document.getElementById("periodPart").value;
+    var action = document.getElementById("periodAction").value;
+    var res = { name: name, part: part, action: action, days: [], removals: [], error: null };
+    if(!name){ res.error = "Scegli un collega."; return res; }
+    if(!fromV || !toV){ res.error = "Indica le date di inizio e fine."; return res; }
+    if(toV < fromV){ res.error = "La data di fine è prima della data di inizio."; return res; }
+    var days = periodDays(fromV, toV);
+    if(days.length > 160){ res.error = "Il periodo è troppo lungo (massimo circa 6 mesi)."; return res; }
+    res.days = days;
+    if(action === "add"){
+      days.forEach(function(d){
+        var wk = weeksStore[toISO(getMonday(d))];
+        if(!wk) return;
+        var day = wk.days[d.getDay() - 1];
+        if(!day) return;
+        AGENCIES.forEach(function(a){
+          SHIFTS.forEach(function(sp){
+            if(part !== "giorno" && part !== sp[0]) return;
+            if(day.shifts[a] && day.shifts[a][sp[0]].indexOf(name) !== -1) res.removals.push({ date: d, agency: a, shift: sp[0] });
+          });
+        });
+      });
+    }
+    return res;
+  }
+
+  function renderPeriodPreview(){
+    var box = document.getElementById("periodPreview");
+    var p = planPeriod();
+    if(p.error){ box.innerHTML = '<span style="color:var(--alert);">' + escapeHtml(p.error) + '</span>'; return; }
+    var first = p.days[0], last = p.days[p.days.length - 1];
+    if(!p.days.length){ box.textContent = "Nessun giorno lavorativo nel periodo scelto."; return; }
+    var partTxt = p.part === "giorno" ? "giornata intera" : ("solo " + p.part);
+    var lines = [];
+    if(p.action === "add"){
+      lines.push("<b>" + escapeHtml(p.name) + "</b> in ferie/permesso (" + partTxt + ") per <b>" + p.days.length + " giorn" + (p.days.length === 1 ? "o" : "i") + "</b> lavorativ" + (p.days.length === 1 ? "o" : "i") + ", dal " + fmtItFull(first) + " al " + fmtItFull(last) + " (domeniche escluse).");
+      if(p.removals.length){
+        lines.push('<span style="color:var(--alert);">' + (p.removals.length === 1 ? "Questo turno già assegnato verrà liberato:" : ("Questi " + p.removals.length + " turni già assegnati verranno liberati:")) + "</span>");
+        lines.push(p.removals.slice(0, 8).map(function(r){ return "• " + DAY_NAMES[r.date.getDay() - 1] + " " + fmtIt(r.date) + " " + escapeHtml(r.agency) + " " + (r.shift === "mattina" ? "mattina" : "pomeriggio"); }).join("<br>") + (p.removals.length > 8 ? "<br>…e altri " + (p.removals.length - 8) : ""));
+      }
+    } else {
+      lines.push("Verranno tolte le ferie/permessi di <b>" + escapeHtml(p.name) + "</b> (" + partTxt + ") dal " + fmtItFull(first) + " al " + fmtItFull(last) + ".");
+    }
+    box.innerHTML = lines.join("<br>");
+  }
+
+  ["periodEmp","periodFrom","periodTo","periodPart","periodAction"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", function(){
+      if(id === "periodFrom"){
+        var to = document.getElementById("periodTo");
+        if(!to.value || to.value < this.value) to.value = this.value;
+      }
+      renderPeriodPreview();
+    });
+  });
+
+  document.getElementById("periodSaveBtn").addEventListener("click", function(){
+    var p = planPeriod();
+    if(p.error){ alert(p.error); return; }
+    if(!p.days.length){ alert("Nessun giorno lavorativo nel periodo scelto."); return; }
+    if(p.action === "add" && p.removals.length){
+      if(!window.confirm("Nel periodo " + p.name + " ha " + p.removals.length + " turn" + (p.removals.length === 1 ? "o" : "i") + " già assegnat" + (p.removals.length === 1 ? "o" : "i") + ": " + (p.removals.length === 1 ? "verrà liberato" : "verranno liberati") + ". Continuare?")) return;
+    }
+    var note = document.getElementById("periodNote").value.trim();
+    var touched = {};
+    p.days.forEach(function(d){
+      var wkISO = toISO(getMonday(d));
+      var w = getWeek(wkISO);
+      var day = w.days[d.getDay() - 1];
+      var abs = day.absence;
+      if(!abs.parts) abs.parts = {};
+      var idx = abs.people.indexOf(p.name);
+      if(p.action === "add"){
+        if(idx === -1) abs.people.push(p.name);
+        if(p.part === "giorno") delete abs.parts[p.name]; else abs.parts[p.name] = p.part;
+        AGENCIES.forEach(function(a){
+          SHIFTS.forEach(function(sp){
+            if(p.part !== "giorno" && p.part !== sp[0]) return;
+            var arr = day.shifts[a][sp[0]], i = arr.indexOf(p.name);
+            if(i !== -1) arr.splice(i, 1);
+          });
+        });
+        if(note){
+          var tag = p.name + ": " + note;
+          if(abs.note.indexOf(tag) === -1) abs.note = abs.note ? (abs.note + "\n" + tag) : tag;
+        }
+      } else {
+        if(idx === -1) return;
+        var cur = (abs.parts[p.name] === "mattina" || abs.parts[p.name] === "pomeriggio") ? abs.parts[p.name] : "giorno";
+        if(p.part === "giorno" || cur === p.part){
+          abs.people.splice(idx, 1); delete abs.parts[p.name];
+        } else if(cur === "giorno"){
+          // tolgo solo metà giornata: resta assente nell'altra metà
+          abs.parts[p.name] = (p.part === "mattina") ? "pomeriggio" : "mattina";
+        } else {
+          return; // l'assenza riguarda l'altra metà: niente da togliere
+        }
+      }
+      touched[wkISO] = true;
+    });
+    Object.keys(touched).forEach(function(wk){ markDirty(wk); });
+    if(!Object.keys(touched).length){ alert("Nessuna ferie da togliere nel periodo scelto."); return; }
+    hideSheet("periodSheetOverlay");
+    hideSheet("absenceSheetOverlay");
+    renderWeek();
+    showToast(p.action === "add"
+      ? "🏖 Ferie inserite per " + p.name + " (" + p.days.length + " giorn" + (p.days.length === 1 ? "o" : "i") + ")."
+      : "Ferie tolte per " + p.name + ".");
+  });
+
+  document.getElementById("absencePeriodBtn").addEventListener("click", function(){
+    var w = getWeek(toISO(currentMonday));
+    var day = absenceCtx ? w.days[absenceCtx.dayIdx] : null;
+    openPeriodSheet(day ? day.date : null, null);
+  });
+  document.getElementById("colleaguePeriodBtn").addEventListener("click", function(){
+    openPeriodSheet(toISO(currentMonday), colleagueSelected);
   });
 
   applyTheme();
