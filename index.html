@@ -543,6 +543,21 @@
   .logo-preview img { width: 100%; height: 100%; object-fit: cover; }
   .app-logo-header { display: flex; justify-content: center; margin-bottom: 6px; }
   .app-logo-header img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; border: 1px solid var(--line-strong); }
+
+  /* ---- v2.4.0: riempimento automatico, turni del collega ---- */
+  .m-autofill { background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 4px 11px; font-size: 11.5px; font-weight: 600; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; }
+  .m-autofill:active { opacity: .8; }
+  .undo-bar { position: fixed; bottom: calc(78px + var(--safe-b) + 10px); left: 50%; transform: translateX(-50%); background: var(--navy); color: #fff; padding: 8px 8px 8px 16px; border-radius: 22px; font-size: 12.5px; z-index: 71; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; max-width: 92%; font-family: 'IBM Plex Sans', sans-serif; }
+  .undo-bar.hidden { display: none; }
+  .undo-bar button { background: #fff; color: var(--navy); border: none; border-radius: 16px; padding: 6px 12px; font-weight: 700; font-size: 12.5px; cursor: pointer; flex-shrink: 0; }
+  .colleague-preview { background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 12px 0 4px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+  .colleague-preview .free { color: var(--ink-soft); }
+  input[type=tel] { width: 100%; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 15px; background: #fff; }
+  .time-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 13px; }
+  .time-row span { min-width: 82px; color: var(--ink-soft); }
+  .time-row input[type=time] { padding: 7px 8px; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 14px; background: #fff; }
+  details.times-box { margin-top: 14px; font-size: 13px; }
+  details.times-box summary { cursor: pointer; color: var(--ink-soft); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -577,6 +592,7 @@
   <div class="m-substatus">
     <span class="m-stamp" id="conflictStamp">✓ ok</span>
     <button class="m-link" id="gotoUpcoming">→ prossima settimana</button>
+    <button class="m-autofill" id="autoFillBtn" data-open="autoFillSheetOverlay">✨ Riempi automatico</button>
   </div>
 </header>
 
@@ -590,6 +606,7 @@
 <nav class="m-tabbar">
   <button data-open="settingsSheetOverlay"><span class="ico">⚙️</span>Impostazioni</button>
   <button data-open="dupSheetOverlay"><span class="ico">⎘</span>Duplica</button>
+  <button data-open="colleagueSheetOverlay"><span class="ico">👥</span>Colleghi</button>
   <button data-open="historySheetOverlay"><span class="ico">🕘</span>Storico</button>
   <button data-open="exportSheetOverlay"><span class="ico">📤</span>Esporta</button>
   <button data-open="memoriaSheetOverlay"><span class="ico">💾</span>Memoria</button>
@@ -876,10 +893,64 @@
   </div>
 </div>
 
+<!-- ===== Sheet: riempimento automatico (v2.4.0) ===== -->
+<div class="sheet-overlay hidden" id="autoFillSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>✨ Riempimento automatico</h3><div class="sub" id="autoFillSheetSub"></div></div>
+    <div class="sheet-body">
+      <div class="emp-hint">Compila i turni aperti ancora vuoti (o con meno persone del previsto) della settimana visualizzata. Non tocca i turni già compilati, rispetta sedi, ferie e chiusure, evita le sovrapposizioni e distribuisce i turni in modo equo. Dopo potrai annullare con un tocco.</div>
+      <label class="field-label" for="autoFillCount">Persone per turno</label>
+      <select id="autoFillCount">
+        <option value="history">Come nelle ultime settimane compilate</option>
+        <option value="1">1 persona</option>
+        <option value="2">2 persone</option>
+        <option value="3">3 persone</option>
+      </select>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-ghost" data-close="autoFillSheetOverlay">Annulla</button>
+      <button class="btn btn-primary" id="autoFillConfirmBtn">✨ Riempi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet: turni del collega (v2.4.0) ===== -->
+<div class="sheet-overlay hidden" id="colleagueSheetOverlay">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h3>👥 Turni del collega</h3><div class="sub">Visualizza e invia i turni di una persona</div></div>
+    <div class="sheet-body">
+      <label class="field-label" for="colleagueSelect">Collega</label>
+      <select id="colleagueSelect"></select>
+      <label class="field-label" for="colleaguePeriod">Periodo</label>
+      <select id="colleaguePeriod">
+        <option value="1">Settimana visualizzata</option>
+        <option value="4">4 settimane (dalla settimana visualizzata)</option>
+      </select>
+      <div class="colleague-preview" id="colleaguePreview"></div>
+      <label class="field-label" for="colleaguePhone">Cellulare per WhatsApp (facoltativo)</label>
+      <input type="tel" id="colleaguePhone" placeholder="es. 333 1234567" autocomplete="off">
+      <div style="height:10px;"></div>
+      <button class="btn btn-primary btn-block" id="colleagueWaBtn">💬 Invia su WhatsApp</button>
+      <button class="btn btn-outline btn-block" id="colleagueCopyBtn">📋 Copia testo</button>
+      <button class="btn btn-outline btn-block" id="colleagueIcsBtn">📅 Scarica calendario (.ics)</button>
+      <details class="times-box">
+        <summary>Orari dei turni (usati nel messaggio e nel calendario)</summary>
+        <div class="time-row"><span>Mattina</span><input type="time" id="timeMatStart"> – <input type="time" id="timeMatEnd"></div>
+        <div class="time-row"><span>Pomeriggio</span><input type="time" id="timePomStart"> – <input type="time" id="timePomEnd"></div>
+      </details>
+    </div>
+    <div class="sheet-foot"><button class="btn btn-primary" data-close="colleagueSheetOverlay">Chiudi</button></div>
+  </div>
+</div>
+
+<div class="undo-bar hidden" id="undoBar"><span id="undoBarText"></span><button id="undoBarBtn">Annulla</button></div>
+
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.3.1";
+  var APP_VERSION = "2.4.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -932,6 +1003,7 @@
     return { start: mondayISO, days: days };
   }
   var DEFAULT_THEME = { accent: "#2F6F62", navy: "#223349", paper: "#F5F1E6" };
+  var DEFAULT_SHIFT_TIMES = { mattina: { start: "09:00", end: "13:00" }, pomeriggio: { start: "14:30", end: "19:00" } };
 
   function normalizeState(st){
     if(!st || typeof st !== "object") st = {};
@@ -951,6 +1023,13 @@
     st.theme.navy = st.theme.navy || DEFAULT_THEME.navy;
     st.theme.paper = st.theme.paper || DEFAULT_THEME.paper;
     if(!st.openingSchedule) st.openingSchedule = {};
+    if(!st.shiftTimes || typeof st.shiftTimes !== "object") st.shiftTimes = {};
+    ["mattina","pomeriggio"].forEach(function(k){
+      var def = DEFAULT_SHIFT_TIMES[k];
+      if(!st.shiftTimes[k]) st.shiftTimes[k] = { start: def.start, end: def.end };
+      if(!st.shiftTimes[k].start) st.shiftTimes[k].start = def.start;
+      if(!st.shiftTimes[k].end) st.shiftTimes[k].end = def.end;
+    });
     if(typeof st.logo !== "string") st.logo = null;
     if(!st.cloud) st.cloud = {};
     st.cloud.fileId = st.cloud.fileId || null;
@@ -1720,7 +1799,7 @@
   function contentSignature(st){
     var weeks = {};
     Object.keys(st.weeks || {}).forEach(function(k){ if(weekHasData(st.weeks[k])) weeks[k] = st.weeks[k]; });
-    return canonical({ employees: st.employees, weeks: weeks, theme: st.theme, openingSchedule: st.openingSchedule, logo: st.logo, deletedWeeks: st.deletedWeeks });
+    return canonical({ employees: st.employees, weeks: weeks, theme: st.theme, openingSchedule: st.openingSchedule, logo: st.logo, shiftTimes: st.shiftTimes, deletedWeeks: st.deletedWeeks });
   }
   function mergeStates(local, remote){
     var remoteIsNewerOverall = tsOf(remote.meta.updatedAt) > tsOf(local.meta.updatedAt);
@@ -1736,6 +1815,7 @@
       merged.theme = deepCopy(remote.theme);
       merged.openingSchedule = deepCopy(remote.openingSchedule);
       merged.logo = remote.logo;
+      merged.shiftTimes = deepCopy(remote.shiftTimes);
       merged.meta.settingsUpdatedAt = remote.meta.settingsUpdatedAt;
     }
 
@@ -2147,6 +2227,8 @@
     if(id === "logoSheetOverlay") renderLogoPreview();
     if(id === "cloudSheetOverlay") refreshCloudSheetUI();
     if(id === "statsSheetOverlay") renderStats();
+    if(id === "autoFillSheetOverlay") document.getElementById("autoFillSheetSub").textContent = "Settimana " + fmtItFull(currentMonday) + " – " + fmtItFull(addDays(currentMonday, 5));
+    if(id === "colleagueSheetOverlay") openColleagueSheet();
     if(id === "dupSheetOverlay"){
       var sourceSel = document.getElementById("dupSource");
       var keys = Object.keys(weeksStore).filter(function(k){ return weekHasData(weeksStore[k]); });
@@ -2524,6 +2606,283 @@
     state.logo = null;
     renderLogoPreview();
     markDirty();
+  });
+
+  /* ================= v2.4.0 · Riempimento automatico ================= */
+
+  // Quante persone mettere in un turno: mediana delle ultime 8 settimane compilate per lo stesso giorno/agenzia/turno.
+  function historicalTarget(agency, dayIdx, shiftKey, beforeISO){
+    var keys = Object.keys(weeksStore).filter(function(k){ return k < beforeISO && weekHasData(weeksStore[k]); });
+    keys.sort(function(a, b){ return b.localeCompare(a); });
+    var counts = [];
+    keys.slice(0, 8).forEach(function(k){
+      var day = weeksStore[k].days && weeksStore[k].days[dayIdx];
+      if(!day || !day.shifts || !day.shifts[agency]) return;
+      var arr = day.shifts[agency][shiftKey] || [];
+      if(arr.length && isShiftOpen(agency, dayIdx, shiftKey, day)) counts.push(arr.length);
+    });
+    if(!counts.length) return 1;
+    counts.sort(function(a, b){ return a - b; });
+    return counts[Math.floor(counts.length / 2)];
+  }
+
+  function recentLoad(beforeISO){
+    var load = {};
+    var keys = Object.keys(weeksStore).filter(function(k){ return k < beforeISO && weekHasData(weeksStore[k]); });
+    keys.sort(function(a, b){ return b.localeCompare(a); });
+    keys.slice(0, 4).forEach(function(k){
+      weeksStore[k].days.forEach(function(day){
+        AGENCIES.forEach(function(a){ SHIFTS.forEach(function(sp){
+          ((day.shifts[a] && day.shifts[a][sp[0]]) || []).forEach(function(n){ load[n] = (load[n] || 0) + 1; });
+        }); });
+      });
+    });
+    return load;
+  }
+
+  // Calcola le assegnazioni senza modificare nulla. mode: "history" oppure un numero di persone per turno.
+  function planAutoFill(w, mode){
+    var weekISO = w.start;
+    var load = {};
+    employees.forEach(function(e){ load[e.name] = 0; });
+    w.days.forEach(function(day){
+      AGENCIES.forEach(function(a){ SHIFTS.forEach(function(sp){
+        day.shifts[a][sp[0]].forEach(function(n){ load[n] = (load[n] || 0) + 1; });
+      }); });
+    });
+    var past = recentLoad(weekISO);
+    var planned = {}; // "dayIdx|agency|shift" -> [nomi aggiunti]
+    function plannedFor(dayIdx, agency, shiftKey){ return planned[dayIdx + "|" + agency + "|" + shiftKey] || []; }
+    function busyInShift(day, dayIdx, shiftKey, name){
+      return AGENCIES.some(function(a){
+        return day.shifts[a][shiftKey].indexOf(name) !== -1 || plannedFor(dayIdx, a, shiftKey).indexOf(name) !== -1;
+      });
+    }
+    function eligible(slot){
+      var day = w.days[slot.dayIdx];
+      return employees.filter(function(emp){
+        return sedeMatches(emp, slot.agency) && !isAbsentOn(day, emp.name) && !busyInShift(day, slot.dayIdx, slot.shift, emp.name);
+      });
+    }
+
+    var slots = [];
+    w.days.forEach(function(day, dayIdx){
+      AGENCIES.forEach(function(agency){
+        SHIFTS.forEach(function(sp){
+          var shiftKey = sp[0];
+          if(!isShiftOpen(agency, dayIdx, shiftKey, day)) return;
+          var target = (mode === "history") ? historicalTarget(agency, dayIdx, shiftKey, weekISO) : parseInt(mode, 10);
+          var need = target - day.shifts[agency][shiftKey].length;
+          if(need > 0) slots.push({ dayIdx: dayIdx, agency: agency, shift: shiftKey, need: need });
+        });
+      });
+    });
+    // Prima i turni con meno candidati possibili, così le persone "rare" non vengono usate altrove.
+    slots.forEach(function(sl){ sl.candidates = eligible(sl).length; });
+    slots.sort(function(a, b){ return (a.candidates - b.candidates) || (a.dayIdx - b.dayIdx); });
+
+    var additions = [], uncovered = [];
+    slots.forEach(function(slot){
+      for(var i = 0; i < slot.need; i++){
+        var cands = eligible(slot);
+        if(!cands.length){ uncovered.push(slot); break; }
+        cands.sort(function(a, b){
+          var la = load[a.name] || 0, lb = load[b.name] || 0;
+          if(la !== lb) return la - lb;                                  // 1) meno turni questa settimana
+          var sa = (a.sedi.indexOf(slot.agency) !== -1) ? 0 : 1;
+          var sb = (b.sedi.indexOf(slot.agency) !== -1) ? 0 : 1;
+          if(sa !== sb) return sa - sb;                                  // 2) chi ha questa sede assegnata
+          var pa = past[a.name] || 0, pb = past[b.name] || 0;
+          if(pa !== pb) return pa - pb;                                  // 3) meno turni nelle ultime 4 settimane
+          return a.name.localeCompare(b.name, "it");
+        });
+        var pick = cands[0].name;
+        var key = slot.dayIdx + "|" + slot.agency + "|" + slot.shift;
+        if(!planned[key]) planned[key] = [];
+        planned[key].push(pick);
+        load[pick] = (load[pick] || 0) + 1;
+        additions.push({ dayIdx: slot.dayIdx, agency: slot.agency, shift: slot.shift, name: pick });
+      }
+    });
+    return { additions: additions, uncovered: uncovered };
+  }
+
+  var undoTimer = null;
+  function showUndoBar(text, onUndo){
+    var bar = document.getElementById("undoBar");
+    document.getElementById("undoBarText").textContent = text;
+    bar.classList.remove("hidden");
+    document.getElementById("undoBarBtn").onclick = function(){ bar.classList.add("hidden"); clearTimeout(undoTimer); onUndo(); };
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(function(){ bar.classList.add("hidden"); }, 15000);
+  }
+
+  document.getElementById("autoFillConfirmBtn").addEventListener("click", function(){
+    var weekISO = toISO(currentMonday);
+    var w = getWeek(weekISO);
+    var plan = planAutoFill(w, document.getElementById("autoFillCount").value);
+    hideSheet("autoFillSheetOverlay");
+    if(!plan.additions.length){
+      alert(plan.uncovered.length
+        ? "Non ci sono persone disponibili per i turni ancora scoperti (controlla ferie e sedi assegnate)."
+        : "Tutti i turni aperti di questa settimana sono già compilati.");
+      return;
+    }
+    var snapshot = deepCopy(w);
+    plan.additions.forEach(function(a){ w.days[a.dayIdx].shifts[a.agency][a.shift].push(a.name); });
+    markDirty(weekISO);
+    renderWeek();
+    var msg = "✨ " + plan.additions.length + " assegnazion" + (plan.additions.length === 1 ? "e" : "i") +
+      (plan.uncovered.length ? " · " + plan.uncovered.length + " turn" + (plan.uncovered.length === 1 ? "o" : "i") + " senza candidati" : "");
+    showUndoBar(msg, function(){
+      weeksStore[weekISO] = snapshot;
+      markDirty(weekISO);
+      renderWeek();
+      showToast("Riempimento automatico annullato.");
+    });
+  });
+
+  /* ================= v2.4.0 · Turni del singolo collega ================= */
+
+  function shiftTimeLabel(shiftKey){
+    var t = state.shiftTimes[shiftKey];
+    return t.start + "–" + t.end;
+  }
+  function colleagueItems(name, startMonday, nWeeks){
+    var items = [];
+    for(var i = 0; i < nWeeks; i++){
+      var iso = toISO(addDays(startMonday, 7 * i));
+      var w = weeksStore[iso];
+      for(var dayIdx = 0; dayIdx < 6; dayIdx++){
+        var day = (w && w.days) ? w.days[dayIdx] : null;
+        var date = day ? day.date : toISO(addDays(fromISO(iso), dayIdx));
+        var shifts = [];
+        if(day){
+          SHIFTS.forEach(function(sp){
+            AGENCIES.forEach(function(a){
+              if(day.shifts[a] && day.shifts[a][sp[0]].indexOf(name) !== -1 && isShiftOpen(a, dayIdx, sp[0], day)){
+                shifts.push({ agency: a, shift: sp[0] });
+              }
+            });
+          });
+        }
+        items.push({ date: date, dayIdx: dayIdx, absent: !!(day && isAbsentOn(day, name)), shifts: shifts });
+      }
+    }
+    return items;
+  }
+  function colleagueText(name, startMonday, nWeeks){
+    var items = colleagueItems(name, startMonday, nWeeks);
+    var end = addDays(startMonday, 7 * (nWeeks - 1) + 5);
+    var lines = ["Ciao " + name + ", ecco i tuoi turni dal " + fmtIt(startMonday) + " al " + fmtIt(end) + ":", ""];
+    var any = false;
+    items.forEach(function(it){
+      var label = DAY_NAMES[it.dayIdx] + " " + fmtIt(fromISO(it.date));
+      if(it.absent){ lines.push("• " + label + " — ferie/permesso"); any = true; return; }
+      if(it.shifts.length){
+        any = true;
+        lines.push("• " + label + " — " + it.shifts.map(function(s){
+          return s.agency + ", " + (s.shift === "mattina" ? "mattina" : "pomeriggio") + " (" + shiftTimeLabel(s.shift) + ")";
+        }).join(" + "));
+        return;
+      }
+      if(nWeeks === 1) lines.push("• " + label + " — libero");
+    });
+    if(!any) lines.push("Nessun turno assegnato in questo periodo.");
+    return lines.join("\n");
+  }
+
+  function icsEscape(t){ return String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n"); }
+  function icsDate(iso){ return iso.replace(/-/g, ""); }
+  function icsDateTime(iso, hhmm){ return icsDate(iso) + "T" + hhmm.replace(":", "") + "00"; }
+  function colleagueIcs(name, startMonday, nWeeks){
+    var stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+    var out = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Registro Turni//IT", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+    colleagueItems(name, startMonday, nWeeks).forEach(function(it){
+      var uidBase = (name + "-" + it.date).replace(/[^A-Za-z0-9-]/g, "_");
+      if(it.absent){
+        var next = toISO(addDays(fromISO(it.date), 1));
+        out.push("BEGIN:VEVENT", "UID:" + uidBase + "-ferie@turni-ion", "DTSTAMP:" + stamp,
+          "DTSTART;VALUE=DATE:" + icsDate(it.date), "DTEND;VALUE=DATE:" + icsDate(next),
+          "SUMMARY:" + icsEscape("Ferie/permesso"), "END:VEVENT");
+        return;
+      }
+      it.shifts.forEach(function(s){
+        var t = state.shiftTimes[s.shift];
+        out.push("BEGIN:VEVENT", "UID:" + uidBase + "-" + AGENCY_CODES[s.agency] + "-" + s.shift + "@turni-ion", "DTSTAMP:" + stamp,
+          "DTSTART:" + icsDateTime(it.date, t.start), "DTEND:" + icsDateTime(it.date, t.end),
+          "SUMMARY:" + icsEscape("Turno " + (s.shift === "mattina" ? "mattina" : "pomeriggio") + " · " + s.agency),
+          "LOCATION:" + icsEscape(s.agency), "END:VEVENT");
+      });
+    });
+    out.push("END:VCALENDAR");
+    return out.join("\r\n") + "\r\n";
+  }
+
+  var colleagueSelected = null;
+  function colleaguePeriodWeeks(){ return parseInt(document.getElementById("colleaguePeriod").value, 10) || 1; }
+  function openColleagueSheet(){
+    var sel = document.getElementById("colleagueSelect");
+    var names = employees.map(function(e){ return e.name; }).sort(function(a, b){ return a.localeCompare(b, "it"); });
+    if(!colleagueSelected || names.indexOf(colleagueSelected) === -1) colleagueSelected = names[0] || null;
+    sel.innerHTML = names.map(function(n){ return '<option value="' + escapeHtml(n) + '"' + (n === colleagueSelected ? " selected" : "") + ">" + escapeHtml(n) + "</option>"; }).join("");
+    document.getElementById("timeMatStart").value = state.shiftTimes.mattina.start;
+    document.getElementById("timeMatEnd").value = state.shiftTimes.mattina.end;
+    document.getElementById("timePomStart").value = state.shiftTimes.pomeriggio.start;
+    document.getElementById("timePomEnd").value = state.shiftTimes.pomeriggio.end;
+    renderColleaguePreview();
+  }
+  function renderColleaguePreview(){
+    var box = document.getElementById("colleaguePreview");
+    var phone = document.getElementById("colleaguePhone");
+    if(!colleagueSelected){ box.textContent = "Nessun dipendente in elenco."; phone.value = ""; return; }
+    var emp = findEmployee(colleagueSelected);
+    phone.value = (emp && emp.phone) ? emp.phone : "";
+    box.textContent = colleagueText(colleagueSelected, currentMonday, colleaguePeriodWeeks());
+  }
+  function whatsappNumber(raw){
+    var digits = String(raw || "").replace(/[^\d+]/g, "");
+    if(!digits) return "";
+    if(digits.indexOf("+") === 0) return digits.slice(1);
+    if(digits.indexOf("00") === 0) return digits.slice(2);
+    return (digits.length <= 10 ? "39" : "") + digits; // numeri italiani senza prefisso
+  }
+  document.getElementById("colleagueSelect").addEventListener("change", function(){ colleagueSelected = this.value; renderColleaguePreview(); });
+  document.getElementById("colleaguePeriod").addEventListener("change", renderColleaguePreview);
+  document.getElementById("colleaguePhone").addEventListener("change", function(){
+    var emp = findEmployee(colleagueSelected); if(!emp) return;
+    emp.phone = this.value.trim();
+    markDirty();
+  });
+  [["timeMatStart","mattina","start"],["timeMatEnd","mattina","end"],["timePomStart","pomeriggio","start"],["timePomEnd","pomeriggio","end"]].forEach(function(cfg){
+    document.getElementById(cfg[0]).addEventListener("change", function(){
+      if(!this.value) return;
+      state.shiftTimes[cfg[1]][cfg[2]] = this.value;
+      markDirty();
+      renderColleaguePreview();
+    });
+  });
+  document.getElementById("colleagueWaBtn").addEventListener("click", function(){
+    if(!colleagueSelected) return;
+    var text = colleagueText(colleagueSelected, currentMonday, colleaguePeriodWeeks());
+    var emp = findEmployee(colleagueSelected);
+    var num = whatsappNumber(emp && emp.phone);
+    window.open("https://wa.me/" + num + "?text=" + encodeURIComponent(text), "_blank");
+  });
+  document.getElementById("colleagueCopyBtn").addEventListener("click", function(){
+    if(!colleagueSelected) return;
+    var text = colleagueText(colleagueSelected, currentMonday, colleaguePeriodWeeks());
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ showToast("📋 Testo copiato."); }, function(){ alert(text); });
+    } else { alert(text); }
+  });
+  document.getElementById("colleagueIcsBtn").addEventListener("click", function(){
+    if(!colleagueSelected) return;
+    var n = colleaguePeriodWeeks();
+    var ics = colleagueIcs(colleagueSelected, currentMonday, n);
+    var blob = new Blob([ics], { type: "text/calendar" });
+    var fname = "turni_" + colleagueSelected.replace(/[^A-Za-z0-9]+/g, "_") + "_" + toISO(currentMonday) + ".ics";
+    shareOrDownload(blob, fname, "text/calendar");
   });
 
   applyTheme();
