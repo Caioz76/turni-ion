@@ -2,6 +2,19 @@
 
 > A ogni release aggiornare insieme: `APP_VERSION` in `index.html` e `storico.html`, `CACHE_NAME` in `sw.js`, e questo file.
 
+## v2.6.0 — 15/11/2026 · Orari reali per agenzia
+
+- **Orari diversi per agenzia e giorno**, impostati sugli orari reali:
+  - Somma Lombardo: lun–ven 9–12 e 14–17, sabato 9–12
+  - Busto Arsizio: lun–ven 9–12 e 14–16, sabato 9–12
+  - Tradate: lun–sab 9–12, mercoledì anche 14–16
+  - Oleggio: lun, mer, ven 9–12; mar, gio 9–12 e 14–16; sabato chiuso
+- I messaggi WhatsApp e il calendario .ics dei colleghi usano gli orari dell'agenzia di quel giorno.
+- Gli orari decidono anche quali turni sono aperti: niente più avvisi di "copertura mancante" sui pomeriggi chiusi, e il riempimento automatico non assegna turni dove l'agenzia è chiusa.
+- **Impostazioni → Aperture e orari agenzie**: per ogni agenzia e giorno si spunta mattina/pomeriggio e si modificano gli orari. Chiudendo un turno con persone già assegnate l'app chiede conferma prima di toglierle.
+- Le assenze di mezza giornata nel calendario usano la fascia oraria delle agenzie aperte quel giorno.
+- Le precedenti "aperture agenzie" vengono sostituite dagli orari reali; i turni già assegnati in fasce ora chiuse restano visibili come "⚠ Chiuso ma assegnato".
+
 ## v2.5.0 — 15/11/2026 · Ferie a mezza giornata
 
 - **Ferie/permessi per giornata, mattina o pomeriggio**: nella scheda Ferie ogni persona ha i pulsanti *Giorno*, *Mat*, *Pom* (tocca di nuovo per togliere).
