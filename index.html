@@ -12,7 +12,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <title>Turni · Mobile &amp; Desktop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -843,7 +843,7 @@
 <div class="sheet-overlay hidden" id="exportSheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><h3>Esporta settimana</h3><div class="sub">Immagine pronta per il gruppo WhatsApp: due sedi per riga, con orari e ferie</div></div>
+    <div class="sheet-head"><h3>Esporta settimana</h3><div class="sub">Immagine pronta per il gruppo WhatsApp: una scheda per sede, due per riga, con orari e ferie</div></div>
     <div class="sheet-body">
       <button class="btn btn-primary btn-block" id="copyPngBtn">📋 Copia PNG negli appunti</button>
       <button class="btn btn-outline btn-block" id="exportPngBtn">🖼 Salva / Condividi PNG</button>
@@ -957,7 +957,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.7.0";
+  var APP_VERSION = "2.8.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -2410,85 +2410,112 @@
   var DAY_NAMES_FULL = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
   function shortTime(t){ return t.replace(/^0/, "").replace(/:00$/, ""); }
 
-  function exportChip(name, suffix){
-    var color = colorFor(name), bg = tintHex(color, 0.82);
-    return '<span style="display:inline-flex;align-items:center;gap:6px;background:' + bg + ';border:1.5px solid ' + color +
-      ';border-radius:14px;padding:3px 11px;margin:2px 4px 2px 0;font-size:17px;font-weight:600;color:#23211D;white-space:nowrap;">' +
-      escapeHtml(name) +
-      (suffix ? '<span style="font-size:12px;font-weight:500;opacity:.75;">' + suffix + '</span>' : "") + '</span>';
+  /* v2.8.0 · Design dell'immagine: un colore per sede, griglia 2×2 (due sedi per riga),
+     intestazione scura con le date in grande e una striscia nei quattro colori delle sedi. */
+  var EXPORT_AGENCY_COLORS = { "Somma Lombardo": "#2F6F62", "Busto Arsizio": "#3B5BA9", "Tradate": "#7E4A9E", "Oleggio": "#B7830F" };
+  var EXPORT_INK = "#1C2333", EXPORT_MUTED = "#69728A", EXPORT_CANVAS = "#EEF1F5", EXPORT_LINE = "#E1E5EC";
+  var MONTHS_LOWER = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+  var MONTHS_SHORT = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+
+  function exportNamePill(name){
+    var color = colorFor(name);
+    return '<div style="display:block;background:' + tintHex(color, 0.86) + ';border-left:4px solid ' + color +
+      ';border-radius:7px;padding:4px 9px;margin:0 0 4px 0;font-size:16.5px;font-weight:600;color:' + EXPORT_INK +
+      ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(name) + '</div>';
+  }
+  function exportAbsencePill(name, part){
+    var color = colorFor(name);
+    return '<span style="display:inline-block;background:' + tintHex(color, 0.86) + ';border-left:4px solid ' + color +
+      ';border-radius:7px;padding:4px 10px;margin:0 6px 6px 0;font-size:16.5px;font-weight:600;color:' + EXPORT_INK + ';">' +
+      escapeHtml(name) + (part ? '<span style="font-weight:500;color:' + EXPORT_MUTED + ';"> solo ' + part + '</span>' : "") + '</span>';
+  }
+  function weekRangeTitle(mon, sat){
+    if(mon.getMonth() === sat.getMonth()) return { big: mon.getDate() + "–" + sat.getDate(), small: MONTHS_LOWER[mon.getMonth()] + " " + sat.getFullYear() };
+    return { big: mon.getDate() + "–" + sat.getDate(), small: MONTHS_SHORT[mon.getMonth()] + " – " + MONTHS_SHORT[sat.getMonth()] + " " + sat.getFullYear() };
+  }
+
+  function exportAgencyCard(w, agency){
+    var c = EXPORT_AGENCY_COLORS[agency] || state.theme.accent;
+    var html = '<div style="background:#fff;border:1px solid ' + EXPORT_LINE + ';border-radius:18px;overflow:hidden;">';
+    html += '<div style="background:' + c + ';color:#fff;padding:14px 18px 13px;font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.2px;">' + escapeHtml(agency) + '</div>';
+    html += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;">' +
+      '<colgroup><col style="width:72px"><col><col></colgroup>' +
+      '<tr><td></td>' +
+      '<td style="padding:9px 8px 4px;font-size:14px;font-weight:600;color:' + c + ';">Mattina</td>' +
+      '<td style="padding:9px 8px 4px;font-size:14px;font-weight:600;color:' + c + ';">Pomeriggio</td></tr>';
+    w.days.forEach(function(day, dayIdx){
+      var d = fromISO(day.date);
+      var openM = isShiftOpen(agency, dayIdx, "mattina", day), openP = isShiftOpen(agency, dayIdx, "pomeriggio", day);
+      html += '<tr style="border-top:1px solid ' + EXPORT_LINE + ';">' +
+        '<td style="padding:9px 0 9px 16px;vertical-align:top;"><div style="font-size:13.5px;color:' + EXPORT_MUTED + ';">' + DAY_NAMES[dayIdx] + '</div>' +
+        '<div style="font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:24px;font-weight:700;line-height:1.05;color:' + EXPORT_INK + ';">' + d.getDate() + '</div></td>';
+      if(!openM && !openP){
+        html += '<td colspan="2" style="padding:9px 8px;vertical-align:middle;color:#A3AABA;font-size:15px;">Agenzia chiusa</td></tr>';
+        return;
+      }
+      SHIFTS.forEach(function(sp){
+        var sk = sp[0];
+        var cellPad = 'padding:8px 8px 6px;vertical-align:top;';
+        if(!isShiftOpen(agency, dayIdx, sk, day)){
+          html += '<td style="' + cellPad + 'color:#A3AABA;font-size:15px;padding-top:12px;">chiuso</td>';
+          return;
+        }
+        var names = (day.shifts[agency] && day.shifts[agency][sk]) ? day.shifts[agency][sk] : [];
+        var hrs = shiftHours(agency, dayIdx, sk);
+        var body = names.length ? names.map(exportNamePill).join("")
+          : '<div style="border:1.5px dashed #E3A69C;color:#B13B2E;border-radius:7px;padding:3px 9px;font-size:15px;font-weight:600;margin-bottom:4px;">da coprire</div>';
+        html += '<td style="' + cellPad + '"><div style="font-size:12.5px;color:' + EXPORT_MUTED + ';margin:0 0 4px 1px;">' + shortTime(hrs.start) + '–' + shortTime(hrs.end) + '</div>' + body + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</table></div>';
+    return html;
   }
 
   function buildExportNode(w){
-    var navy = state.theme.navy, accent = state.theme.accent, paper = state.theme.paper;
-    var line = "#D8CDB2";
     var sat = addDays(currentMonday, 5);
-    var html = '<div style="width:1080px;box-sizing:border-box;padding:32px;background:' + paper + ';font-family:\'IBM Plex Sans\',Arial,sans-serif;color:#23211D;">';
+    var title = weekRangeTitle(currentMonday, sat);
+    var html = '<div style="width:1080px;box-sizing:border-box;padding:28px;background:' + EXPORT_CANVAS + ';font-family:\'IBM Plex Sans\',Arial,sans-serif;color:' + EXPORT_INK + ';">';
 
-    // Intestazione
-    html += '<div style="display:flex;align-items:center;gap:18px;background:' + navy + ';color:#fff;border-radius:16px;padding:20px 26px;margin-bottom:22px;">';
-    if(state.logo) html += '<img src="' + state.logo + '" style="width:64px;height:64px;border-radius:12px;object-fit:cover;background:#fff;">';
-    html += '<div style="flex:1;"><div style="font-family:Fraunces,Georgia,serif;font-size:30px;font-weight:700;letter-spacing:.5px;">Turni della settimana</div>' +
-      '<div style="font-size:19px;opacity:.85;margin-top:2px;">da lunedì ' + fmtItFull(currentMonday) + ' a sabato ' + fmtItFull(sat) + '</div></div></div>';
+    // Intestazione: date in grande + striscia nei colori delle sedi
+    html += '<div style="background:' + EXPORT_INK + ';border-radius:22px;overflow:hidden;margin-bottom:20px;">' +
+      '<div style="display:flex;align-items:center;gap:20px;padding:26px 30px 22px;">';
+    if(state.logo) html += '<img src="' + state.logo + '" style="width:72px;height:72px;border-radius:16px;object-fit:cover;background:#fff;flex-shrink:0;">';
+    html += '<div style="flex:1;color:#fff;font-size:34px;font-weight:600;letter-spacing:-.4px;">Turni settimanali</div>' +
+      '<div style="text-align:right;color:#fff;"><div style="font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:76px;font-weight:800;line-height:.9;letter-spacing:-2px;">' + title.big + '</div>' +
+      '<div style="font-size:18px;color:#AEB6C8;margin-top:6px;">' + title.small + '</div></div></div>' +
+      '<div style="display:flex;height:8px;">' + AGENCIES.map(function(a){ return '<div style="flex:1;background:' + (EXPORT_AGENCY_COLORS[a] || state.theme.accent) + ';"></div>'; }).join("") + '</div></div>';
 
-    // Blocchi con due sedi
+    // Griglia 2×2: due sedi per riga
     EXPORT_PAIRS.forEach(function(pair){
-      html += '<table style="width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1.5px solid ' + line + ';border-radius:14px;overflow:hidden;margin-bottom:22px;table-layout:fixed;">';
-      html += '<colgroup><col style="width:112px">' + '<col><col><col><col>' + '</colgroup>';
-      html += '<tr><th style="background:' + navy + ';"></th>';
-      pair.forEach(function(ag){
-        html += '<th colspan="2" style="background:' + accent + ';color:#fff;font-size:21px;font-weight:700;padding:12px 8px;text-align:center;border-left:3px solid #fff;letter-spacing:.3px;">' + escapeHtml(ag) + '</th>';
-      });
-      html += '</tr><tr><th style="background:' + navy + ';"></th>';
-      pair.forEach(function(){
-        html += '<th style="background:' + tintHex(accent, 0.8) + ';font-size:13px;text-transform:uppercase;letter-spacing:.6px;padding:6px;color:' + navy + ';border-left:3px solid #fff;">Mattina</th>' +
-                '<th style="background:' + tintHex(accent, 0.8) + ';font-size:13px;text-transform:uppercase;letter-spacing:.6px;padding:6px;color:' + navy + ';border-left:1px solid #fff;">Pomeriggio</th>';
-      });
-      html += '</tr>';
-      w.days.forEach(function(day, dayIdx){
-        var d = fromISO(day.date);
-        var rowBg = dayIdx % 2 ? "#FBF8F1" : "#fff";
-        html += '<tr><td style="background:' + navy + ';color:#fff;padding:10px 8px;text-align:center;border-top:1px solid rgba(255,255,255,.15);">' +
-          '<div style="font-size:15px;opacity:.8;">' + DAY_NAMES[dayIdx] + '</div><div style="font-size:26px;font-weight:700;line-height:1.1;">' + d.getDate() + '</div></td>';
-        pair.forEach(function(ag){
-          SHIFTS.forEach(function(sp, sIdx){
-            var sk = sp[0];
-            var open = isShiftOpen(ag, dayIdx, sk, day);
-            var names = (day.shifts[ag] && day.shifts[ag][sk]) ? day.shifts[ag][sk] : [];
-            var border = 'border-top:1px solid ' + line + ';border-left:' + (sIdx === 0 ? '3px solid ' + line : '1px solid ' + line) + ';';
-            if(!open){
-              html += '<td style="' + border + 'background:#EDE8DC;color:#9A927F;font-size:14px;text-align:center;font-style:italic;padding:8px;">chiuso</td>';
-              return;
-            }
-            var hrs = shiftHours(ag, dayIdx, sk);
-            var content = names.length ? names.map(function(n){ return exportChip(n); }).join("") : '<span style="color:#B13B2E;font-size:15px;font-weight:600;">—</span>';
-            html += '<td style="' + border + 'background:' + rowBg + ';padding:8px 8px 9px;vertical-align:top;">' +
-              '<div style="font-size:12px;color:#8A8371;font-family:\'IBM Plex Mono\',monospace;margin-bottom:3px;">' + shortTime(hrs.start) + '–' + shortTime(hrs.end) + '</div>' + content + '</td>';
-          });
-        });
-        html += '</tr>';
-      });
-      html += '</table>';
+      html += '<div style="display:flex;gap:18px;margin-bottom:18px;">' +
+        pair.map(function(ag){ return '<div style="flex:1;min-width:0;">' + exportAgencyCard(w, ag) + '</div>'; }).join("") + '</div>';
     });
 
-    // Ferie / permessi e note
+    // Ferie e permessi
     var absRows = [];
     w.days.forEach(function(day, dayIdx){
       var people = (day.absence && day.absence.people) ? day.absence.people : [];
       var note = (day.absence && day.absence.note) ? day.absence.note.trim() : "";
       if(!people.length && !note) return;
-      var chips = people.map(function(n){
+      var pills = people.map(function(n){
         var pt = absencePart(day, n);
-        return exportChip(n, pt === "mattina" ? "mattina" : (pt === "pomeriggio" ? "pomeriggio" : ""));
+        return exportAbsencePill(n, pt === "giorno" ? "" : pt);
       }).join("");
-      absRows.push('<div style="display:flex;gap:14px;align-items:flex-start;padding:8px 0;border-top:1px solid ' + line + ';">' +
-        '<div style="width:150px;flex-shrink:0;font-size:17px;font-weight:600;padding-top:4px;">' + DAY_NAMES_FULL[dayIdx] + ' ' + fmtIt(fromISO(day.date)) + '</div>' +
-        '<div style="flex:1;">' + chips + (note ? '<div style="font-size:15px;color:#5B564A;margin-top:3px;font-style:italic;">' + escapeHtml(note) + '</div>' : "") + '</div></div>');
+      absRows.push('<div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0 6px;border-top:1px solid ' + EXPORT_LINE + ';">' +
+        '<div style="width:140px;flex-shrink:0;padding-top:4px;"><span style="font-size:16px;color:' + EXPORT_MUTED + ';">' + DAY_NAMES_FULL[dayIdx] + '</span> ' +
+        '<span style="font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:20px;font-weight:700;">' + fromISO(day.date).getDate() + '</span></div>' +
+        '<div style="flex:1;">' + pills + (note ? '<div style="font-size:15px;color:' + EXPORT_MUTED + ';margin:0 0 6px 2px;">' + escapeHtml(note) + '</div>' : "") + '</div></div>');
     });
     if(absRows.length){
-      html += '<div style="background:#fff;border:1.5px solid ' + line + ';border-radius:14px;padding:14px 20px 8px;margin-bottom:18px;">' +
-        '<div style="font-size:20px;font-weight:700;margin-bottom:6px;">🏖 Ferie e permessi</div>' + absRows.join("") + '</div>';
+      html += '<div style="background:#fff;border:1px solid ' + EXPORT_LINE + ';border-radius:18px;padding:16px 22px 10px;margin-bottom:16px;">' +
+        '<div style="font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px;">Ferie e permessi</div>' + absRows.join("") + '</div>';
     }
-    html += '<div style="text-align:right;font-size:12px;color:#8A8371;">Registro Turni · v' + APP_VERSION + '</div></div>';
+
+    // Piede: quando sono stati aggiornati i dati
+    var upd = state.meta.updatedAt ? new Date(state.meta.updatedAt) : new Date();
+    html += '<div style="display:flex;justify-content:space-between;font-size:13.5px;color:' + EXPORT_MUTED + ';padding:2px 6px 0;">' +
+      '<span>Aggiornato il ' + fmtItFull(upd) + ' alle ' + pad(upd.getHours()) + ':' + pad(upd.getMinutes()) + '</span><span>Registro Turni</span></div></div>';
 
     var holder = document.createElement("div");
     holder.style.cssText = "position:fixed;left:-20000px;top:0;z-index:-1;";
@@ -2502,9 +2529,12 @@
     var holder = buildExportNode(w);
     document.body.appendChild(holder);
     var target = holder.firstChild;
-    var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    // Il font dei titoli si carica solo quando serve: lo richiediamo prima di disegnare l'immagine.
+    var ready = (document.fonts && document.fonts.load)
+      ? Promise.all([document.fonts.load('700 24px "Bricolage Grotesque"'), document.fonts.load('800 76px "Bricolage Grotesque"'), document.fonts.load('600 16px "IBM Plex Sans"')]).catch(function(){}).then(function(){ return document.fonts.ready; })
+      : Promise.resolve();
     return ready.then(function(){
-      return html2canvas(target, { scale: 2, backgroundColor: state.theme.paper, useCORS: true, allowTaint: true, logging: false, windowWidth: 1200 });
+      return html2canvas(target, { scale: 2, backgroundColor: EXPORT_CANVAS, useCORS: true, allowTaint: true, logging: false, windowWidth: 1200 });
     }).then(function(canvas){
       holder.remove(); return canvas;
     }, function(err){

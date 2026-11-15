@@ -2,6 +2,15 @@
 
 > A ogni release aggiornare insieme: `APP_VERSION` in `index.html` e `storico.html`, `CACHE_NAME` in `sw.js`, e questo file.
 
+## v2.8.0 — 15/11/2026 · Immagine WhatsApp ridisegnata
+
+- **Nuovo design**: ogni sede ha il suo colore (Somma Lombardo verde petrolio, Busto Arsizio blu cobalto, Tradate prugna, Oleggio ocra), con una scheda per sede, due per riga.
+- **Intestazione** scura con le date della settimana in grande e una striscia nei quattro colori delle sedi.
+- Nomi in etichette colorate più leggibili; orari della fascia sopra ogni turno; "chiuso" e "Agenzia chiusa" discreti; i turni scoperti sono segnati "da coprire".
+- **Ferie e permessi** con le mezze giornate ("solo pomeriggio") e le note.
+- In fondo: data e ora dell'ultimo aggiornamento dei turni, per capire subito se l'immagine è quella più recente.
+- Nuovo carattere per titoli e numeri (Bricolage Grotesque).
+
 ## v2.7.0 — 15/11/2026 · Immagine per WhatsApp
 
 - **Nuova immagine esportata**, uguale da telefono e da computer (larghezza fissa, alta risoluzione):
