@@ -2,6 +2,13 @@
 
 > A ogni release aggiornare insieme: `APP_VERSION` in `index.html` e `storico.html`, `CACHE_NAME` in `sw.js`, e questo file.
 
+## v2.3.1 — 15/11/2026 · Correzione bug minori
+
+- **Rimozione dipendente**: ora chiede conferma (prima bastava un tocco sulla ✕).
+- **Nomi simili** (es. "Anna M." e "Anna M"): toccando un nome non si spunta più l'altro.
+- **Backup "Esporta memoria"**: risulta fatto solo se il file viene davvero condiviso o scaricato, non se annulli.
+- **Settimane solo visitate**: non vengono più salvate né caricate su Drive (file più leggero).
+
 ## v2.3.0 — 15/11/2026 · Correzione bug
 
 ### Sincronizzazione Google Drive

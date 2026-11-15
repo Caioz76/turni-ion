@@ -879,7 +879,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.3.0";
+  var APP_VERSION = "2.3.1";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -1027,7 +1027,19 @@
   var currentMonday = getUpcomingMonday();
   var cellCtx = null, absenceCtx = null;
 
-  function persistLocal(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(state)); }catch(e){} }
+  /* Le settimane solo visitate (vuote e mai modificate) restano in memoria ma non vengono salvate né caricate su Drive.
+     Una settimana svuotata dopo una modifica ha updatedAt e viene salvata, così la sincronizzazione propaga lo svuotamento. */
+  function serializableState(st){
+    var out = {};
+    Object.keys(st).forEach(function(k){ if(k !== "weeks") out[k] = st[k]; });
+    out.weeks = {};
+    Object.keys(st.weeks || {}).forEach(function(wk){
+      var w = st.weeks[wk];
+      if(w && (w.updatedAt || weekHasData(w))) out.weeks[wk] = w;
+    });
+    return out;
+  }
+  function persistLocal(){ try{ localStorage.setItem(LS_STATE, JSON.stringify(serializableState(state))); }catch(e){} }
   /* markDirty(weekISO): se viene passata una settimana, marca solo quella come modificata;
      senza argomenti marca le impostazioni (dipendenti, colori, aperture, logo).
      I timestamp separati permettono alla sincronizzazione di unire le modifiche di più dispositivi. */
@@ -1432,12 +1444,12 @@
   function renderCellEmpList(day, agency, shiftKey, selectedNames, showAllSedi){
     var container = document.getElementById("cellEmpList"); container.innerHTML = "";
     var sorted = employees.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'it'); });
-    sorted.forEach(function(emp){
+    sorted.forEach(function(emp, empIdx){
       var absent = isAbsentOn(day, emp.name);
       var sedeOk = showAllSedi || sedeMatches(emp, agency);
       var isSelected = selectedNames.indexOf(emp.name) !== -1;
       if(!sedeOk && !isSelected) return;
-      var id = "emp_" + emp.name.replace(/[^a-zA-Z0-9]/g, "_");
+      var id = "emp_" + empIdx; // indice: nomi simili ("Anna M." / "Anna M") non devono avere lo stesso id
       var row = document.createElement("div");
       row.className = "emp-row" + (absent ? " is-absent" : "");
       var extra = absent ? '<span class="tag-absent">in ferie</span>' : (!sedeOk ? '<span class="tag-outsede">altra sede</span>' : "");
@@ -1477,8 +1489,8 @@
     document.getElementById("absenceSheetSub").textContent = DAY_NAMES[dayIdx] + " " + fmtItFull(d);
     var container = document.getElementById("absenceEmpList"); container.innerHTML = "";
     var sorted = employees.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'it'); });
-    sorted.forEach(function(emp){
-      var id = "abs_" + emp.name.replace(/[^a-zA-Z0-9]/g, "_");
+    sorted.forEach(function(emp, empIdx){
+      var id = "abs_" + empIdx;
       var checked = day.absence && day.absence.people && day.absence.people.indexOf(emp.name) !== -1;
       var assignedIn = [];
       AGENCIES.forEach(function(a){
@@ -1624,7 +1636,10 @@
       });
       row.appendChild(toggles);
       var removeBtn = document.createElement("button"); removeBtn.className = "emp-remove"; removeBtn.textContent = "✕";
-      removeBtn.addEventListener("click", function(){ removeEmployeeByName(emp.name); renderMasterEmpList(); });
+      removeBtn.addEventListener("click", function(){
+        if(!window.confirm("Rimuovere " + emp.name + " dall'elenco dei dipendenti?\n\nI turni già assegnati nello storico restano visibili.")) return;
+        removeEmployeeByName(emp.name); renderMasterEmpList();
+      });
       row.appendChild(removeBtn);
       container.appendChild(row);
     });
@@ -1751,9 +1766,13 @@
   }
 
   document.getElementById("exportMemoriaBtn").addEventListener("click", function(){
-    state.meta.lastExport = new Date().toISOString(); isDirty = false; persistLocal();
-    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-    shareOrDownload(blob, "turni_memoria.json", "application/json").then(function(){
+    var exportedAt = new Date().toISOString();
+    var snapshot = serializableState(state);
+    snapshot.meta = Object.assign({}, state.meta, { lastExport: exportedAt });
+    var blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });
+    shareOrDownload(blob, "turni_memoria.json", "application/json").then(function(done){
+      if(!done) return; // condivisione annullata: il backup NON risulta fatto
+      state.meta.lastExport = exportedAt; isDirty = false; persistLocal();
       updateMemoryStatus();
     });
   });
@@ -2007,7 +2026,7 @@
 
   // Copia da caricare su Drive: senza le informazioni di collegamento di questo dispositivo.
   function stateForUpload(st){
-    var copy = deepCopy(st);
+    var copy = deepCopy(serializableState(st));
     delete copy.cloud;
     return JSON.stringify(copy, null, 2);
   }
@@ -2171,13 +2190,15 @@
     }
 
     if(canTryShare){
-      return navigator.share({ files: [file] }).catch(function(err){
-        if(err && err.name === "AbortError") return;
+      // Risolve true se il file è stato condiviso/scaricato, false se l'utente ha annullato.
+      return navigator.share({ files: [file] }).then(function(){ return true; }).catch(function(err){
+        if(err && err.name === "AbortError") return false;
         fallbackDownload();
+        return true;
       });
     }
     fallbackDownload();
-    return Promise.resolve();
+    return Promise.resolve(true);
   }
 
   function addCanvasAsMultipagePdf(pdf, canvas, marginPt){
