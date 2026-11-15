@@ -1,6 +1,6 @@
 // Registro Turni — service worker
 // IMPORTANTE: aumentare CACHE_NAME a ogni release, insieme ad APP_VERSION in index.html e storico.html.
-var CACHE_NAME = "turni-cache-v13-2.3.0";
+var CACHE_NAME = "turni-cache-v14-2.3.1";
 var CORE_ASSETS = [
   "./",
   "./index.html",
