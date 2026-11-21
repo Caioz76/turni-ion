@@ -2,112 +2,123 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Storico Turni">
-<meta name="theme-color" content="#223349">
+<meta name="theme-color" content="#15273c">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
 <title>Storico Turni</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+  /* ===== Stile ION (v3.0.0) ===== */
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/montserrat-latin-400-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/montserrat-latin-600-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/montserrat-latin-700-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 800; font-display: swap; src: url(fonts/montserrat-latin-800-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 900; font-display: swap; src: url(fonts/montserrat-latin-900-normal.woff2) format('woff2'); }
   :root{
-    --paper:#F5F1E6; --paper-2:#EFE9D8; --ink:#23211D; --ink-soft:#5B564A;
-    --navy:#223349; --accent:#2F6F62; --accent-2:#3E8C7A; --alert:#B13B2E; --alert-bg:#F6E1DC;
-    --line:#D8CDB2; --line-strong:#B9AC87;
+    --ion-ink:#122133; --ion-night:#15273c; --ion-panel:#182b43; --ion-navy:#234061; --ion-blue:#3f70ad;
+    --ion-text:#1c324d; --ion-text-2:#2a3a4f; --ion-lavender:#a09eb6; --ion-lavender-soft:#e0dfe9; --ion-label-dark:#bebdcd; --ion-eyebrow:#223e60;
+    --ion-font:'Montserrat','Avenir Next','Segoe UI',Arial,sans-serif;
+    --ion-shadow-soft:0 12px 36px rgba(21,39,60,0.08); --ion-ease:cubic-bezier(0.22,1,0.36,1);
+    --paper:#f5f5f8; --paper-2:#f2f2f6; --ink:#122133; --ink-soft:#616973;
+    --navy:#15273c; --accent:#234061; --accent-2:#3f70ad; --alert:#a8243d; --alert-bg:#f8e8ec;
+    --line:#dcdce4; --line-strong:#d1d0db;
     --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
   html,body{ margin:0; padding:0; }
-  body{ background: var(--paper); color: var(--ink); font-family:'IBM Plex Sans', sans-serif; font-size:16px; min-height:100dvh; padding-bottom: calc(24px + var(--safe-b)); }
+  body{ background: var(--paper); color: var(--ion-text-2); font-family: var(--ion-font); font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100dvh; padding-bottom: calc(24px + var(--safe-b)); }
+  button, select, input { font-family: var(--ion-font); }
+  button:focus-visible, a:focus-visible, select:focus-visible { outline:2px solid var(--ion-blue); outline-offset:2px; }
+  .i { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
 
-  header.s-header{ position:sticky; top:0; z-index:30; background: var(--navy); color:#EFE9DA; padding: calc(12px + var(--safe-t)) 16px 14px; }
-
+  header.s-header{ position:sticky; top:0; z-index:30; background: var(--ion-night); color:#f3f3f6; padding: calc(14px + var(--safe-t)) 16px 14px; }
   .update-banner{
-    background: var(--accent-2); color: #fff; padding: calc(9px + var(--safe-t)) 16px 9px;
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    font-family:'IBM Plex Sans', sans-serif; font-size: 13.5px; font-weight: 600;
+    background: var(--ion-navy); color:#fff; padding: calc(10px + var(--safe-t)) 16px 10px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:14px; font-weight:600;
   }
-  .update-banner.hidden{ display: none; }
-  .update-banner button{
-    background: #fff; color: var(--navy); border: none; border-radius: 16px; padding: 7px 14px;
-    font-weight: 700; font-size: 13px; min-height: 32px; flex-shrink: 0;
-  }
-  .s-brand{ font-family:'Fraunces', serif; font-weight:700; font-size:19px; margin-bottom:2px; }
-  .s-brand span{ color: var(--accent-2); }
-  .s-sub{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:#B8C0CB; letter-spacing:1px; text-transform:uppercase; }
+  .update-banner.hidden{ display:none; }
+  .update-banner button{ background:#fff; color: var(--ion-night); border:none; border-radius:16px; padding:8px 16px; font-weight:800; font-size:13.5px; min-height:44px; flex-shrink:0; cursor:pointer; }
+  .s-brand{ font-weight:800; font-size:20px; letter-spacing:-0.035em; color:#fff; margin-bottom:4px; }
+  .s-sub{ font-size:12.5px; color: var(--ion-label-dark); display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; }
+  .s-sub a{ color:#fff; font-weight:700; text-underline-offset:3px; min-height:44px; display:inline-flex; align-items:center; }
 
-  .s-import-row{ padding:12px 16px; background: var(--paper-2); border-bottom:2px solid var(--accent); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .s-status{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; color: var(--ink-soft); flex:1 1 100%; }
-  .btn{ font-family:'IBM Plex Sans', sans-serif; font-size:13.5px; font-weight:600; padding:10px 14px; border-radius:20px; border:1px solid transparent; min-height:42px; }
-  .btn:active{ transform: scale(0.98); }
-  .btn-primary{ background: var(--accent); color:#fff; }
-  .btn-outline{ background:#fff; color: var(--navy); border-color: var(--line-strong); }
+  .s-import-row{ padding:14px 16px; background:#fff; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .s-status{ font-size:13px; color: var(--ink-soft); flex:1 1 100%; font-variant-numeric: tabular-nums; }
+  .btn{ font-size:14px; font-weight:800; padding:11px 16px; border-radius:16px; border:1px solid transparent; min-height:44px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; transition: transform .25s var(--ion-ease), border-color .25s var(--ion-ease), background .25s var(--ion-ease); }
+  .btn:active{ transform: scale(0.97); }
+  .btn-primary{ background: var(--ion-navy); color:#fff; box-shadow:0 10px 24px rgba(35,64,97,0.22); }
+  .btn-primary:hover{ background: var(--ion-ink); }
+  .btn-outline{ background:#fff; color: var(--ion-text); border-color: var(--line-strong); box-shadow:0 8px 18px rgba(21,39,60,0.06); }
+  .btn-outline:hover{ border-color: var(--ion-lavender); }
   .btn-alert{ background: var(--alert); color:#fff; }
-  .btn-sm{ padding:8px 12px; font-size:12.5px; }
+  .btn-sm{ padding:8px 14px; font-size:13px; }
 
-  .s-filters{ padding: 12px 16px; display:flex; gap:8px; flex-wrap:wrap; }
-  .s-filters select{ flex:1; min-width:140px; padding:10px 12px; border:1px solid var(--line-strong); border-radius:10px; font-size:14px; background:#fff; }
+  .s-filters{ padding: 14px 16px; display:flex; gap:10px; flex-wrap:wrap; max-width:1240px; margin:0 auto; }
+  .s-filters select{ flex:1; min-width:140px; min-height:46px; padding:10px 12px; border:1px solid var(--line-strong); border-radius:12px; font-size:15px; background:#fff; color: var(--ion-ink); }
+  .s-filters select:focus{ outline:none; border-color: var(--ion-blue); box-shadow:0 0 0 3px rgba(63,112,173,0.35); }
 
-  main{ padding: 4px 16px 20px; }
-  .empty-state{ text-align:center; padding: 60px 20px; color: var(--ink-soft); font-size:14px; line-height:1.7; }
-  .empty-state b{ color: var(--navy); }
+  main{ padding: 4px 16px 20px; max-width:1240px; margin:0 auto; }
+  .empty-state{ text-align:center; padding: 60px 20px; color: var(--ink-soft); font-size:15px; line-height:1.7; }
+  .empty-state b{ color: var(--ion-navy); }
 
-  .week-card{ background:#FFFEFB; border:1px solid var(--line-strong); border-radius:14px; margin-bottom:12px; overflow:hidden; box-shadow:0 2px 6px rgba(35,33,29,0.06); }
-  .week-card-head{ padding:13px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
-  .week-card-head:active{ background: var(--paper-2); }
-  .week-title{ font-family:'Fraunces', serif; font-weight:600; font-size:15.5px; color: var(--navy); }
-  .week-meta{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; color: var(--ink-soft); margin-top:2px; }
+  .week-card{ background:#fff; border:1px solid var(--line); border-radius:24px; margin-bottom:14px; overflow:hidden; box-shadow: var(--ion-shadow-soft); }
+  .week-card-head{ padding:14px 18px; display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; min-height:56px; }
+  .week-card-head:hover{ background: var(--paper-2); }
+  .week-title{ font-weight:800; font-size:16.5px; color: var(--ion-ink); letter-spacing:-0.03em; font-variant-numeric: tabular-nums; }
+  .week-meta{ font-size:12.5px; color: var(--ink-soft); margin-top:2px; }
   .week-badges{ display:flex; gap:6px; align-items:center; flex-shrink:0; }
-  .badge{ font-family:'IBM Plex Mono', monospace; font-size:10px; padding:3px 8px; border-radius:10px; background: var(--paper-2); color: var(--ink-soft); }
-  .badge.alert{ background: var(--alert-bg); color: var(--alert); font-weight:600; }
-  .chevron{ font-size:13px; color: var(--ink-soft); transition: transform .2s; }
+  .badge{ font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:8px; background: var(--ion-lavender-soft); color: var(--ion-navy); }
+  .badge.alert{ background: var(--alert-bg); color: var(--alert); }
+  .chevron{ font-size:16px; color: var(--ink-soft); transition: transform .25s var(--ion-ease); }
   .week-card.open .chevron{ transform: rotate(90deg); }
 
-  .week-detail{ display:none; border-top:1px solid var(--line); padding: 12px 14px 16px; }
+  .week-detail{ display:none; border-top:1px solid var(--line); padding: 14px 18px 18px; }
   .week-card.open .week-detail{ display:block; }
-  .day-row{ margin-bottom:12px; }
-  .day-row-title{ font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color: var(--navy); font-weight:600; margin-bottom:5px; }
-  .day-row-body{ font-size:12.5px; line-height:1.9; }
+  .day-row{ margin-bottom:14px; }
+  .day-row-title{ font-size:11.5px; text-transform:uppercase; letter-spacing:.12em; color: var(--ion-eyebrow); font-weight:900; margin-bottom:6px; }
+  .day-row-body{ font-size:13.5px; line-height:1.9; color: var(--ion-text-2); }
   .agency-line{ margin-bottom:2px; }
-  .agency-line b{ color: var(--ink-soft); font-weight:600; font-size:11px; }
-  .chip{ display:inline-flex; align-items:center; gap:4px; border:1.4px solid var(--line-strong); border-radius:10px; padding:2px 7px 2px 5px; font-size:11px; color: var(--ink); margin:1px 3px 1px 0; }
-  .chip-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .agency-line b{ color: var(--ink-soft); font-weight:700; font-size:12px; }
+  .chip{ display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line-strong); border-radius:8px; padding:2px 8px 2px 6px; font-size:12.5px; font-weight:600; color: var(--ion-ink); margin:1px 4px 1px 0; background:#fff; }
+  .chip-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
   .chip.chip-absent{ border-style:dashed; }
-  .none-txt{ color:#C6BC9E; font-style:italic; font-size:11.5px; }
-  .abs-note-text{ font-size:11px; color: var(--ink-soft); font-style:italic; margin-top:3px; }
+  .none-txt{ color: var(--ink-soft); font-size:12.5px; }
+  .abs-note-text{ font-size:12.5px; color: var(--ink-soft); margin-top:3px; }
 
-  .week-actions{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .week-actions{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
 
-  .conflict-box{ background: var(--alert-bg); border:1px solid #E2B4AA; border-left:4px solid var(--alert); border-radius:8px; padding:8px 10px; font-size:11.5px; margin-bottom:12px; }
-  .conflict-box ul{ margin:4px 0 0; padding-left:16px; }
+  .conflict-box{ background: var(--alert-bg); border:1px solid #e7bcc5; border-left:4px solid var(--alert); border-radius:12px; padding:10px 12px; font-size:13px; margin-bottom:14px; color: var(--ion-ink); }
+  .conflict-box ul{ margin:4px 0 0; padding-left:18px; }
 
-  .export-target{ background:#FFFEFB; padding:16px; }
-  .export-target .sheet-head{ margin-bottom:12px; }
-  .export-target h1{ font-family:'Fraunces', serif; font-size:19px; margin:0 0 4px; }
-  .export-target .range{ font-family:'IBM Plex Mono', monospace; font-size:11.5px; color: var(--ink-soft); }
+  .export-target{ background:#fff; padding:20px; font-family: var(--ion-font); }
+  .export-target .sheet-head{ margin-bottom:14px; }
+  .export-target h1{ font-weight:800; font-size:22px; letter-spacing:-0.035em; color: var(--ion-ink); margin:0 0 4px; }
+  .export-target .range{ font-size:13px; color: var(--ink-soft); }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
 </style>
+
 </head>
 <body>
 
 <div class="update-banner hidden" id="updateBanner">
-  <span>🔄 Nuova versione disponibile</span>
+  <span>Nuova versione disponibile</span>
   <button id="updateBannerBtn">Aggiorna</button>
 </div>
 
 <header class="s-header">
-  <div class="s-brand">STORICO <span>TURNI</span></div>
-  <div class="s-sub">archivio di consultazione · 4 agenzie · <span id="storicoVersionLabel"></span> · <a href="index.html" style="color:#8FC7BA;">← torna all'app</a></div>
+  <div class="s-brand">Storico turni</div>
+  <div class="s-sub"><span>Archivio di consultazione delle 4 agenzie</span><span id="storicoVersionLabel"></span><a href="index.html">Torna all'app</a></div>
 </header>
 
 <div class="s-import-row">
   <div class="s-status" id="statusLine">—</div>
-  <button class="btn btn-primary" id="importBtn">📂 Importa memoria (.json)</button>
-  <button class="btn btn-outline" id="exportBtn">💾 Esporta storico aggiornato</button>
+  <button class="btn btn-primary" id="importBtn">Importa backup (.json)</button>
+  <button class="btn btn-outline" id="exportBtn">Esporta storico aggiornato</button>
   <input type="file" id="importInput" accept="application/json,.json" style="display:none;">
 </div>
 
@@ -125,7 +136,7 @@
 <main id="weeksContainer">
   <div class="empty-state" id="emptyState">
     Nessun dato caricato.<br><br>
-    Tocca <b>📂 Importa memoria</b> e seleziona il file <b>turni_memoria.json</b> esportato dall'app principale (desktop o mobile).<br><br>
+    Tocca <b>Importa backup</b> e seleziona il file <b>turni_memoria.json</b> esportato dall'app principale (desktop o mobile).<br><br>
     Tieni questo file nella stessa cartella Download insieme a <b>turni.html</b> / <b>turni-mobile.html</b> per ritrovarlo facilmente.
   </div>
 </main>
@@ -137,7 +148,7 @@
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
   var DAY_NAMES = ["Lun","Mar","Mer","Gio","Ven","Sab"];
-  var APP_VERSION = "2.9.0"; // tenere allineata a index.html
+  var APP_VERSION = "3.0.0"; // tenere allineata a index.html
   var LS_STATE = "turni_state_v2";
 
   function hexToRgb(hex){ hex=hex.replace("#",""); if(hex.length===3) hex=hex.split("").map(function(c){return c+c;}).join(""); var num=parseInt(hex,16); return {r:(num>>16)&255,g:(num>>8)&255,b:num&255}; }
@@ -264,7 +275,7 @@
     container.innerHTML = "";
     if(keys.length === 0){
       var msg = Object.keys(state.weeks).length === 0
-        ? '<div class="empty-state">Nessun dato caricato.<br><br>Tocca <b>📂 Importa memoria</b> e seleziona il file <b>turni_memoria.json</b>.</div>'
+        ? '<div class="empty-state">Nessun dato caricato.<br><br>Tocca <b>Importa backup</b> e seleziona il file <b>turni_memoria.json</b>.</div>'
         : '<div class="empty-state">Nessuna settimana corrisponde ai filtri selezionati.</div>';
       container.innerHTML = msg;
       return;
@@ -283,7 +294,7 @@
       head.innerHTML =
         '<div><div class="week-title">'+fmtIt(mon)+' – '+fmtIt(sat)+' \''+String(mon.getFullYear()).slice(2)+'</div>'+
         '<div class="week-meta">settimana dal '+fmtItFull(mon)+'</div></div>'+
-        '<div class="week-badges">'+(conflicts.length ? '<span class="badge alert">'+conflicts.length+' ⚠</span>' : '<span class="badge">ok</span>')+
+        '<div class="week-badges">'+(conflicts.length ? '<span class="badge alert">'+conflicts.length+(conflicts.length===1?' problema':' problemi')+'</span>' : '<span class="badge">ok</span>')+
         '<span class="chevron">›</span></div>';
       head.addEventListener("click", function(){ card.classList.toggle("open"); });
       card.appendChild(head);
@@ -294,7 +305,7 @@
       if(conflicts.length){
         var cbox = document.createElement("div");
         cbox.className = "conflict-box";
-        cbox.innerHTML = "<b>⚠ Sovrapposizioni</b><ul>" + conflicts.map(function(c){
+        cbox.innerHTML = "<b>Sovrapposizioni</b><ul>" + conflicts.map(function(c){
           var d = fromISO(c.date);
           return "<li><b>"+escapeHtml(c.name)+"</b> · "+DAY_NAMES[c.dayIdx]+" "+fmtIt(d)+" ("+(c.shift==="mattina"?"mattina":"pomeriggio")+"): "+c.agencies.map(escapeHtml).join(" + ")+"</li>";
         }).join("") + "</ul>";
@@ -334,15 +345,15 @@
       actions.className = "week-actions";
       var pngBtn = document.createElement("button");
       pngBtn.className = "btn btn-outline btn-sm";
-      pngBtn.textContent = "🖼 Esporta PNG";
+      pngBtn.textContent = "Esporta PNG";
       pngBtn.addEventListener("click", function(e){ e.stopPropagation(); exportWeekImage(w, mon, sat, "png"); });
       var pdfBtn = document.createElement("button");
       pdfBtn.className = "btn btn-outline btn-sm";
-      pdfBtn.textContent = "📄 Esporta PDF";
+      pdfBtn.textContent = "Esporta PDF";
       pdfBtn.addEventListener("click", function(e){ e.stopPropagation(); exportWeekImage(w, mon, sat, "pdf"); });
       var delBtn = document.createElement("button");
       delBtn.className = "btn btn-alert btn-sm";
-      delBtn.textContent = "🗑 Elimina";
+      delBtn.textContent = "Elimina";
       delBtn.addEventListener("click", function(e){
         e.stopPropagation();
         if(confirm("Eliminare definitivamente la settimana "+fmtIt(mon)+" – "+fmtIt(sat)+" dallo storico?")){
@@ -448,7 +459,7 @@
     target.innerHTML = html;
     document.body.appendChild(target);
 
-    html2canvas(target, { scale:2, backgroundColor:"#FFFEFB", useCORS:true, allowTaint:true, logging:false }).then(function(canvas){
+    html2canvas(target, { scale:2, backgroundColor:"#ffffff", useCORS:true, allowTaint:true, logging:false }).then(function(canvas){
       document.body.removeChild(target);
       var base = "turni_"+mon.getFullYear()+"-"+pad(mon.getMonth()+1)+"-"+pad(mon.getDate())+"_"+sat.getFullYear()+"-"+pad(sat.getMonth()+1)+"-"+pad(sat.getDate());
       if(kind === "png"){
