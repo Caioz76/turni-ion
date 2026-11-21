@@ -2,33 +2,41 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Turni">
-<meta name="theme-color" content="#223349">
+<meta name="theme-color" content="#15273c">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
-<title>Turni · Mobile &amp; Desktop</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Turni · ION</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
+  /* ===== Stile ION (v3.0.0) — palette e tipografia di www.ion.srl ===== */
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/montserrat-latin-400-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/montserrat-latin-600-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/montserrat-latin-700-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 800; font-display: swap; src: url(fonts/montserrat-latin-800-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'Montserrat'; font-style: normal; font-weight: 900; font-display: swap; src: url(fonts/montserrat-latin-900-normal.woff2) format('woff2'); }
+
   :root {
-    --paper: #F5F1E6;
-    --paper-2: #EFE9D8;
-    --ink: #23211D;
-    --ink-soft: #5B564A;
-    --navy: #223349;
-    --accent: #2F6F62;
-    --accent-2: #3E8C7A;
-    --alert: #B13B2E;
-    --alert-bg: #F6E1DC;
-    --line: #D8CDB2;
-    --line-strong: #B9AC87;
+    --ion-ink: #122133; --ion-night: #15273c; --ion-panel: #182b43; --ion-navy: #234061;
+    --ion-blue: #3f70ad; --ion-blue-deep: #2c4f7a; --ion-text: #1c324d; --ion-text-2: #2a3a4f;
+    --ion-muted: #616973; --ion-line: #dcdce4; --ion-field: #d1d0db; --ion-paper: #f5f5f8;
+    --ion-paper-2: #f2f2f6; --ion-white: #ffffff; --ion-lavender: #a09eb6;
+    --ion-lavender-soft: #e0dfe9; --ion-label-dark: #bebdcd; --ion-eyebrow: #223e60;
+    --ion-font: 'Montserrat', 'Avenir Next', 'Segoe UI', Arial, sans-serif;
+    --ion-shadow-soft: 0 12px 36px rgba(21, 39, 60, 0.08);
+    --ion-shadow: 0 24px 70px rgba(21, 39, 60, 0.13);
+    --ion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ion-focus: 0 0 0 3px rgba(63, 112, 173, 0.35);
+    /* Nomi storici usati dal codice: puntano ai valori ION */
+    --paper: #f5f5f8; --paper-2: #f2f2f6; --ink: #122133; --ink-soft: #616973;
+    --navy: #15273c; --accent: #234061; --accent-2: #3f70ad;
+    --alert: #a8243d; --alert-bg: #f8e8ec; --line: #dcdce4; --line-strong: #d1d0db;
     --safe-t: env(safe-area-inset-top, 0px);
     --safe-b: env(safe-area-inset-bottom, 0px);
   }
@@ -36,552 +44,417 @@
   html, body { margin: 0; padding: 0; }
   body {
     background: var(--paper);
-    color: var(--ink);
-    font-family: 'IBM Plex Sans', sans-serif;
+    color: var(--ion-text-2);
+    font-family: var(--ion-font);
     font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
     min-height: 100dvh;
     touch-action: manipulation;
-    padding-bottom: calc(78px + var(--safe-b));
+    padding-bottom: calc(80px + var(--safe-b));
   }
+  button, input, select, textarea { font-family: var(--ion-font); }
+  button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--ion-blue); outline-offset: 2px;
+  }
+  .i { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; vertical-align: -4px; }
+  .i-sm { width: 16px; height: 16px; vertical-align: -3px; }
+  .with-icon { display: inline-flex; align-items: center; gap: 10px; }
 
   .update-banner {
-    background: var(--accent-2);
-    color: #fff;
-    padding: calc(9px + var(--safe-t)) 16px 9px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13.5px;
-    font-weight: 600;
+    background: var(--ion-navy); color: #fff;
+    padding: calc(10px + var(--safe-t)) 16px 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    font-size: 14px; font-weight: 600;
   }
   .update-banner.hidden { display: none; }
   .update-banner button {
-    background: #fff;
-    color: var(--navy);
-    border: none;
-    border-radius: 16px;
-    padding: 7px 14px;
-    font-weight: 700;
-    font-size: 13px;
-    min-height: 32px;
-    flex-shrink: 0;
-    cursor: pointer;
+    background: #fff; color: var(--ion-night); border: none; border-radius: 16px;
+    padding: 8px 16px; font-weight: 800; font-size: 13.5px; min-height: 44px; flex-shrink: 0; cursor: pointer;
   }
 
   .auto-toast {
-    position: fixed;
-    bottom: calc(78px + var(--safe-b) + 10px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--navy);
-    color: #fff;
-    padding: 9px 16px;
-    border-radius: 20px;
-    font-size: 12.5px;
-    z-index: 70;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-    max-width: 85%;
-    text-align: center;
-    font-family: 'IBM Plex Sans', sans-serif;
+    position: fixed; bottom: calc(80px + var(--safe-b) + 12px); left: 50%; transform: translateX(-50%);
+    background: var(--ion-night); color: #fff; padding: 11px 18px; border-radius: 16px;
+    font-size: 13.5px; font-weight: 600; z-index: 70; box-shadow: var(--ion-shadow); max-width: 88%; text-align: center;
   }
   .auto-toast.hidden { display: none; }
 
+  /* ---- Intestazione (blu notte) ---- */
   header.m-header {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    background: var(--navy);
-    color: #EFE9DA;
-    padding: calc(10px + var(--safe-t)) 14px 10px;
+    position: sticky; top: 0; z-index: 40;
+    background: var(--ion-night); color: #f3f3f6;
+    padding: calc(12px + var(--safe-t)) 16px 12px;
   }
-  .m-brand {
-    font-family: 'Fraunces', serif;
-    font-weight: 700;
-    font-size: 17px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .m-brand .accent { color: var(--accent-2); }
+  .m-brand { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .m-title { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; overflow: hidden; }
+  .m-brand.has-logo .m-title-text { display: none; }
+  @media (min-width: 560px) { .m-brand.has-logo .m-title-text { display: inline; } }
+  .m-logo { display: flex; align-items: center; }
+  .m-logo img { height: 40px; width: auto; max-width: 46vw; object-fit: contain; object-position: left center; display: block; }
+  .m-logo img.on-tile { background: #fff; border-radius: 8px; padding: 4px 6px; }
+  .m-title-text { font-size: 19px; font-weight: 800; letter-spacing: -0.03em; color: #fff; white-space: nowrap; }
   .m-header-badges { display: flex; align-items: center; gap: 8px; margin-left: auto; }
   .m-cloud-indicator {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    cursor: pointer;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 12px;
-    padding: 2px 7px;
-    color: #EFE9DA;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    font-size: 12.5px; font-weight: 600; cursor: pointer;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 12px; padding: 6px 11px; min-height: 44px; color: #f3f3f6;
+    display: flex; align-items: center; gap: 7px; white-space: nowrap; max-width: 52vw; overflow: hidden; text-overflow: ellipsis;
   }
-  .m-cloud-indicator.synced { border-color: var(--accent-2); color: #B3E0D6; }
+  .m-cloud-indicator.synced { border-color: rgba(255,255,255,0.55); }
   .m-cloud-indicator.syncing { animation: pulse 1s infinite alternate; }
-  @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
-  .m-version {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px;
-    font-weight: 500;
-    color: #8FA0AE;
-    padding-left: 4px;
-  }
-  .settings-app-version {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--ink-soft);
-    text-align: center;
-    margin-top: 18px;
-  }
-  .m-week-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  @keyframes pulse { from { opacity: 0.55; } to { opacity: 1; } }
+  .m-version { font-size: 11px; font-weight: 600; color: var(--ion-label-dark); padding-left: 2px; font-variant-numeric: tabular-nums; }
+  .settings-app-version { font-size: 12px; color: var(--ink-soft); text-align: center; margin-top: 18px; font-variant-numeric: tabular-nums; }
+  .m-week-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
   .m-arrow {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid #4C617A;
-    color: #EFE9DA;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.25); color: #fff;
+    width: 44px; height: 44px; border-radius: 50%; font-size: 20px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: background .25s var(--ion-ease);
   }
-  .m-arrow:active { background: rgba(255,255,255,0.2); }
+  .m-arrow:hover { background: var(--ion-panel); }
+  .m-arrow:active { transform: scale(0.97); }
   .m-week-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 14px;
-    min-width: 150px;
-    text-align: center;
-    background: none;
-    border: none;
-    color: inherit;
-    padding: 6px 4px;
-    cursor: pointer;
+    font-size: 17px; font-weight: 600; min-width: 160px; min-height: 44px; text-align: center;
+    background: none; border: none; color: var(--ion-label-dark); padding: 6px 4px; cursor: pointer;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
   }
-  .m-week-label:active { opacity: 0.7; }
-  .m-week-label b { color: var(--accent-2); }
-  .m-substatus {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 9px;
-    flex-wrap: wrap;
-  }
+  .m-week-label b { color: #fff; font-weight: 800; }
+  .m-subbar { background: var(--ion-night); padding: 0 16px 14px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .m-substatus { display: flex; align-items: center; justify-content: center; gap: 8px; padding-top: 10px; flex-wrap: wrap; }
   .m-stamp {
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 700;
-    font-size: 11.5px;
-    letter-spacing: .5px;
-    border: 2px solid var(--accent-2);
-    color: var(--accent-2);
-    padding: 4px 10px;
-    border-radius: 12px;
-    text-transform: uppercase;
+    font-weight: 800; font-size: 12.5px; border: 1px solid rgba(255,255,255,0.35); color: #fff;
+    padding: 0 12px; min-height: 36px; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px;
   }
-  .m-stamp.alert { border-color: #E38C7C; color: #E38C7C; }
+  .m-stamp.alert { background: var(--alert); border-color: var(--alert); }
   .m-link {
-    background: none;
-    border: none;
-    color: #B8C0CB;
-    font-size: 12px;
-    text-decoration: underline;
-    font-family: 'IBM Plex Sans', sans-serif;
-    cursor: pointer;
+    background: none; border: none; color: var(--ion-label-dark); font-size: 13px; font-weight: 600;
+    text-decoration: underline; text-underline-offset: 3px; min-height: 44px; padding: 0 6px; cursor: pointer;
   }
+  .m-link:hover { color: #fff; }
 
-  main.m-main {
-    padding: 14px 16px 20px;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
+  /* ---- Contenuto ---- */
+  main.m-main { padding: 18px 16px 24px; max-width: 1240px; margin: 0 auto; width: 100%; }
+  .m-conflict, .m-gap {
+    background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--alert);
+    border-radius: 16px; padding: 14px 16px; font-size: 14px; margin-bottom: 16px; color: var(--ion-text-2);
+    box-shadow: var(--ion-shadow-soft);
   }
-  .m-conflict {
-    background: var(--alert-bg);
-    border: 1px solid #E2B4AA;
-    border-left: 4px solid var(--alert);
-    border-radius: 10px;
-    padding: 10px 12px;
-    font-size: 12.5px;
-    margin-bottom: 14px;
-  }
-  .m-conflict.hidden { display: none; }
-  .m-conflict h3 { margin: 0 0 6px; font-family: 'Fraunces', serif; font-size: 14px; color: var(--alert); }
-  .m-conflict ul { margin: 0; padding-left: 18px; }
-  .m-conflict li { margin-bottom: 3px; }
-
-  .m-gap {
-    background: #F5EAD2;
-    border: 1px solid #DFC48B;
-    border-left: 4px solid #B8860B;
-    border-radius: 10px;
-    padding: 10px 12px;
-    font-size: 12.5px;
-    margin-bottom: 14px;
-  }
-  .m-gap.hidden { display: none; }
-  .m-gap h3 { margin: 0 0 6px; font-family: 'Fraunces', serif; font-size: 14px; color: #8A6209; }
-  .m-gap ul { margin: 0; padding-left: 18px; }
-  .m-gap li { margin-bottom: 3px; }
+  .m-gap { border-left-color: var(--ion-blue); }
+  .m-gap summary { list-style: none; cursor: pointer; min-height: 28px; }
+  .m-gap summary::-webkit-details-marker { display: none; }
+  .m-gap:not([open]) h3 { margin-bottom: 0; }
+  .m-gap .gap-toggle { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--ion-blue-deep); text-decoration: underline; text-underline-offset: 3px; }
+  .m-gap[open] .gap-toggle { font-size: 0; }
+  .m-gap[open] .gap-toggle::after { content: "Nascondi"; font-size: 13px; }
+  .m-conflict.hidden, .m-gap.hidden { display: none; }
+  .m-conflict h3, .m-gap h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+  .m-conflict h3 { color: var(--alert); }
+  .m-gap h3 { color: var(--ion-navy); }
+  .m-conflict ul, .m-gap ul { margin: 0; padding-left: 20px; }
+  .m-conflict li, .m-gap li { margin-bottom: 4px; }
 
   .day-card {
-    background: #FFFEFB;
-    border: 1px solid var(--line-strong);
-    border-radius: 16px;
-    padding: 12px;
-    margin-bottom: 14px;
-    box-shadow: 0 2px 8px rgba(35,33,29,0.07);
+    background: #fff; border: 1px solid var(--line); border-radius: 24px;
+    padding: 16px; margin-bottom: 16px; box-shadow: var(--ion-shadow-soft);
   }
-  .day-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .day-badge { display: flex; align-items: baseline; gap: 8px; }
-  .day-badge .num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 24px; color: var(--navy); line-height: 1; }
-  .day-badge .name { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; color: var(--ink-soft); letter-spacing: 1px; }
+  .day-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .day-badge { display: flex; align-items: baseline; gap: 10px; }
+  .day-badge .num { font-weight: 900; font-size: 30px; color: var(--ion-ink); line-height: 1; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; }
+  .day-badge .name { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--ion-eyebrow); letter-spacing: 0.12em; }
 
-  .agency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media(min-width: 768px) {
-    .agency-grid { grid-template-columns: repeat(4, 1fr); }
-  }
-
+  .agency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(min-width: 768px) { .agency-grid { grid-template-columns: repeat(4, 1fr); } }
   @media(min-width: 1200px) {
-    #daysList {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-    .day-card {
-      margin-bottom: 0;
-    }
+    #daysList { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .day-card { margin-bottom: 0; }
   }
 
-  .agency-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px;
-    text-transform: uppercase;
-    letter-spacing: .4px;
-    color: var(--navy);
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
+  .agency-label { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ion-eyebrow); margin-bottom: 2px; }
   .shift-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    min-height: 50px;
-    text-align: left;
-    border: 1.4px solid var(--line-strong);
-    border-radius: 10px;
-    padding: 7px 9px;
-    margin-top: 6px;
-    background: #fff;
-    font-family: 'IBM Plex Sans', sans-serif;
-    cursor: pointer;
+    display: flex; flex-direction: column; align-items: flex-start; width: 100%; min-height: 56px;
+    text-align: left; border: 1px solid var(--line-strong); border-radius: 16px; padding: 9px 11px; margin-top: 7px;
+    background: #fff; color: var(--ion-ink); cursor: pointer;
+    transition: border-color .25s var(--ion-ease), background .25s var(--ion-ease);
   }
+  .shift-btn:hover { border-color: var(--ion-lavender); }
   .shift-btn:active { background: var(--paper-2); }
   .shift-btn.conflict { border-color: var(--alert); background: var(--alert-bg); }
-  .shift-btn.closed { background: var(--line); opacity: 0.6; cursor: not-allowed; }
-  .shift-btn.closed:active { background: var(--line); }
-  .shift-tag { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; text-transform: uppercase; color: var(--ink-soft); letter-spacing: .5px; }
-  .shift-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
-  .empty-hint { color: #C6BC9E; font-size: 11px; font-style: italic; margin-top: 4px; }
+  .shift-btn.closed { background: var(--paper-2); border-color: var(--line); cursor: default; }
+  .shift-btn.closed:hover { border-color: var(--line); }
+  .shift-btn.closed:active { background: var(--paper-2); }
+  .shift-tag { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); }
+  .shift-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .empty-hint { color: var(--ink-soft); font-size: 12px; margin-top: 4px; }
+  .shift-btn:not(.closed) .empty-hint { color: var(--ion-blue-deep); font-weight: 600; }
 
   .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    border: 1.4px solid var(--line-strong);
-    border-radius: 10px;
-    padding: 2px 7px 2px 5px;
-    font-size: 11px;
-    color: var(--ink);
+    display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line-strong);
+    border-radius: 8px; padding: 3px 8px 3px 6px; font-size: 12.5px; font-weight: 600; color: var(--ion-ink); background: #fff;
   }
-  .chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .chip.chip-absent { border-style: dashed; }
 
   .ferie-btn {
-    width: 100%;
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    border: 1.4px dashed var(--line-strong);
-    border-radius: 10px;
-    padding: 9px 11px;
-    background: var(--paper-2);
-    min-height: 46px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--navy);
-    cursor: pointer;
+    width: 100%; margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    border: 1px dashed var(--ion-lavender); border-radius: 16px; padding: 10px 12px; background: var(--paper-2);
+    min-height: 48px; font-size: 13.5px; font-weight: 700; color: var(--ion-navy); cursor: pointer; text-align: left;
   }
-  .ferie-btn .fchips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
-  .ferie-btn:active { background: var(--line); }
-  .closed-btn { border-color: #DFC48B; background: #F5EAD2; }
-  .closed-btn:active { background: #EBD8AC; }
+  .ferie-btn > span:first-child { display: inline-flex; align-items: center; gap: 8px; }
+  .ferie-btn .fchips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; }
+  .ferie-btn:hover { border-color: var(--ion-navy); }
+  .closed-btn { background: #fff; border-color: var(--line-strong); }
 
-  .month-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 14px; }
+  .month-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; }
   .month-nav button {
-    background: var(--paper-2);
-    border: 1px solid var(--line-strong);
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-    color: var(--navy);
-    cursor: pointer;
+    background: #fff; border: 1px solid var(--line-strong); border-radius: 50%; width: 44px; height: 44px;
+    font-size: 18px; color: var(--ion-navy); cursor: pointer;
   }
-  .month-nav button:active { background: var(--line); }
-  .month-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 16px;
-    min-width: 140px;
-    text-align: center;
-    color: var(--navy);
-  }
-  .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-  .month-dow { text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-soft); padding-bottom: 5px; }
+  .month-nav button:hover { border-color: var(--ion-lavender); }
+  .month-title { font-weight: 800; font-size: 18px; min-width: 150px; text-align: center; color: var(--ion-ink); letter-spacing: -0.03em; }
+  .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .month-dow { text-align: center; font-size: 11px; font-weight: 700; color: var(--ink-soft); padding-bottom: 6px; }
   .month-cell {
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9px;
-    font-size: 12.5px;
-    background: #fff;
-    border: 1px solid var(--line);
-    gap: 3px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    cursor: pointer;
+    aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 12px; font-size: 13px; font-weight: 600; background: #fff; border: 1px solid var(--line);
+    gap: 3px; cursor: pointer; color: var(--ion-ink); font-variant-numeric: tabular-nums;
   }
   .month-cell.empty { border: none; background: transparent; cursor: default; }
-  .month-cell.off { color: #C6BC9E; background: var(--paper-2); border-color: var(--line); cursor: default; }
-  .month-cell.today { border: 2px solid var(--accent); font-weight: 700; }
+  .month-cell.off { color: var(--ink-soft); background: var(--paper-2); border-color: var(--line); cursor: default; }
+  .month-cell.today { border: 2px solid var(--ion-blue); font-weight: 800; }
   .month-daynum { line-height: 1; }
-  .month-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--line-strong); }
-  .month-cell.ok .month-dot { background: var(--accent); }
-  .month-cell.gap .month-dot { background: #B8860B; }
+  .month-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line-strong); }
+  .month-cell.ok .month-dot { background: var(--ion-navy); }
+  .month-cell.gap .month-dot { background: var(--ion-lavender); }
   .month-cell.conflict .month-dot { background: var(--alert); }
-  .month-legend { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 16px; font-size: 11px; color: var(--ink-soft); }
-  .month-legend span { display: flex; align-items: center; gap: 5px; }
-  .month-legend .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .month-legend { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 16px; font-size: 12px; color: var(--ink-soft); }
+  .month-legend span { display: flex; align-items: center; gap: 6px; }
+  .month-legend .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
+  /* ---- Barra in basso (menu su scuro) ---- */
   nav.m-tabbar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 50;
-    background: var(--navy);
-    border-top: 3px solid var(--accent);
-    display: flex;
-    padding: 6px 4px calc(6px + var(--safe-b));
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
-    justify-content: center;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    background: var(--ion-night); display: flex; padding: 6px 6px calc(6px + var(--safe-b));
+    width: 100%; justify-content: center; box-shadow: 0 -8px 24px rgba(21,39,60,0.18);
   }
   nav.m-tabbar button {
-    flex: 1;
-    max-width: 180px;
-    background: none;
-    border: none;
-    color: #B8C0CB;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 6px 2px;
-    font-size: 10px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    min-height: 48px;
-    cursor: pointer;
+    flex: 1; max-width: 160px; background: none; border: none; color: var(--ion-label-dark); border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 2px;
+    font-size: 11px; font-weight: 600; min-height: 56px; cursor: pointer;
+    transition: background .25s var(--ion-ease), color .25s var(--ion-ease);
   }
-  nav.m-tabbar button .ico { font-size: 19px; }
-  nav.m-tabbar button:active { color: #fff; }
+  nav.m-tabbar button .i { width: 22px; height: 22px; }
+  nav.m-tabbar button:hover { background: var(--ion-panel); color: #fff; }
+  nav.m-tabbar button:active { background: #fff; color: var(--ion-night); }
 
-  .sheet-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(35,33,29,0.5);
-    z-index: 100;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-  }
+  /* ---- Schede (pannelli dal basso) ---- */
+  .sheet-overlay { position: fixed; inset: 0; background: rgba(18,33,51,0.55); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
   .sheet-overlay.hidden { display: none; }
   .sheet-panel {
-    background: #FFFEFB;
-    width: 100%;
-    max-width: 600px;
-    max-height: 88dvh;
-    border-radius: 20px 20px 0 0;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
-    padding-bottom: var(--safe-b);
+    background: #fff; width: 100%; max-width: 600px; max-height: 88dvh; border-radius: 24px 24px 0 0;
+    display: flex; flex-direction: column; box-shadow: var(--ion-shadow); padding-bottom: var(--safe-b);
   }
-  .sheet-handle { width: 40px; height: 4px; background: var(--line-strong); border-radius: 3px; margin: 10px auto 4px; }
-  .sheet-head { padding: 6px 18px 12px; border-bottom: 1px solid var(--line); }
-  .sheet-head h3 { margin: 0; font-family: 'Fraunces', serif; font-size: 17px; }
-  .sheet-head .sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
-  .sheet-body { padding: 14px 18px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-  .sheet-foot { padding: 12px 18px; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+  .sheet-handle { width: 40px; height: 4px; background: var(--line-strong); border-radius: 8px; margin: 10px auto 4px; }
+  .sheet-head { padding: 8px 20px 14px; border-bottom: 1px solid var(--line); }
+  .sheet-head h3 { margin: 0; font-size: 20px; font-weight: 800; color: var(--ion-ink); letter-spacing: -0.035em; line-height: 1.15; display: flex; align-items: center; gap: 10px; }
+  .sheet-head h3 .i { color: var(--ion-navy); }
+  .sheet-head .sub { font-size: 13px; color: var(--ink-soft); margin-top: 4px; }
+  .sheet-body { padding: 16px 20px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; color: var(--ion-text-2); }
+  .sheet-foot { padding: 12px 20px; border-top: 1px solid var(--line); display: flex; gap: 10px; }
 
+  /* ---- Pulsanti ---- */
   .btn {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 11px 16px;
-    border-radius: 22px;
-    border: 1px solid transparent;
-    min-height: 44px;
-    flex: 1;
-    cursor: pointer;
+    font-size: 14.5px; font-weight: 800; padding: 12px 18px; border-radius: 16px; border: 1px solid transparent;
+    min-height: 48px; flex: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    transition: transform .25s var(--ion-ease), background .25s var(--ion-ease), border-color .25s var(--ion-ease), box-shadow .25s var(--ion-ease);
   }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-outline { background: #fff; color: var(--navy); border-color: var(--line-strong); }
-  .btn-ghost { background: var(--paper-2); color: var(--navy); }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--ion-navy); color: #fff; box-shadow: 0 10px 24px rgba(35,64,97,0.22); }
+  .btn-primary:hover { background: var(--ion-ink); }
+  .btn-outline { background: #fff; color: var(--ion-text); border-color: var(--line-strong); box-shadow: 0 8px 18px rgba(21,39,60,0.06); }
+  .btn-outline:hover { border-color: var(--ion-lavender); }
+  .btn-ghost { background: var(--paper-2); color: var(--ion-navy); }
+  .btn-ghost:hover { background: var(--ion-lavender-soft); }
   .btn-alert { background: var(--alert); color: #fff; }
-  .btn-block { width: 100%; margin-bottom: 8px; display: block; text-align: center; }
+  .btn-block { width: 100%; margin-bottom: 10px; display: flex; text-align: center; }
 
-  .filter-row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 12px; color: var(--ink-soft); }
-  .filter-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+  .filter-row { display: flex; align-items: center; gap: 10px; font-size: 14px; margin-bottom: 12px; color: var(--ink-soft); min-height: 44px; }
+  .filter-row input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--ion-navy); }
 
-  .emp-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
-  .emp-row { display: flex; align-items: center; gap: 10px; padding: 9px 6px; border-radius: 8px; min-height: 44px; }
-  .emp-row.is-absent { opacity: 0.5; }
-  .emp-row input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
-  .emp-row label { font-size: 14.5px; flex: 1; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-  .tag-absent { font-size: 10.5px; font-family: 'IBM Plex Mono', monospace; color: var(--alert); }
-  .tag-outsede { font-size: 10.5px; font-family: 'IBM Plex Mono', monospace; color: var(--ink-soft); }
+  .emp-list { display: flex; flex-direction: column; gap: 4px; margin: 10px 0 12px; }
+  .emp-row { display: flex; align-items: center; gap: 10px; padding: 8px 8px; border-radius: 12px; min-height: 48px; }
+  .emp-row:hover { background: var(--paper-2); }
+  .emp-row.is-absent { opacity: 0.55; }
+  .emp-row input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--ion-navy); flex-shrink: 0; }
+  .emp-row label { font-size: 15px; font-weight: 600; color: var(--ion-ink); flex: 1; display: flex; align-items: center; gap: 8px; cursor: pointer; flex-wrap: wrap; }
+  .tag-absent { font-size: 11.5px; font-weight: 600; color: var(--alert); }
+  .tag-outsede { font-size: 11.5px; font-weight: 500; color: var(--ink-soft); }
 
-  .add-emp-row { display: flex; gap: 8px; margin-top: 6px; }
-  .add-emp-row input { flex: 1; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 15px; }
+  .add-emp-row { display: flex; gap: 8px; margin-top: 8px; }
+  .add-emp-row input { flex: 1; min-height: 46px; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 12px; font-size: 15px; color: var(--ion-ink); }
 
-  label.field-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--ink-soft); font-weight: 600; display: block; margin: 12px 0 5px; }
-  select, input[type=date], input[type=text] { width: 100%; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 15px; background: #fff; }
-  textarea.note-input { width: 100%; min-height: 64px; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 14.5px; resize: vertical; }
-  .warn-box { background: var(--alert-bg); border: 1px solid #E2B4AA; border-radius: 10px; padding: 10px 12px; font-size: 12.5px; margin-top: 12px; display: none; }
+  label.field-label { font-size: 13px; font-weight: 700; color: var(--ion-text); display: block; margin: 14px 0 6px; }
+  select, input[type=date], input[type=text], input[type=tel] {
+    width: 100%; min-height: 46px; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 12px;
+    font-size: 15px; background: #fff; color: var(--ion-ink);
+  }
+  textarea.note-input { width: 100%; min-height: 72px; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 12px; font-size: 15px; resize: vertical; color: var(--ion-ink); }
+  select:focus, input:focus, textarea:focus { outline: none; border-color: var(--ion-blue); box-shadow: var(--ion-focus); }
+  .warn-box { background: var(--alert-bg); border: 1px solid #e7bcc5; border-radius: 12px; padding: 11px 13px; font-size: 13.5px; margin-top: 12px; display: none; color: var(--ion-ink); }
   .warn-box.show { display: block; }
 
-  .emp-manage-row { display: flex; align-items: center; gap: 9px; padding: 10px 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-  .emp-manage-row input[type=color] { width: 32px; height: 32px; border: 1px solid var(--line-strong); border-radius: 50%; padding: 0; background: none; cursor: pointer; }
-  .emp-manage-name { font-size: 14.5px; font-weight: 600; flex: 1; min-width: 80px; }
-  .sede-toggles { display: flex; gap: 4px; flex-wrap: wrap; }
-  .sede-btn { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; padding: 5px 8px; border: 1px solid var(--line-strong); border-radius: 10px; background: #fff; color: var(--ink-soft); min-height: 30px; cursor: pointer; }
-  .sede-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .emp-remove { background: var(--alert); color: #fff; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 12px; flex-shrink: 0; cursor: pointer; }
-  .emp-hint { font-size: 11.5px; color: var(--ink-soft); margin-bottom: 10px; line-height: 1.5; }
+  .emp-manage-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .emp-manage-row input[type=color] { width: 36px; height: 36px; border: 1px solid var(--line-strong); border-radius: 50%; padding: 0; background: none; cursor: pointer; }
+  .emp-manage-name { font-size: 15px; font-weight: 700; color: var(--ion-ink); flex: 1; min-width: 80px; }
+  .sede-toggles { display: flex; gap: 5px; flex-wrap: wrap; }
+  .sede-btn {
+    font-size: 12px; font-weight: 700; padding: 6px 10px; border: 1px solid var(--line-strong); border-radius: 12px;
+    background: #fff; color: var(--ion-text); min-height: 44px; min-width: 44px; cursor: pointer;
+  }
+  .sede-btn:hover { border-color: var(--ion-lavender); }
+  .sede-btn.active { background: var(--ion-navy); color: #fff; border-color: var(--ion-navy); }
+  .emp-remove {
+    background: var(--alert-bg); color: var(--alert); border: 1px solid #e7bcc5; border-radius: 50%;
+    width: 44px; height: 44px; font-size: 14px; font-weight: 800; flex-shrink: 0; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .emp-hint { font-size: 13px; color: var(--ink-soft); margin-bottom: 12px; line-height: 1.55; }
 
   #historyList { list-style: none; margin: 0; padding: 0; }
-  #historyList li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 8px; border-bottom: 1px solid var(--line); font-size: 14px; min-height: 44px; cursor: pointer; }
-  #historyList li:active { background: var(--paper-2); }
-  #historyList li.active { background: var(--accent); color: #fff; border-radius: 8px; }
-  #historyList li .tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 10px; background: var(--paper-2); color: var(--ink-soft); }
-  #historyList li.active .tag { background: rgba(255,255,255,0.25); color: #fff; }
-  #historyList .empty { font-size: 13px; color: var(--ink-soft); font-style: italic; padding: 10px 4px; }
-
-  .status-line { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.6; }
-  .status-line.dirty { color: var(--alert); font-weight: 600; }
-  .companion-note { font-size: 12px; color: var(--ink-soft); line-height: 1.6; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
-  .companion-note a { color: var(--accent); font-weight: 600; }
-
-  .settings-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--ink-soft); font-weight: 700; margin: 16px 4px 6px; }
-  .settings-section-label:first-child { margin-top: 0; }
-  .settings-row {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 48px;
-    padding: 12px 14px;
-    border: 1px solid var(--line-strong);
-    border-radius: 10px;
-    background: #fff;
-    margin-bottom: 8px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 14.5px;
-    color: var(--ink);
-    cursor: pointer;
+  #historyList li {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 10px;
+    border-bottom: 1px solid var(--line); font-size: 15px; font-weight: 600; color: var(--ion-ink); min-height: 48px; cursor: pointer;
+    font-variant-numeric: tabular-nums;
   }
+  #historyList li:hover { background: var(--paper-2); }
+  #historyList li.active { background: var(--ion-navy); color: #fff; border-radius: 12px; }
+  #historyList li .tag { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 8px; background: var(--ion-lavender-soft); color: var(--ion-navy); }
+  #historyList li.active .tag { background: rgba(255,255,255,0.2); color: #fff; }
+  #historyList .empty { font-size: 14px; color: var(--ink-soft); padding: 10px 4px; }
+
+  .status-line { font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+  .status-line.dirty { color: var(--alert); font-weight: 700; }
+  .companion-note { font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .companion-note a { color: var(--ion-navy); font-weight: 700; text-underline-offset: 3px; }
+  .companion-note a:hover { color: var(--ion-blue); }
+
+  /* Occhiello ION: maiuscolo con trattino */
+  .settings-section-label {
+    font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ion-eyebrow);
+    margin: 20px 2px 10px; display: flex; align-items: center; gap: 10px;
+  }
+  .settings-section-label::before { content: ""; width: 24px; height: 1px; background: currentColor; display: inline-block; }
+  .settings-section-label:first-child { margin-top: 2px; }
+  .settings-row {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; min-height: 56px;
+    padding: 12px 16px; border: 1px solid var(--line); border-radius: 16px; background: #fff; margin-bottom: 10px;
+    font-size: 15px; font-weight: 600; color: var(--ion-ink); cursor: pointer; text-align: left;
+    transition: border-color .25s var(--ion-ease);
+  }
+  .settings-row > span:first-child { display: inline-flex; align-items: center; gap: 12px; }
+  .settings-row .i { color: var(--ion-navy); }
+  .settings-row:hover { border-color: var(--ion-lavender); }
   .settings-row:active { background: var(--paper-2); }
-  .settings-row .chev { color: var(--ink-soft); font-size: 16px; }
+  .settings-row .chev { color: var(--ink-soft); font-size: 18px; }
 
-  .palette-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 2px; border-bottom: 1px solid var(--line); }
-  .palette-row label { font-size: 14px; }
-  .palette-row input[type=color] { width: 44px; height: 32px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0; background: none; cursor: pointer; }
+  .palette-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 2px; border-bottom: 1px solid var(--line); min-height: 52px; }
+  .palette-row label { font-size: 15px; font-weight: 600; color: var(--ion-ink); }
+  .palette-row input[type=color] { width: 48px; height: 36px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 0; background: none; cursor: pointer; }
 
-  .opening-agency-title { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--navy); font-weight: 700; margin: 16px 2px 6px; }
+  .opening-agency-title { font-size: 11.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ion-eyebrow); margin: 20px 2px 6px; }
   .opening-agency-title:first-child { margin-top: 0; }
-  .opening-day-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 2px; border-bottom: 1px solid var(--line); }
-  .opening-day-row label { font-size: 13.5px; flex: 0 0 90px; }
+  .opening-day-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+  .opening-day-row label { font-size: 14px; flex: 0 0 90px; color: var(--ion-ink); }
   .hours-row { flex-direction: column; align-items: stretch; gap: 6px; }
-  .hours-row label { flex: none; font-weight: 600; }
+  .hours-row label { flex: none; font-weight: 700; }
   .hours-shifts { display: flex; flex-direction: column; gap: 6px; }
-  .hours-line { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-  .hours-line input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0; }
-  .hours-line .hours-name { width: 30px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); }
-  .hours-line input[type=time] { padding: 5px 6px; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 13px; background: #fff; min-width: 0; width: 0; flex: 1 1 0; max-width: 150px; }
-  .hours-line.is-closed input[type=time] { opacity: .35; }
-  .opening-day-row select { flex: 1; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 13px; background: #fff; }
+  .hours-line { display: flex; align-items: center; gap: 8px; font-size: 13.5px; min-height: 44px; }
+  .hours-line input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--ion-navy); flex-shrink: 0; }
+  .hours-line .hours-name { width: 34px; font-size: 12.5px; font-weight: 700; color: var(--ink-soft); }
+  .hours-line input[type=time] {
+    padding: 8px; border: 1px solid var(--line-strong); border-radius: 12px; font-size: 14px; background: #fff; color: var(--ion-ink);
+    min-height: 42px; min-width: 0; width: 0; flex: 1 1 0; max-width: 150px;
+  }
+  .hours-line.is-closed input[type=time] { opacity: .4; }
+  .opening-day-row select { flex: 1; min-height: 44px; padding: 8px 10px; font-size: 14px; }
 
   .logo-preview {
-    width: 140px;
-    height: 140px;
-    border-radius: 16px;
-    border: 1px solid var(--line-strong);
-    background: var(--paper-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: var(--ink-soft);
-    overflow: hidden;
+    width: 100%; max-width: 280px; height: 120px; border-radius: 16px; border: 1px solid var(--line);
+    background: var(--paper-2); display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--ink-soft); overflow: hidden; padding: 12px;
   }
-  .logo-preview img { width: 100%; height: 100%; object-fit: cover; }
-  .app-logo-header { display: flex; justify-content: center; margin-bottom: 6px; }
-  .app-logo-header img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; border: 1px solid var(--line-strong); }
+  .logo-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .app-logo-header { display: none; }
 
-  /* ---- v2.4.0: riempimento automatico, turni del collega ---- */
-  .m-autofill { background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 4px 11px; font-size: 11.5px; font-weight: 600; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; }
-  .m-autofill:active { opacity: .8; }
-  .undo-bar { position: fixed; bottom: calc(78px + var(--safe-b) + 10px); left: 50%; transform: translateX(-50%); background: var(--navy); color: #fff; padding: 8px 8px 8px 16px; border-radius: 22px; font-size: 12.5px; z-index: 71; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; max-width: 92%; font-family: 'IBM Plex Sans', sans-serif; }
+  /* ---- Riempimento automatico, annulla, collega ---- */
+  .m-autofill {
+    background: #fff; color: var(--ion-night); border: none; border-radius: 16px; padding: 0 16px; min-height: 44px;
+    font-size: 13.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .25s var(--ion-ease);
+  }
+  .m-autofill:hover { transform: translateY(-2px); }
+  .m-autofill:active { transform: scale(0.97); }
+  .undo-bar {
+    position: fixed; bottom: calc(80px + var(--safe-b) + 12px); left: 50%; transform: translateX(-50%);
+    background: var(--ion-night); color: #fff; padding: 8px 8px 8px 18px; border-radius: 16px; font-size: 13.5px; font-weight: 600;
+    z-index: 71; box-shadow: var(--ion-shadow); display: flex; align-items: center; gap: 12px; max-width: 92%;
+  }
   .undo-bar.hidden { display: none; }
-  .undo-bar button { background: #fff; color: var(--navy); border: none; border-radius: 16px; padding: 6px 12px; font-weight: 700; font-size: 12.5px; cursor: pointer; flex-shrink: 0; }
-  .colleague-preview { background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 12px 0 4px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+  .undo-bar button { background: #fff; color: var(--ion-night); border: none; border-radius: 12px; padding: 0 16px; min-height: 44px; font-weight: 800; font-size: 13.5px; cursor: pointer; flex-shrink: 0; }
+  .colleague-preview {
+    background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin: 14px 0 6px;
+    font-size: 14px; line-height: 1.65; white-space: pre-wrap; color: var(--ion-ink);
+  }
   .colleague-preview .free { color: var(--ink-soft); }
-  input[type=tel] { width: 100%; padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: 10px; font-size: 15px; background: #fff; }
-  .time-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 13px; }
-  .time-row span { min-width: 82px; color: var(--ink-soft); }
-  .time-row input[type=time] { padding: 7px 8px; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 14px; background: #fff; }
-  details.times-box { margin-top: 14px; font-size: 13px; }
-  .abs-parts { display: flex; gap: 4px; flex-shrink: 0; }
-  .abs-parts .sede-btn.active { background: var(--alert); border-color: var(--alert); }
-  .chip-part { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; opacity: .8; margin-left: 3px; }
-  details.times-box summary { cursor: pointer; color: var(--ink-soft); font-weight: 600; }
+  .abs-parts { display: flex; gap: 5px; flex-shrink: 0; }
+  .abs-parts .sede-btn.active { background: var(--alert); border-color: var(--alert); color: #fff; }
+  .chip-part { font-size: 10.5px; font-weight: 700; color: var(--ink-soft); margin-left: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .btn:active, .m-autofill:hover, .m-autofill:active, .m-arrow:active { transform: none; }
+  }
 </style>
 </head>
 <body>
+<!-- Icone a linea (stile ION: tratto 2px, niente emoji) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-settings" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M11 3l1.8 4.9L18 10l-5.2 2.1L11 17l-1.8-4.9L4 10l5.2-2.1z"/><path d="M19 15l.7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3h.5a8.5 8.5 0 0 1 8 8z"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+</svg>
 
 <noscript>
-  <div style="background:#B13B2E;color:#fff;padding:22px 18px;font-family:sans-serif;line-height:1.6;font-size:15px;">
+  <div style="background:#a8243d;color:#fff;padding:22px 18px;font-family:sans-serif;line-height:1.6;font-size:15px;">
     <b>Questa pagina richiede JavaScript per funzionare.</b><br><br>
     Se stai usando iOS, aprila in Safari e non in anteprima Quick Look.
   </div>
 </noscript>
 
 <div class="update-banner hidden" id="updateBanner">
-  <span>🔄 Nuova versione disponibile</span>
+  <span class="with-icon"><svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>Nuova versione disponibile</span>
   <button id="updateBannerBtn">Aggiorna</button>
 </div>
 
@@ -589,9 +462,9 @@
 
 <header class="m-header">
   <div class="m-brand">
-    <span>REGISTRO <span class="accent">TURNI</span></span>
+    <span class="m-title"><span class="m-logo" id="headerLogo"></span><span class="m-title-text">Turni</span></span>
     <div class="m-header-badges">
-      <span class="m-cloud-indicator" id="headerCloudStatus" title="Stato Google Drive">☁️ Non collegato</span>
+      <span class="m-cloud-indicator" id="headerCloudStatus" title="Stato Google Drive" role="button" tabindex="0"><svg class="i i-sm" aria-hidden="true"><use href="#i-cloud"/></svg>Non collegato</span>
       <span class="m-version" id="appVersionBadge"></span>
     </div>
   </div>
@@ -600,27 +473,29 @@
     <button class="m-week-label" id="weekLabel">—</button>
     <button class="m-arrow" id="nextWeek" aria-label="Settimana successiva">›</button>
   </div>
-  <div class="m-substatus">
-    <span class="m-stamp" id="conflictStamp">✓ ok</span>
-    <button class="m-link" id="gotoUpcoming">→ prossima settimana</button>
-    <button class="m-autofill" id="autoFillBtn" data-open="autoFillSheetOverlay">✨ Riempi automatico</button>
-  </div>
 </header>
+<div class="m-subbar">
+  <div class="m-substatus">
+    <span class="m-stamp" id="conflictStamp"><svg class="i i-sm" aria-hidden="true"><use href="#i-check"/></svg>Tutto ok</span>
+    <button class="m-link" id="gotoUpcoming">Vai alla prossima settimana</button>
+    <button class="m-autofill" id="autoFillBtn" data-open="autoFillSheetOverlay"><svg class="i i-sm" aria-hidden="true"><use href="#i-spark"/></svg>Riempi automatico</button>
+  </div>
+</div>
 
 <main class="m-main" id="exportArea">
   <div class="app-logo-header" id="appLogoHeader"></div>
-  <div class="m-conflict hidden" id="conflictPanel"><h3>⚠ Sovrapposizioni e ferie</h3><ul id="conflictListUI"></ul></div>
-  <div class="m-gap hidden" id="gapPanel"><h3>🕳 Copertura mancante</h3><ul id="gapListUI"></ul></div>
+  <div class="m-conflict hidden" id="conflictPanel"><h3><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>Sovrapposizioni e ferie</h3><ul id="conflictListUI"></ul></div>
+  <details class="m-gap hidden" id="gapPanel"><summary><h3><svg class="i" aria-hidden="true"><use href="#i-info"/></svg><span id="gapTitle">Copertura mancante</span><span class="gap-toggle">Mostra</span></h3></summary><ul id="gapListUI"></ul></details>
   <div id="daysList"></div>
 </main>
 
 <nav class="m-tabbar">
-  <button data-open="settingsSheetOverlay"><span class="ico">⚙️</span>Impostazioni</button>
-  <button data-open="dupSheetOverlay"><span class="ico">⎘</span>Duplica</button>
-  <button data-open="colleagueSheetOverlay"><span class="ico">👥</span>Colleghi</button>
-  <button data-open="historySheetOverlay"><span class="ico">🕘</span>Storico</button>
-  <button data-open="exportSheetOverlay"><span class="ico">📤</span>Esporta</button>
-  <button data-open="memoriaSheetOverlay"><span class="ico">💾</span>Memoria</button>
+  <button data-open="settingsSheetOverlay"><svg class="i" aria-hidden="true"><use href="#i-settings"/></svg>Impostazioni</button>
+  <button data-open="dupSheetOverlay"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Duplica</button>
+  <button data-open="colleagueSheetOverlay"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg>Colleghi</button>
+  <button data-open="historySheetOverlay"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>Storico</button>
+  <button data-open="exportSheetOverlay"><svg class="i" aria-hidden="true"><use href="#i-share"/></svg>Esporta</button>
+  <button data-open="memoriaSheetOverlay"><svg class="i" aria-hidden="true"><use href="#i-save"/></svg>Memoria</button>
 </nav>
 
 <!-- ===== Sheet: turno ===== -->
@@ -650,7 +525,7 @@
     <div class="sheet-head"><h3>Ferie &amp; permessi</h3><div class="sub" id="absenceSheetSub"></div></div>
     <div class="sheet-body">
       <div class="emp-hint">Per ogni persona scegli <b>Giorno</b> (giornata intera), <b>Mat</b> (solo mattina) o <b>Pom</b> (solo pomeriggio); tocca di nuovo per togliere. Chi è assente viene tolto dai turni coperti dall'assenza.</div>
-      <button class="btn btn-outline btn-block" id="absencePeriodBtn" type="button">📅 Inserisci ferie per un periodo (dal… al…)</button>
+      <button class="btn btn-outline btn-block" id="absencePeriodBtn" type="button"><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg>Inserisci ferie per un periodo</button>
       <div class="emp-list" id="absenceEmpList"></div>
       <label class="field-label">Nota (facoltativa)</label>
       <textarea class="note-input" id="absenceNoteInput" placeholder="es. malattia, corso…"></textarea>
@@ -685,15 +560,15 @@
     <div class="sheet-head"><h3>Impostazioni</h3></div>
     <div class="sheet-body">
       <div class="settings-section-label">Aspetto</div>
-      <button class="settings-row" data-open="paletteSheetOverlay"><span>🎨 Palette colori</span><span class="chev">›</span></button>
-      <button class="settings-row" data-open="logoSheetOverlay"><span>🖼 Logo</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="paletteSheetOverlay"><span><svg class="i" aria-hidden="true"><use href="#i-drop"/></svg>Colori</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="logoSheetOverlay"><span><svg class="i" aria-hidden="true"><use href="#i-image"/></svg>Logo</span><span class="chev">›</span></button>
       <div class="settings-section-label">Organizzazione</div>
-      <button class="settings-row" data-open="empSheetOverlay"><span>👤 Elenco dipendenti</span><span class="chev">›</span></button>
-      <button class="settings-row" data-open="openingSheetOverlay"><span>🏬 Aperture e orari agenzie</span><span class="chev">›</span></button>
-      <button class="settings-row" data-open="statsSheetOverlay"><span>📊 Conteggio turni</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="empSheetOverlay"><span><svg class="i" aria-hidden="true"><use href="#i-user"/></svg>Elenco dipendenti</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="openingSheetOverlay"><span><svg class="i" aria-hidden="true"><use href="#i-building"/></svg>Aperture e orari agenzie</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="statsSheetOverlay"><span><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg>Conteggio turni</span><span class="chev">›</span></button>
       <div class="settings-section-label">Memoria &amp; Cloud</div>
-      <button class="settings-row" data-open="cloudSheetOverlay"><span>☁️ Sincronizza con Google Drive</span><span class="chev">›</span></button>
-      <button class="settings-row" data-open="memoriaSheetOverlay"><span>💾 Backup / Ripristino file (.json)</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="cloudSheetOverlay"><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>Sincronizza con Google Drive</span><span class="chev">›</span></button>
+      <button class="settings-row" data-open="memoriaSheetOverlay"><span><svg class="i" aria-hidden="true"><use href="#i-save"/></svg>Backup e ripristino (.json)</span><span class="chev">›</span></button>
       <div class="settings-app-version" id="settingsVersionLine"></div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="settingsSheetOverlay">Chiudi</button></div>
@@ -707,7 +582,7 @@
     <div class="sheet-head"><h3>Palette colori</h3><div class="sub">Applicati a tutta l'app</div></div>
     <div class="sheet-body">
       <div class="palette-row">
-        <label for="paletteAccent">Colore principale (accento)</label>
+        <label for="paletteAccent">Colore principale (pulsanti)</label>
         <input type="color" id="paletteAccent">
       </div>
       <div class="palette-row">
@@ -718,7 +593,7 @@
         <label for="palettePaper">Sfondo</label>
         <input type="color" id="palettePaper">
       </div>
-      <button class="btn btn-outline btn-block" id="paletteResetBtn" style="margin-top:14px;">Ripristina colori predefiniti</button>
+      <button class="btn btn-outline btn-block" id="paletteResetBtn" style="margin-top:14px;">Ripristina colori ION</button>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="paletteSheetOverlay">Chiudi</button></div>
   </div>
@@ -755,7 +630,7 @@
 <div class="sheet-overlay hidden" id="logoSheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><h3>Logo</h3><div class="sub">Formato quadrato, mostrato nell'app e nelle esportazioni</div></div>
+    <div class="sheet-head"><h3>Logo</h3><div class="sub">Mostrato nell'intestazione e nelle immagini esportate</div></div>
     <div class="sheet-body">
       <div style="display:flex; justify-content:center; margin-bottom:14px;">
         <div id="logoPreview" class="logo-preview">Nessun logo</div>
@@ -763,7 +638,7 @@
       <input type="file" id="logoFileInput" accept="image/*" style="display:none;">
       <button class="btn btn-outline btn-block" id="logoChooseBtn">Scegli logo dal dispositivo</button>
       <button class="btn btn-alert btn-block" id="logoRemoveBtn" style="display:none; margin-top:8px;">Rimuovi logo</button>
-      <div class="companion-note">L'immagine viene ritagliata automaticamente al centro in formato quadrato.</div>
+      <div class="companion-note">Il logo mantiene le sue proporzioni e la trasparenza. Usa il logo ION blu su sfondo trasparente (PNG o WebP): sulle parti scure dell'app e dell'immagine esportata viene mostrato in bianco automaticamente.</div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="logoSheetOverlay">Chiudi</button></div>
   </div>
@@ -820,7 +695,7 @@
       <div class="month-grid" id="monthGrid"></div>
       <div class="month-legend">
         <span><span class="dot" style="background:var(--accent);"></span>compilata</span>
-        <span><span class="dot" style="background:#B8860B;"></span>copertura mancante</span>
+        <span><span class="dot" style="background:#a09eb6;"></span>copertura mancante</span>
         <span><span class="dot" style="background:var(--alert);"></span>conflitto</span>
       </div>
     </div>
@@ -846,9 +721,9 @@
     <div class="sheet-handle"></div>
     <div class="sheet-head"><h3>Esporta settimana</h3><div class="sub">Immagine pronta per il gruppo WhatsApp: una scheda per sede, due per riga, con orari e ferie</div></div>
     <div class="sheet-body">
-      <button class="btn btn-primary btn-block" id="copyPngBtn">📋 Copia PNG negli appunti</button>
-      <button class="btn btn-outline btn-block" id="exportPngBtn">🖼 Salva / Condividi PNG</button>
-      <button class="btn btn-outline btn-block" id="exportPdfBtn">📄 Esporta PDF</button>
+      <button class="btn btn-primary btn-block" id="copyPngBtn"><svg class="i" aria-hidden="true"><use href="#i-clipboard"/></svg>Copia immagine negli appunti</button>
+      <button class="btn btn-outline btn-block" id="exportPngBtn"><svg class="i" aria-hidden="true"><use href="#i-share"/></svg>Salva o condividi immagine</button>
+      <button class="btn btn-outline btn-block" id="exportPdfBtn"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg>Esporta PDF</button>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="exportSheetOverlay">Chiudi</button></div>
   </div>
@@ -861,8 +736,8 @@
     <div class="sheet-head"><h3>Memoria locale (.json)</h3><div class="sub">Salva o ripristina un file di backup manuale</div></div>
     <div class="sheet-body">
       <div class="status-line" id="memoryStatus">—</div>
-      <button class="btn btn-primary btn-block" id="exportMemoriaBtn">💾 Esporta backup (.json)</button>
-      <button class="btn btn-outline btn-block" id="importMemoriaBtn">📂 Importa backup (.json)</button>
+      <button class="btn btn-primary btn-block" id="exportMemoriaBtn"><svg class="i" aria-hidden="true"><use href="#i-save"/></svg>Esporta backup (.json)</button>
+      <button class="btn btn-outline btn-block" id="importMemoriaBtn"><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg>Importa backup (.json)</button>
       <input type="file" id="importMemoriaInput" accept="application/json,.json" style="display:none;">
       <div class="companion-note">Il file di backup contiene tutti i turni, dipendenti e impostazioni. Puoi importarlo su qualsiasi computer o smartphone.</div>
     </div>
@@ -886,7 +761,7 @@
       </div>
 
       <div id="cloudActionsBlock" style="display:none;">
-        <button class="btn btn-primary btn-block" id="cloudSyncBtn">🔄 Sincronizza ora</button>
+        <button class="btn btn-primary btn-block" id="cloudSyncBtn"><svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>Sincronizza ora</button>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <button class="btn btn-outline" id="cloudForcePullBtn" title="Scarica l'ultima versione presente su Google Drive e sostituisci quella locale">⬇️ Scarica da Drive</button>
           <button class="btn btn-outline" id="cloudForcePushBtn" title="Carica la versione attuale del dispositivo su Google Drive sovrascrivendo il cloud">⬆️ Carica su Drive</button>
@@ -896,7 +771,7 @@
 
       <div class="companion-note" id="cloudHowToBox">
         <b>Comandi di sincronizzazione:</b><br>
-        • <b>🔄 Sincronizza ora:</b> confronta la versione sul cloud con quella locale e allinea quella più recente.<br>
+        • <b>Sincronizza ora:</b> confronta la versione sul cloud con quella locale e allinea quella più recente.<br>
         • <b>⬇️ Scarica da Drive:</b> scarica l'archivio salvato su Google Drive e aggiorna questo dispositivo.<br>
         • <b>⬆️ Carica su Drive:</b> invia i dati attuali di questo dispositivo su Google Drive.
       </div>
@@ -909,7 +784,7 @@
 <div class="sheet-overlay hidden" id="autoFillSheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><h3>✨ Riempimento automatico</h3><div class="sub" id="autoFillSheetSub"></div></div>
+    <div class="sheet-head"><h3><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg>Riempimento automatico</h3><div class="sub" id="autoFillSheetSub"></div></div>
     <div class="sheet-body">
       <div class="emp-hint">Compila i turni aperti ancora vuoti (o con meno persone del previsto) della settimana visualizzata. Non tocca i turni già compilati, rispetta sedi, ferie e chiusure, evita le sovrapposizioni e distribuisce i turni in modo equo. Dopo potrai annullare con un tocco.</div>
       <label class="field-label" for="autoFillCount">Persone per turno</label>
@@ -922,7 +797,7 @@
     </div>
     <div class="sheet-foot">
       <button class="btn btn-ghost" data-close="autoFillSheetOverlay">Annulla</button>
-      <button class="btn btn-primary" id="autoFillConfirmBtn">✨ Riempi</button>
+      <button class="btn btn-primary" id="autoFillConfirmBtn">Riempi la settimana</button>
     </div>
   </div>
 </div>
@@ -931,7 +806,7 @@
 <div class="sheet-overlay hidden" id="colleagueSheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><h3>👥 Turni del collega</h3><div class="sub">Visualizza e invia i turni di una persona</div></div>
+    <div class="sheet-head"><h3><svg class="i" aria-hidden="true"><use href="#i-users"/></svg>Turni del collega</h3><div class="sub">Visualizza e invia i turni di una persona</div></div>
     <div class="sheet-body">
       <label class="field-label" for="colleagueSelect">Collega</label>
       <select id="colleagueSelect"></select>
@@ -944,10 +819,10 @@
       <label class="field-label" for="colleaguePhone">Cellulare per WhatsApp (facoltativo)</label>
       <input type="tel" id="colleaguePhone" placeholder="es. 333 1234567" autocomplete="off">
       <div style="height:10px;"></div>
-      <button class="btn btn-primary btn-block" id="colleagueWaBtn">💬 Invia su WhatsApp</button>
-      <button class="btn btn-outline btn-block" id="colleagueCopyBtn">📋 Copia testo</button>
-      <button class="btn btn-outline btn-block" id="colleagueIcsBtn">📅 Scarica calendario (.ics)</button>
-      <button class="btn btn-outline btn-block" id="colleaguePeriodBtn">🏖 Ferie per un periodo</button>
+      <button class="btn btn-primary btn-block" id="colleagueWaBtn"><svg class="i" aria-hidden="true"><use href="#i-message"/></svg>Invia su WhatsApp</button>
+      <button class="btn btn-outline btn-block" id="colleagueCopyBtn"><svg class="i" aria-hidden="true"><use href="#i-clipboard"/></svg>Copia testo</button>
+      <button class="btn btn-outline btn-block" id="colleagueIcsBtn"><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg>Scarica calendario (.ics)</button>
+      <button class="btn btn-outline btn-block" id="colleaguePeriodBtn"><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg>Ferie per un periodo</button>
       <div class="companion-note">Gli orari di ogni agenzia si modificano in <b>Impostazioni → Aperture e orari agenzie</b>.</div>
     </div>
     <div class="sheet-foot"><button class="btn btn-primary" data-close="colleagueSheetOverlay">Chiudi</button></div>
@@ -958,7 +833,7 @@
 <div class="sheet-overlay hidden" id="periodSheetOverlay">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <div class="sheet-head"><h3>🏖 Ferie per periodo</h3><div class="sub">Dal… al…, per un collega</div></div>
+    <div class="sheet-head"><h3><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg>Ferie per periodo</h3><div class="sub">Dal… al…, per un collega</div></div>
     <div class="sheet-body">
       <label class="field-label" for="periodAction">Cosa vuoi fare</label>
       <select id="periodAction">
@@ -993,7 +868,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "2.9.0";
+  var APP_VERSION = "3.0.0";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -1045,7 +920,7 @@
     }
     return { start: mondayISO, days: days };
   }
-  var DEFAULT_THEME = { accent: "#2F6F62", navy: "#223349", paper: "#F5F1E6" };
+  var DEFAULT_THEME = { accent: "#234061", navy: "#15273c", paper: "#f5f5f8", brand: "ion" }; // palette ION (www.ion.srl)
   var DEFAULT_SHIFT_TIMES = { mattina: { start: "09:00", end: "12:00" }, pomeriggio: { start: "14:00", end: "17:00" } };
   // Orari reali delle agenzie (v2.6.0). Indici giorno: 0 = lunedì … 5 = sabato. null = chiuso.
   var DEFAULT_AGENCY_HOURS = (function(){
@@ -1078,6 +953,10 @@
     if(typeof st.meta.settingsUpdatedAt === "undefined") st.meta.settingsUpdatedAt = null;
     if(!st.deletedWeeks || typeof st.deletedWeeks !== "object") st.deletedWeeks = {};
     if(!st.theme) st.theme = {};
+    // v3.0.0: passaggio una tantum ai colori ION (poi restano modificabili da Impostazioni → Colori)
+    if(st.theme.brand !== "ion"){
+      st.theme.accent = DEFAULT_THEME.accent; st.theme.navy = DEFAULT_THEME.navy; st.theme.paper = DEFAULT_THEME.paper; st.theme.brand = "ion";
+    }
     st.theme.accent = st.theme.accent || DEFAULT_THEME.accent;
     st.theme.navy = st.theme.navy || DEFAULT_THEME.navy;
     st.theme.paper = st.theme.paper || DEFAULT_THEME.paper;
@@ -1481,7 +1360,7 @@
           if(closedWithPeople){
             // Turno chiuso ma con persone ancora assegnate: le mostriamo, così si possono togliere.
             btn.className += " conflict";
-            chipsHtml = '<span class="empty-hint" style="font-style:normal;color:var(--alert);">⚠ Chiuso ma assegnato:</span>' + names.map(function(n){ return chipHtml(n, false); }).join("");
+            chipsHtml = '<span class="empty-hint" style="color:var(--alert);font-weight:700;">Chiuso ma assegnato:</span>' + names.map(function(n){ return chipHtml(n, false); }).join("");
           }
           else if(!open) chipsHtml = '<span class="empty-hint">Chiuso</span>';
           else chipsHtml = names.length ? names.map(function(n){ return chipHtml(n, false); }).join("") : '<span class="empty-hint">+ aggiungi</span>';
@@ -1502,7 +1381,7 @@
         var chip = chipHtml(n, true);
         return pt === "giorno" ? chip : chip.replace(/<\/span>$/, '<span class="chip-part">' + (pt === "mattina" ? "mat" : "pom") + '</span></span>');
       }).join("") : '<span class="empty-hint">nessuno</span>';
-      ferieBtn.innerHTML = '<span>🏖 Ferie/Permessi</span><span class="fchips">' + fchips + '</span>';
+      ferieBtn.innerHTML = '<span><svg class="i i-sm" aria-hidden="true"><use href="#i-sun"/></svg>Ferie e permessi</span><span class="fchips">' + fchips + '</span>';
       ferieBtn.addEventListener("click", function(){ openAbsenceSheet(dayIdx); });
       card.appendChild(ferieBtn);
 
@@ -1514,10 +1393,10 @@
         var idx = key.lastIndexOf("_");
         var agency = key.slice(0, idx);
         var shiftKey = key.slice(idx + 1);
-        var icon = overrides[key] === "open" ? "🔓" : "🔒";
-        return '<span class="empty-hint" style="font-style:normal;color:#8A6209;">' + icon + ' ' + AGENCY_CODES[agency] + ' ' + (shiftKey === "mattina" ? "mat" : "pom") + '</span>';
+        var label = overrides[key] === "open" ? "aperto" : "chiuso";
+        return '<span class="chip" style="border-color:var(--ion-lavender);">' + AGENCY_CODES[agency] + ' ' + (shiftKey === "mattina" ? "mat" : "pom") + ' ' + label + '</span>';
       }).join(" ") : '<span class="empty-hint">nessuna</span>';
-      closedBtn.innerHTML = '<span>🔧 Orari straordinari</span><span class="fchips">' + cchips + '</span>';
+      closedBtn.innerHTML = '<span><svg class="i i-sm" aria-hidden="true"><use href="#i-clock"/></svg>Orari straordinari</span><span class="fchips">' + cchips + '</span>';
       closedBtn.addEventListener("click", function(){ openClosedSheet(dayIdx); });
       card.appendChild(closedBtn);
 
@@ -1543,6 +1422,7 @@
     var list = document.getElementById("gapListUI");
     if(gaps.length === 0 || !weekHasData(w)){ panel.classList.add("hidden"); list.innerHTML = ""; return; }
     panel.classList.remove("hidden");
+    document.getElementById("gapTitle").textContent = "Copertura mancante: " + gaps.length + " turn" + (gaps.length === 1 ? "o" : "i");
     list.innerHTML = gaps.map(function(g){
       var d = fromISO(g.date);
       return "<li>" + escapeHtml(g.agency) + " · " + DAY_NAMES[g.dayIdx] + " " + fmtIt(d) + " (" + (g.shift === "mattina" ? "mattina" : "pomeriggio") + "): nessuno assegnato</li>";
@@ -1553,8 +1433,8 @@
     var stamp = document.getElementById("conflictStamp");
     var panel = document.getElementById("conflictPanel");
     var list = document.getElementById("conflictListUI");
-    if(conflicts.length === 0){ stamp.textContent = "✓ ok"; stamp.classList.remove("alert"); panel.classList.add("hidden"); list.innerHTML = ""; return; }
-    stamp.textContent = "⚠ " + conflicts.length;
+    if(conflicts.length === 0){ stamp.innerHTML = '<svg class="i i-sm" aria-hidden="true"><use href="#i-check"/></svg>Tutto ok'; stamp.classList.remove("alert"); panel.classList.add("hidden"); list.innerHTML = ""; return; }
+    stamp.innerHTML = '<svg class="i i-sm" aria-hidden="true"><use href="#i-alert"/></svg>' + conflicts.length + (conflicts.length === 1 ? " problema" : " problemi");
     stamp.classList.add("alert");
     panel.classList.remove("hidden");
     list.innerHTML = conflicts.map(function(c){
@@ -1587,7 +1467,7 @@
       var w = weeksStore[k]; var mon = fromISO(k); var sat = addDays(mon, 5); var conflicts = computeConflicts(w);
       var li = document.createElement("li");
       if(k === currentISO) li.classList.add("active");
-      li.innerHTML = '<span>' + fmtIt(mon) + ' – ' + fmtIt(sat) + ' \'' + String(mon.getFullYear()).slice(2) + '</span><span class="tag">' + (conflicts.length ? conflicts.length + " ⚠" : "ok") + '</span>';
+      li.innerHTML = '<span>' + fmtIt(mon) + ' – ' + fmtIt(sat) + ' \'' + String(mon.getFullYear()).slice(2) + '</span><span class="tag">' + (conflicts.length ? conflicts.length + (conflicts.length === 1 ? " problema" : " problemi") : "ok") + '</span>';
       li.addEventListener("click", function(){
         currentMonday = mon; renderWeek(); hideSheet("historySheetOverlay"); window.scrollTo({ top: 0, behavior: "smooth" });
       });
@@ -1770,7 +1650,7 @@
       var block = document.createElement("div");
       block.style.marginBottom = "16px";
       var title = document.createElement("div");
-      title.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);font-weight:600;margin-bottom:8px;";
+      title.style.cssText = "font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ion-eyebrow);font-weight:900;margin:6px 0 8px;";
       title.textContent = agency;
       block.appendChild(title);
 
@@ -1849,7 +1729,7 @@
         toggles.appendChild(btn);
       });
       row.appendChild(toggles);
-      var removeBtn = document.createElement("button"); removeBtn.className = "emp-remove"; removeBtn.textContent = "✕";
+      var removeBtn = document.createElement("button"); removeBtn.className = "emp-remove"; removeBtn.innerHTML = '<svg class="i i-sm" aria-hidden="true"><use href="#i-x"/></svg>'; removeBtn.setAttribute("aria-label", "Rimuovi " + emp.name);
       removeBtn.addEventListener("click", function(){
         if(!window.confirm("Rimuovere " + emp.name + " dall'elenco dei dipendenti?\n\nI turni già assegnati nello storico restano visibili.")) return;
         removeEmployeeByName(emp.name); renderMasterEmpList();
@@ -2049,17 +1929,17 @@
     if(headerBadge){
       if(isSyncing){
         headerBadge.className = "m-cloud-indicator syncing";
-        headerBadge.innerHTML = "☁️ Sincronizzazione…";
+        headerBadge.innerHTML = '<svg class="i i-sm" aria-hidden="true"><use href="#i-cloud"/></svg>' + "Sincronizzazione…";
       } else if(hasValidToken()){
         headerBadge.className = "m-cloud-indicator synced";
         var label = googleUserEmail ? googleUserEmail.split("@")[0] : "Connesso";
-        headerBadge.innerHTML = "☁️ " + escapeHtml(label);
+        headerBadge.innerHTML = '<svg class="i i-sm" aria-hidden="true"><use href="#i-cloud"/></svg>' + escapeHtml(label);
       } else if(getWasConnected()){
         headerBadge.className = "m-cloud-indicator";
-        headerBadge.innerHTML = "☁️ Tocca per sincronizzare";
+        headerBadge.innerHTML = '<svg class="i i-sm" aria-hidden="true"><use href="#i-cloud"/></svg>' + "Tocca per sincronizzare";
       } else {
         headerBadge.className = "m-cloud-indicator";
-        headerBadge.innerHTML = "☁️ Non collegato";
+        headerBadge.innerHTML = '<svg class="i i-sm" aria-hidden="true"><use href="#i-cloud"/></svg>' + "Non collegato";
       }
     }
     if(!msg && el){
@@ -2085,6 +1965,9 @@
     updateCloudStatus();
   }
 
+  document.getElementById("headerCloudStatus").addEventListener("keydown", function(e){
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); this.click(); }
+  });
   document.getElementById("headerCloudStatus").addEventListener("click", function(){
     // Se l'account era collegato ma la sessione è scaduta, un tocco rinnova l'accesso e sincronizza.
     if(getWasConnected() && !hasValidToken() && getStoredClientId() && !isSyncing){
@@ -2122,7 +2005,7 @@
             fetchGoogleUserEmail().then(function(){
               updateCloudStatus();
               if(typeof cb === "function") cb();
-              else showToast("☁️ Account Google connesso.");
+              else showToast("Account Google connesso.");
             });
           } else {
             isSyncing = false;
@@ -2161,7 +2044,7 @@
     setStoredClientId(clientId);
     withGoogleToken(function(){
       refreshCloudSheetUI();
-      showToast("☁️ Connessione a Google Drive riuscita!");
+      showToast("Connessione a Google Drive riuscita!");
     }, true);
   });
 
@@ -2269,7 +2152,7 @@
           state.cloud.fileId = res.id;
           state.cloud.lastPush = new Date().toISOString();
           persistLocal();
-          finishSync("☁️ Primo archivio creato su Google Drive.");
+          finishSync("Primo archivio creato su Google Drive.");
         });
       }
 
@@ -2294,10 +2177,10 @@
           return driveUpdateFile(latest.id, stateForUpload(state)).then(function(){
             state.cloud.lastPush = new Date().toISOString();
             persistLocal();
-            finishSync(localChanged ? "☁️ Modifiche unite: dispositivo e Drive aggiornati." : "☁️ Modifiche caricate su Drive con successo!");
+            finishSync(localChanged ? "Modifiche unite: dispositivo e Drive aggiornati." : "Modifiche caricate su Drive con successo!");
           });
         }
-        finishSync(localChanged ? "☁️ Dati aggiornati dal Drive con successo!" : "☁️ Dispositivi già allineati.");
+        finishSync(localChanged ? "Dati aggiornati dal Drive con successo!" : "Dispositivi già allineati.");
       });
     }).catch(function(err){
       isSyncing = false;
@@ -2319,7 +2202,7 @@
           state.cloud.fileId = latest.id;
           state.cloud.lastPull = new Date().toISOString();
           persistLocal();
-          finishSync("⬇️ Dati scaricati con successo da Google Drive.");
+          finishSync("Dati scaricati con successo da Google Drive.");
         });
       }).catch(function(err){
         isSyncing = false;
@@ -2342,7 +2225,7 @@
           state.cloud.fileId = res.id || (latest ? latest.id : null);
           state.cloud.lastPush = new Date().toISOString();
           persistLocal();
-          finishSync("⬆️ Dati caricati con successo su Google Drive.");
+          finishSync("Dati caricati con successo su Google Drive.");
         });
       }).catch(function(err){
         isSyncing = false;
@@ -2455,23 +2338,25 @@
   var DAY_NAMES_FULL = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
   function shortTime(t){ return t.replace(/^0/, "").replace(/:00$/, ""); }
 
-  /* v2.8.0 · Design dell'immagine: un colore per sede, griglia 2×2 (due sedi per riga),
-     intestazione scura con le date in grande e una striscia nei quattro colori delle sedi. */
-  var EXPORT_AGENCY_COLORS = { "Somma Lombardo": "#2F6F62", "Busto Arsizio": "#3B5BA9", "Tradate": "#7E4A9E", "Oleggio": "#B7830F" };
-  var EXPORT_INK = "#1C2333", EXPORT_MUTED = "#69728A", EXPORT_CANVAS = "#EEF1F5", EXPORT_LINE = "#E1E5EC";
+  /* v3.0.0 · Immagine in stile ION: intestazione blu notte con logo bianco, Montserrat,
+     una tinta della palette ION per sede (navy, blu accento, lavanda, grigio), griglia 2×2. */
+  var EXPORT_AGENCY_COLORS = { "Somma Lombardo": "#234061", "Busto Arsizio": "#3f70ad", "Tradate": "#a09eb6", "Oleggio": "#616973" };
+  var EXPORT_AGENCY_TEXT = { "Somma Lombardo": "#ffffff", "Busto Arsizio": "#ffffff", "Tradate": "#122133", "Oleggio": "#ffffff" };
+  var EXPORT_INK = "#122133", EXPORT_MUTED = "#616973", EXPORT_CANVAS = "#f5f5f8", EXPORT_LINE = "#dcdce4", EXPORT_NIGHT = "#15273c";
+  var EXPORT_FONT = "font-family:Montserrat,'Avenir Next','Segoe UI',Arial,sans-serif;";
   var MONTHS_LOWER = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
   var MONTHS_SHORT = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
 
   function exportNamePill(name){
     var color = colorFor(name);
     return '<div style="display:block;background:' + tintHex(color, 0.86) + ';border-left:4px solid ' + color +
-      ';border-radius:7px;padding:4px 9px;margin:0 0 4px 0;font-size:16.5px;font-weight:600;color:' + EXPORT_INK +
+      ';border-radius:8px;padding:4px 9px;margin:0 0 4px 0;font-size:16px;font-weight:700;color:' + EXPORT_INK +
       ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(name) + '</div>';
   }
   function exportAbsencePill(name, part){
     var color = colorFor(name);
     return '<span style="display:inline-block;background:' + tintHex(color, 0.86) + ';border-left:4px solid ' + color +
-      ';border-radius:7px;padding:4px 10px;margin:0 6px 6px 0;font-size:16.5px;font-weight:600;color:' + EXPORT_INK + ';">' +
+      ';border-radius:8px;padding:4px 10px;margin:0 6px 6px 0;font-size:16px;font-weight:700;color:' + EXPORT_INK + ';">' +
       escapeHtml(name) + (part ? '<span style="font-weight:500;color:' + EXPORT_MUTED + ';"> solo ' + part + '</span>' : "") + '</span>';
   }
   function weekRangeTitle(mon, sat){
@@ -2481,34 +2366,36 @@
 
   function exportAgencyCard(w, agency){
     var c = EXPORT_AGENCY_COLORS[agency] || state.theme.accent;
-    var html = '<div style="background:#fff;border:1px solid ' + EXPORT_LINE + ';border-radius:18px;overflow:hidden;">';
-    html += '<div style="background:' + c + ';color:#fff;padding:14px 18px 13px;font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.2px;">' + escapeHtml(agency) + '</div>';
+    var ct = EXPORT_AGENCY_TEXT[agency] || "#ffffff";
+    var label = (agency === "Tradate") ? "#3a3950" : c; // lavanda troppo chiara come testo: usiamo un tono scuro
+    var html = '<div style="background:#fff;border:1px solid ' + EXPORT_LINE + ';border-radius:24px;overflow:hidden;box-shadow:0 12px 36px rgba(21,39,60,0.08);">';
+    html += '<div style="background:' + c + ';color:' + ct + ';padding:15px 20px 14px;' + EXPORT_FONT + 'font-size:23px;font-weight:800;letter-spacing:-.035em;">' + escapeHtml(agency) + '</div>';
     html += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;">' +
       '<colgroup><col style="width:72px"><col><col></colgroup>' +
       '<tr><td></td>' +
-      '<td style="padding:9px 8px 4px;font-size:14px;font-weight:600;color:' + c + ';">Mattina</td>' +
-      '<td style="padding:9px 8px 4px;font-size:14px;font-weight:600;color:' + c + ';">Pomeriggio</td></tr>';
+      '<td style="padding:10px 8px 4px;font-size:13px;font-weight:800;color:' + label + ';">Mattina</td>' +
+      '<td style="padding:10px 8px 4px;font-size:13px;font-weight:800;color:' + label + ';">Pomeriggio</td></tr>';
     w.days.forEach(function(day, dayIdx){
       var d = fromISO(day.date);
       var openM = isShiftOpen(agency, dayIdx, "mattina", day), openP = isShiftOpen(agency, dayIdx, "pomeriggio", day);
       html += '<tr style="border-top:1px solid ' + EXPORT_LINE + ';">' +
         '<td style="padding:9px 0 9px 16px;vertical-align:top;"><div style="font-size:13.5px;color:' + EXPORT_MUTED + ';">' + DAY_NAMES[dayIdx] + '</div>' +
-        '<div style="font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:24px;font-weight:700;line-height:1.05;color:' + EXPORT_INK + ';">' + d.getDate() + '</div></td>';
+        '<div style="' + EXPORT_FONT + 'font-size:24px;font-weight:900;line-height:1.05;letter-spacing:-.04em;color:' + EXPORT_INK + ';">' + d.getDate() + '</div></td>';
       if(!openM && !openP){
-        html += '<td colspan="2" style="padding:9px 8px;vertical-align:middle;color:#A3AABA;font-size:15px;">Agenzia chiusa</td></tr>';
+        html += '<td colspan="2" style="padding:9px 8px;vertical-align:middle;color:' + EXPORT_MUTED + ';font-size:14.5px;">Agenzia chiusa</td></tr>';
         return;
       }
       SHIFTS.forEach(function(sp){
         var sk = sp[0];
         var cellPad = 'padding:8px 8px 6px;vertical-align:top;';
         if(!isShiftOpen(agency, dayIdx, sk, day)){
-          html += '<td style="' + cellPad + 'color:#A3AABA;font-size:15px;padding-top:12px;">chiuso</td>';
+          html += '<td style="' + cellPad + 'color:' + EXPORT_MUTED + ';font-size:14.5px;padding-top:12px;">chiuso</td>';
           return;
         }
         var names = (day.shifts[agency] && day.shifts[agency][sk]) ? day.shifts[agency][sk] : [];
         var hrs = shiftHours(agency, dayIdx, sk);
         var body = names.length ? names.map(exportNamePill).join("")
-          : '<div style="border:1.5px dashed #E3A69C;color:#B13B2E;border-radius:7px;padding:3px 9px;font-size:15px;font-weight:600;margin-bottom:4px;">da coprire</div>';
+          : '<div style="border:1.5px dashed #d78a9a;color:#a8243d;border-radius:8px;padding:3px 9px;font-size:14.5px;font-weight:700;margin-bottom:4px;">da coprire</div>';
         html += '<td style="' + cellPad + '"><div style="font-size:12.5px;color:' + EXPORT_MUTED + ';margin:0 0 4px 1px;">' + shortTime(hrs.start) + '–' + shortTime(hrs.end) + '</div>' + body + '</td>';
       });
       html += '</tr>';
@@ -2520,16 +2407,20 @@
   function buildExportNode(w){
     var sat = addDays(currentMonday, 5);
     var title = weekRangeTitle(currentMonday, sat);
-    var html = '<div style="width:1080px;box-sizing:border-box;padding:28px;background:' + EXPORT_CANVAS + ';font-family:\'IBM Plex Sans\',Arial,sans-serif;color:' + EXPORT_INK + ';">';
+    var html = '<div style="width:1080px;box-sizing:border-box;padding:28px;background:' + EXPORT_CANVAS + ';' + EXPORT_FONT + 'color:' + EXPORT_INK + ';">';
 
     // Intestazione: date in grande + striscia nei colori delle sedi
-    html += '<div style="background:' + EXPORT_INK + ';border-radius:22px;overflow:hidden;margin-bottom:20px;">' +
-      '<div style="display:flex;align-items:center;gap:20px;padding:26px 30px 22px;">';
-    if(state.logo) html += '<img src="' + state.logo + '" style="width:72px;height:72px;border-radius:16px;object-fit:cover;background:#fff;flex-shrink:0;">';
-    html += '<div style="flex:1;color:#fff;font-size:34px;font-weight:600;letter-spacing:-.4px;">Turni settimanali</div>' +
-      '<div style="text-align:right;color:#fff;"><div style="font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:76px;font-weight:800;line-height:.9;letter-spacing:-2px;">' + title.big + '</div>' +
-      '<div style="font-size:18px;color:#AEB6C8;margin-top:6px;">' + title.small + '</div></div></div>' +
-      '<div style="display:flex;height:8px;">' + AGENCIES.map(function(a){ return '<div style="flex:1;background:' + (EXPORT_AGENCY_COLORS[a] || state.theme.accent) + ';"></div>'; }).join("") + '</div></div>';
+    html += '<div style="background:' + EXPORT_NIGHT + ';border-radius:24px;overflow:hidden;margin-bottom:20px;">' +
+      '<div style="display:flex;align-items:center;gap:22px;padding:28px 32px 24px;">';
+    if(logoOnDark.dataUrl){
+      html += '<img src="' + logoOnDark.dataUrl + '" style="height:64px;width:auto;max-width:230px;object-fit:contain;flex-shrink:0;' +
+        (logoOnDark.hasAlpha ? '' : 'background:#fff;border-radius:12px;padding:6px 8px;') + '">';
+    }
+    html += '<div style="flex:1;color:#fff;"><div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#bebdcd;margin-bottom:6px;"><span style="display:inline-block;width:24px;height:1px;background:#bebdcd;"></span>Calendario colleghi</div>' +
+      '<div style="font-size:34px;font-weight:800;letter-spacing:-.04em;line-height:1.05;">Turni settimanali</div></div>' +
+      '<div style="text-align:right;color:#fff;"><div style="' + EXPORT_FONT + 'font-size:74px;font-weight:900;line-height:.9;letter-spacing:-.045em;">' + title.big + '</div>' +
+      '<div style="font-size:18px;font-weight:600;color:#bebdcd;margin-top:8px;">' + title.small + '</div></div></div>' +
+      '<div style="display:flex;height:6px;">' + AGENCIES.map(function(a){ return '<div style="flex:1;background:' + (EXPORT_AGENCY_COLORS[a] || state.theme.accent) + ';"></div>'; }).join("") + '</div></div>';
 
     // Griglia 2×2: due sedi per riga
     EXPORT_PAIRS.forEach(function(pair){
@@ -2549,18 +2440,18 @@
       }).join("");
       absRows.push('<div style="display:flex;gap:16px;align-items:flex-start;padding:12px 0 6px;border-top:1px solid ' + EXPORT_LINE + ';">' +
         '<div style="width:140px;flex-shrink:0;padding-top:4px;"><span style="font-size:16px;color:' + EXPORT_MUTED + ';">' + DAY_NAMES_FULL[dayIdx] + '</span> ' +
-        '<span style="font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:20px;font-weight:700;">' + fromISO(day.date).getDate() + '</span></div>' +
+        '<span style="' + EXPORT_FONT + 'font-size:20px;font-weight:900;letter-spacing:-.04em;">' + fromISO(day.date).getDate() + '</span></div>' +
         '<div style="flex:1;">' + pills + (note ? '<div style="font-size:15px;color:' + EXPORT_MUTED + ';margin:0 0 6px 2px;">' + escapeHtml(note) + '</div>' : "") + '</div></div>');
     });
     if(absRows.length){
-      html += '<div style="background:#fff;border:1px solid ' + EXPORT_LINE + ';border-radius:18px;padding:16px 22px 10px;margin-bottom:16px;">' +
-        '<div style="font-family:\'Bricolage Grotesque\',\'IBM Plex Sans\',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px;">Ferie e permessi</div>' + absRows.join("") + '</div>';
+      html += '<div style="background:#fff;border:1px solid ' + EXPORT_LINE + ';border-radius:24px;padding:18px 24px 10px;margin-bottom:16px;box-shadow:0 12px 36px rgba(21,39,60,0.08);">' +
+        '<div style="' + EXPORT_FONT + 'font-size:23px;font-weight:800;letter-spacing:-.035em;margin-bottom:6px;">Ferie e permessi</div>' + absRows.join("") + '</div>';
     }
 
     // Piede: quando sono stati aggiornati i dati
     var upd = state.meta.updatedAt ? new Date(state.meta.updatedAt) : new Date();
     html += '<div style="display:flex;justify-content:space-between;font-size:13.5px;color:' + EXPORT_MUTED + ';padding:2px 6px 0;">' +
-      '<span>Aggiornato il ' + fmtItFull(upd) + ' alle ' + pad(upd.getHours()) + ':' + pad(upd.getMinutes()) + '</span><span>Registro Turni</span></div></div>';
+      '<span>Aggiornato il ' + fmtItFull(upd) + ' alle ' + pad(upd.getHours()) + ':' + pad(upd.getMinutes()) + '</span><span>ION S.r.l.s. · www.ion.srl</span></div></div>';
 
     var holder = document.createElement("div");
     holder.style.cssText = "position:fixed;left:-20000px;top:0;z-index:-1;";
@@ -2571,19 +2462,22 @@
   // Restituisce una Promise<canvas> con l'immagine della settimana visualizzata.
   function captureSheetArea(){
     var w = getWeek(toISO(currentMonday));
-    var holder = buildExportNode(w);
-    document.body.appendChild(holder);
-    var target = holder.firstChild;
-    // Il font dei titoli si carica solo quando serve: lo richiediamo prima di disegnare l'immagine.
-    var ready = (document.fonts && document.fonts.load)
-      ? Promise.all([document.fonts.load('700 24px "Bricolage Grotesque"'), document.fonts.load('800 76px "Bricolage Grotesque"'), document.fonts.load('600 16px "IBM Plex Sans"')]).catch(function(){}).then(function(){ return document.fonts.ready; })
+    var holder = null;
+    // I pesi di Montserrat si caricano solo quando servono: li richiediamo prima di disegnare; poi prepariamo il logo bianco.
+    var fontsReady = (document.fonts && document.fonts.load)
+      ? Promise.all(["400","600","700","800","900"].map(function(wt){ return document.fonts.load(wt + ' 20px Montserrat'); })).catch(function(){}).then(function(){ return document.fonts.ready; })
       : Promise.resolve();
+    var ready = fontsReady.then(function(){ return new Promise(function(res){ prepareLogoOnDark(res); }); }).then(function(){
+      holder = buildExportNode(w);
+      document.body.appendChild(holder);
+    });
     return ready.then(function(){
+      var target = holder.firstChild;
       return html2canvas(target, { scale: 2, backgroundColor: EXPORT_CANVAS, useCORS: true, allowTaint: true, logging: false, windowWidth: 1200 });
     }).then(function(canvas){
-      holder.remove(); return canvas;
+      if(holder) holder.remove(); return canvas;
     }, function(err){
-      holder.remove(); throw err;
+      if(holder) holder.remove(); throw err;
     });
   }
   function captureBlob(){
@@ -2617,7 +2511,7 @@
     }).then(function(){
       done();
       hideSheet("exportSheetOverlay");
-      showToast("📋 Immagine copiata! Incollala direttamente su WhatsApp");
+      showToast("Immagine copiata! Incollala direttamente su WhatsApp");
     }).catch(function(err){
       done();
       alert("Impossibile copiare negli appunti: " + (err && err.message ? err.message : err) + "\n\nUsa 'Salva / Condividi PNG' e scegli WhatsApp.");
@@ -2644,11 +2538,15 @@
 
   function applyTheme(){
     var root = document.documentElement;
+    // Colore principale = pulsanti e scelte attive; intestazione = barra in alto e menu; sfondo = pagina.
     root.style.setProperty("--accent", state.theme.accent);
-    root.style.setProperty("--accent-2", tintHex(state.theme.accent, 0.25));
+    root.style.setProperty("--ion-navy", state.theme.accent);
     root.style.setProperty("--navy", state.theme.navy);
+    root.style.setProperty("--ion-night", state.theme.navy);
     root.style.setProperty("--paper", state.theme.paper);
-    root.style.setProperty("--paper-2", shadeHex(state.theme.paper, 0.05));
+    root.style.setProperty("--paper-2", shadeHex(state.theme.paper, 0.012));
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.setAttribute("content", state.theme.navy);
   }
   function shadeHex(hex, amount){
     var c = hexToRgb(hex);
@@ -2757,10 +2655,10 @@
         var pomPct = (c.pomeriggio / maxTotal * 100);
         return '<li style="padding:10px 6px;border-bottom:1px solid var(--line);">' +
           '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px;">' +
-            '<span style="font-size:13.5px;display:flex;align-items:center;gap:6px;min-width:0;"><span class="chip-dot" style="background:' + color + ';flex-shrink:0;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(name) + '</span></span>' +
-            '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10.5px;color:var(--ink-soft);flex-shrink:0;">' + c.mattina + ' mat · ' + c.pomeriggio + ' pom · <b style="color:var(--ink);">' + total + '</b></span>' +
+            '<span style="font-size:14px;font-weight:600;color:var(--ion-ink);display:flex;align-items:center;gap:6px;min-width:0;"><span class="chip-dot" style="background:' + color + ';flex-shrink:0;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(name) + '</span></span>' +
+            '<span style="font-size:12px;font-weight:600;color:var(--ink-soft);flex-shrink:0;font-variant-numeric:tabular-nums;">' + c.mattina + ' mat · ' + c.pomeriggio + ' pom · <b style="color:var(--ink);">' + total + '</b></span>' +
           '</div>' +
-          '<div style="display:flex;height:11px;border-radius:6px;overflow:hidden;background:var(--paper-2);">' +
+          '<div style="display:flex;height:10px;border-radius:8px;overflow:hidden;background:var(--paper-2);">' +
             '<div style="width:' + matPct + '%;background:' + lightTint + ';"></div>' +
             '<div style="width:' + pomPct + '%;background:' + color + ';"></div>' +
           '</div>' +
@@ -2860,25 +2758,53 @@
     }
     renderAppLogoHeader();
   }
-  function renderAppLogoHeader(){
-    var el = document.getElementById("appLogoHeader");
-    if(!el) return;
-    el.innerHTML = state.logo ? '<img src="' + state.logo + '" alt="Logo">' : "";
+  /* Logo su sfondo scuro: se ha la trasparenza lo ricoloriamo in bianco mantenendo il canale alfa
+     (regola del marchio ION); se è un'immagine piena lo mostriamo su un riquadro bianco. */
+  var logoOnDark = { src: null, dataUrl: null, hasAlpha: false };
+  function prepareLogoOnDark(cb){
+    if(!state.logo){ logoOnDark = { src: null, dataUrl: null, hasAlpha: false }; cb(); return; }
+    if(logoOnDark.src === state.logo){ cb(); return; }
+    var img = new Image();
+    img.onload = function(){
+      try{
+        var c = document.createElement("canvas"); c.width = img.width; c.height = img.height;
+        var ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0);
+        var data = ctx.getImageData(0, 0, c.width, c.height), px = data.data, transparent = 0;
+        for(var i = 3; i < px.length; i += 4){ if(px[i] < 250) transparent++; }
+        var hasAlpha = transparent > (px.length / 4) * 0.05;
+        if(hasAlpha){
+          for(var j = 0; j < px.length; j += 4){ px[j] = 255; px[j + 1] = 255; px[j + 2] = 255; }
+          ctx.putImageData(data, 0, 0);
+        }
+        logoOnDark = { src: state.logo, dataUrl: hasAlpha ? c.toDataURL("image/png") : state.logo, hasAlpha: hasAlpha };
+      }catch(e){ logoOnDark = { src: state.logo, dataUrl: state.logo, hasAlpha: false }; }
+      cb();
+    };
+    img.onerror = function(){ logoOnDark = { src: state.logo, dataUrl: state.logo, hasAlpha: false }; cb(); };
+    img.src = state.logo;
   }
+  function renderAppLogoHeader(){
+    var el = document.getElementById("headerLogo");
+    if(!el) return;
+    prepareLogoOnDark(function(){
+      el.innerHTML = logoOnDark.dataUrl ? '<img src="' + logoOnDark.dataUrl + '" alt="Logo ION"' + (logoOnDark.hasAlpha ? "" : ' class="on-tile"') + '>' : "";
+      var brand = el.closest(".m-brand");
+      if(brand) brand.classList.toggle("has-logo", !!logoOnDark.dataUrl);
+    });
+  }
+  /* v3.0.0: il logo non viene più ritagliato né convertito in JPEG (tagliava i loghi orizzontali
+     e rendeva nero lo sfondo trasparente). Si ridimensiona soltanto, mantenendo proporzioni e trasparenza. */
   function cropImageToSquareDataURL(file, callback){
     var reader = new FileReader();
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var side = Math.min(img.width, img.height);
-        var sx = (img.width - side) / 2;
-        var sy = (img.height - side) / 2;
-        var targetSide = Math.min(side, 500);
+        var scale = Math.min(1, 900 / Math.max(img.width, img.height));
+        var w = Math.max(1, Math.round(img.width * scale)), h = Math.max(1, Math.round(img.height * scale));
         var canvas = document.createElement("canvas");
-        canvas.width = targetSide; canvas.height = targetSide;
-        var ctx = canvas.getContext("2d");
-        ctx.drawImage(img, sx, sy, side, side, 0, 0, targetSide, targetSide);
-        callback(canvas.toDataURL("image/jpeg", 0.85));
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL("image/png"));
       };
       img.onerror = function(){ callback(null); };
       img.src = e.target.result;
@@ -3030,7 +2956,7 @@
     plan.additions.forEach(function(a){ w.days[a.dayIdx].shifts[a.agency][a.shift].push(a.name); });
     markDirty(weekISO);
     renderWeek();
-    var msg = "✨ " + plan.additions.length + " assegnazion" + (plan.additions.length === 1 ? "e" : "i") +
+    var msg = "" + plan.additions.length + " assegnazion" + (plan.additions.length === 1 ? "e" : "i") +
       (plan.uncovered.length ? " · " + plan.uncovered.length + " turn" + (plan.uncovered.length === 1 ? "o" : "i") + " senza candidati" : "");
     showUndoBar(msg, function(){
       weeksStore[weekISO] = snapshot;
@@ -3184,7 +3110,7 @@
     if(!colleagueSelected) return;
     var text = colleagueText(colleagueSelected, currentMonday, colleaguePeriodWeeks());
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(function(){ showToast("📋 Testo copiato."); }, function(){ alert(text); });
+      navigator.clipboard.writeText(text).then(function(){ showToast("Testo copiato."); }, function(){ alert(text); });
     } else { alert(text); }
   });
   document.getElementById("colleagueIcsBtn").addEventListener("click", function(){
@@ -3336,7 +3262,7 @@
     hideSheet("absenceSheetOverlay");
     renderWeek();
     showToast(p.action === "add"
-      ? "🏖 Ferie inserite per " + p.name + " (" + p.days.length + " giorn" + (p.days.length === 1 ? "o" : "i") + ")."
+      ? "Ferie inserite per " + p.name + " (" + p.days.length + " giorn" + (p.days.length === 1 ? "o" : "i") + ")."
       : "Ferie tolte per " + p.name + ".");
   });
 

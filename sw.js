@@ -1,6 +1,6 @@
 // Registro Turni — service worker
 // IMPORTANTE: aumentare CACHE_NAME a ogni release, insieme ad APP_VERSION in index.html e storico.html.
-var CACHE_NAME = "turni-cache-v20-2.9.0";
+var CACHE_NAME = "turni-cache-v21-3.0.0";
 var CORE_ASSETS = [
   "./",
   "./index.html",
@@ -9,13 +9,18 @@ var CORE_ASSETS = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png",
+  "./fonts/montserrat-latin-400-normal.woff2",
+  "./fonts/montserrat-latin-600-normal.woff2",
+  "./fonts/montserrat-latin-700-normal.woff2",
+  "./fonts/montserrat-latin-800-normal.woff2",
+  "./fonts/montserrat-latin-900-normal.woff2",
   "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
 ];
 
 // Solo queste origini esterne possono essere messe in cache (librerie statiche e font).
 // Google Drive, OAuth e userinfo NON devono mai passare dalla cache.
-var CACHEABLE_EXTERNAL_HOSTS = ["cdnjs.cloudflare.com", "fonts.googleapis.com", "fonts.gstatic.com"];
+var CACHEABLE_EXTERNAL_HOSTS = ["cdnjs.cloudflare.com"]; // i font sono ora inclusi nell'app (niente Google Fonts)
 
 self.addEventListener("install", function(event){
   event.waitUntil(

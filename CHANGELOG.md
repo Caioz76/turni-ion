@@ -2,6 +2,26 @@
 
 > A ogni release aggiornare insieme: `APP_VERSION` in `index.html` e `storico.html`, `CACHE_NAME` in `sw.js`, e questo file.
 
+## v3.0.0 — 21/11/2026 · Stile ION
+
+### Nuova veste grafica (immagine aziendale ION, come www.ion.srl)
+- **Colori ION**: blu notte per intestazione e menu, navy per i pulsanti, sfondo carta chiaro; i colori restano modificabili da Impostazioni → Colori ("Ripristina colori ION" per tornare a quelli aziendali).
+- **Carattere Montserrat incluso nell'app** (niente più Google Fonts: rispetto della privacy e funziona anche offline).
+- **Icone a linea** al posto delle emoji in menu, pulsanti, titoli e impostazioni.
+- Card con angoli ION (24 px), pulsanti più ampi, occhielli maiuscoli con trattino nelle impostazioni, contorno blu visibile quando si naviga da tastiera.
+- **Logo nell'intestazione**: il logo caricato compare in alto, in bianco sullo sfondo scuro (se ha lo sfondo trasparente); su schermi stretti sostituisce la scritta "Turni".
+- **Intestazione più bassa**: resta fissa solo la parte con logo, cloud e settimana; la riga "problemi / prossima settimana / Riempi automatico" scorre con la pagina.
+- **"Copertura mancante" richiudibile**: mostra il numero di turni scoperti e si apre con "Mostra".
+- **Immagine per WhatsApp e PDF in stile ION**: intestazione blu notte con logo bianco, Montserrat, una tinta ION per sede (Somma Lombardo navy, Busto Arsizio blu, Tradate lavanda, Oleggio grigio), piè di pagina ION.
+- **Storico** con lo stesso stile.
+- **Icona dell'app** ridisegnata nei colori ION.
+
+### Bug corretti
+- **Logo tagliato e annerito**: veniva ritagliato a quadrato e salvato in JPEG (i loghi orizzontali perdevano i lati e lo sfondo trasparente diventava nero). Ora mantiene proporzioni e trasparenza.
+- **Zoom bloccato**: ora si può ingrandire la pagina con due dita.
+- **Testi poco leggibili** ("+ aggiungi", "Chiuso"): contrasto portato sopra il minimo 4,5:1 (verificato su tutte le coppie di colori).
+- **Pulsanti troppo piccoli** (Riempi automatico, prossima settimana, cloud, Giorno/Mat/Pom, ✕ del dipendente): ora almeno 44 px.
+
 ## v2.9.0 — 15/11/2026 · Ferie per periodo
 
 - **Ferie per periodo (dal… al…)**: si apre dalla scheda Ferie di un giorno ("📅 Inserisci ferie per un periodo") o da Colleghi ("🏖 Ferie per un periodo").
