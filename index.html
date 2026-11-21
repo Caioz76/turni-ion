@@ -76,7 +76,7 @@
   .auto-toast {
     position: fixed; bottom: calc(80px + var(--safe-b) + 12px); left: 50%; transform: translateX(-50%);
     background: var(--ion-night); color: #fff; padding: 11px 18px; border-radius: 16px;
-    font-size: 13.5px; font-weight: 600; z-index: 70; box-shadow: var(--ion-shadow); max-width: 88%; text-align: center;
+    font-size: 13.5px; font-weight: 600; z-index: 120; box-shadow: var(--ion-shadow); max-width: 88%; text-align: center;
   }
   .auto-toast.hidden { display: none; }
 
@@ -398,7 +398,7 @@
   .undo-bar {
     position: fixed; bottom: calc(80px + var(--safe-b) + 12px); left: 50%; transform: translateX(-50%);
     background: var(--ion-night); color: #fff; padding: 8px 8px 8px 18px; border-radius: 16px; font-size: 13.5px; font-weight: 600;
-    z-index: 71; box-shadow: var(--ion-shadow); display: flex; align-items: center; gap: 12px; max-width: 92%;
+    z-index: 120; /* sopra i pannelli aperti */ box-shadow: var(--ion-shadow); display: flex; align-items: center; gap: 12px; max-width: 92%;
   }
   .undo-bar.hidden { display: none; }
   .undo-bar button { background: #fff; color: var(--ion-night); border: none; border-radius: 12px; padding: 0 16px; min-height: 44px; font-weight: 800; font-size: 13.5px; cursor: pointer; flex-shrink: 0; }
@@ -868,7 +868,7 @@
 <script>
 (function(){
   "use strict";
-  var APP_VERSION = "3.0.0";
+  var APP_VERSION = "3.0.1";
   var AGENCIES = ["Somma Lombardo","Busto Arsizio","Tradate","Oleggio"];
   var AGENCY_CODES = {"Somma Lombardo":"SL","Busto Arsizio":"BA","Tradate":"TR","Oleggio":"OL"};
   var SHIFTS = [["mattina","Mattina"], ["pomeriggio","Pomeriggio"]];
@@ -2272,34 +2272,49 @@
   document.getElementById("gotoUpcoming").addEventListener("click", function(){ currentMonday = getUpcomingMonday(); renderWeek(); });
 
   function exportFilenameBase(){ var sat = addDays(currentMonday, 5); return "turni_" + toISO(currentMonday) + "_" + toISO(sat); }
+  /* v3.0.1 · Salvataggio file.
+     Computer (Mac, Windows): download diretto nella cartella Download, mai il menu Condividi.
+     Telefono/tablet: menu Condividi (per WhatsApp ecc.). Se il telefono lo blocca perché la generazione
+     del file ha richiesto qualche secondo, compare "File pronto" con il pulsante Condividi (nuovo tocco). */
+  function isTouchDevice(){
+    var ua = navigator.userAgent || "";
+    return /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  }
+  function downloadBlob(blob, filename){
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url; link.download = filename; link.rel = "noopener"; link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    // Safari ha bisogno che il collegamento resti valido finché il download non è partito.
+    setTimeout(function(){ link.remove(); URL.revokeObjectURL(url); }, 60000);
+  }
   function shareOrDownload(blob, filename, mimeType){
-    var canTryShare = false;
-    var file;
-    try{
-      if(navigator.canShare){
-        file = new File([blob], filename, { type: mimeType });
-        canTryShare = navigator.canShare({ files: [file] });
+    var file = null, canShare = false;
+    if(isTouchDevice() && navigator.canShare){
+      try{ file = new File([blob], filename, { type: mimeType }); canShare = navigator.canShare({ files: [file] }); }catch(e){ canShare = false; }
+    }
+    if(!canShare){
+      downloadBlob(blob, filename);
+      showToast("File scaricato: " + filename);
+      return Promise.resolve(true);
+    }
+    // Risolve true se il file è stato condiviso o scaricato, false se l'utente ha annullato.
+    return navigator.share({ files: [file] }).then(function(){ return true; }).catch(function(err){
+      if(err && err.name === "AbortError") return false;
+      if(err && err.name === "NotAllowedError"){
+        return new Promise(function(resolve){
+          showUndoBar("File pronto", function(){
+            navigator.share({ files: [file] }).then(function(){ resolve(true); }).catch(function(e2){
+              if(e2 && e2.name === "AbortError"){ resolve(false); return; }
+              downloadBlob(blob, filename); resolve(true);
+            });
+          }, "Condividi");
+        });
       }
-    }catch(e){ canTryShare = false; }
-
-    function fallbackDownload(){
-      var url = URL.createObjectURL(blob);
-      var link = document.createElement("a");
-      link.href = url; link.download = filename;
-      document.body.appendChild(link); link.click(); link.remove();
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
-    }
-
-    if(canTryShare){
-      // Risolve true se il file è stato condiviso/scaricato, false se l'utente ha annullato.
-      return navigator.share({ files: [file] }).then(function(){ return true; }).catch(function(err){
-        if(err && err.name === "AbortError") return false;
-        fallbackDownload();
-        return true;
-      });
-    }
-    fallbackDownload();
-    return Promise.resolve(true);
+      downloadBlob(blob, filename);
+      return true;
+    });
   }
 
   function addCanvasAsMultipagePdf(pdf, canvas, marginPt){
@@ -2932,9 +2947,10 @@
   }
 
   var undoTimer = null;
-  function showUndoBar(text, onUndo){
+  function showUndoBar(text, onUndo, buttonLabel){
     var bar = document.getElementById("undoBar");
     document.getElementById("undoBarText").textContent = text;
+    document.getElementById("undoBarBtn").textContent = buttonLabel || "Annulla";
     bar.classList.remove("hidden");
     document.getElementById("undoBarBtn").onclick = function(){ bar.classList.add("hidden"); clearTimeout(undoTimer); onUndo(); };
     clearTimeout(undoTimer);
@@ -3274,6 +3290,12 @@
   document.getElementById("colleaguePeriodBtn").addEventListener("click", function(){
     openPeriodSheet(toISO(currentMonday), colleagueSelected);
   });
+
+  // Etichette dei pulsanti di esportazione: sul computer si scarica, sul telefono si condivide.
+  if(!isTouchDevice()){
+    document.getElementById("exportPngBtn").innerHTML = '<svg class="i" aria-hidden="true"><use href="#i-save"/></svg>Scarica immagine (PNG)';
+    document.getElementById("exportPdfBtn").innerHTML = '<svg class="i" aria-hidden="true"><use href="#i-file"/></svg>Scarica PDF';
+  }
 
   applyTheme();
   initPaletteInputs();
