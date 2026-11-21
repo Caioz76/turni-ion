@@ -2,6 +2,14 @@
 
 > A ogni release aggiornare insieme: `APP_VERSION` in `index.html` e `storico.html`, `CACHE_NAME` in `sw.js`, e questo file.
 
+## v3.0.1 — 21/11/2026 · Esportazione su computer
+
+- **Mac e Windows: "Scarica immagine (PNG)" e "Scarica PDF" scaricano subito il file** nella cartella Download. Prima l'app provava ad aprire il menu Condividi del Mac (Safari e Chrome lo supportano): il browser lo bloccava perché la generazione del file richiede qualche secondo e spesso non partiva nulla.
+- Il collegamento al file resta valido più a lungo: Safari a volte lo perdeva prima di iniziare il download.
+- **Telefono e tablet**: resta la condivisione (WhatsApp ecc.). Se il telefono la blocca, compare "File pronto" con il pulsante **Condividi**.
+- Corretto: la barra "File pronto"/"Annulla" e i messaggi finivano dietro i pannelli aperti.
+- Stessa correzione per backup (.json), calendario (.ics) e storico.
+
 ## v3.0.0 — 21/11/2026 · Stile ION
 
 ### Nuova veste grafica (immagine aziendale ION, come www.ion.srl)
